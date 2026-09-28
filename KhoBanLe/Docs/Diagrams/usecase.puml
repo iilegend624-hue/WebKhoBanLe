@@ -1,0 +1,81 @@
+@startuml usecase
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam roundcorner 10
+skinparam defaultFontName "Segoe UI"
+skinparam sequenceMessageAlign center
+
+title SƠ ĐỒ USE CASE - HỆ THỐNG KHO BÁN LẺ (ECO2415 - ĐỀ TÀI 13)
+
+actor "Thủ Kho\n(WarehouseStaff)" as Staff #3b82f6
+actor "Quản Lý Kho\n(InventoryManager)" as Manager #ef4444
+actor "Khách Hàng / Quầy Lẻ\n(Customer)" as Customer #10b981
+
+rectangle "Hệ Thống Kho Bán Lẻ (KhoBanLe)" {
+    
+    package "Phân Hệ Bán Lẻ & Quầy POS" {
+        usecase "UC01: Tìm kiếm & Tra cứu hàng hóa" as UC_Search
+        usecase "UC02: Quản lý giỏ hàng bán lẻ (Scoped)" as UC_Cart
+        usecase "UC03: Thanh toán tại quầy POS & In hóa đơn" as UC_PosCheckout
+    }
+
+    package "Phân Hệ Quản Lý Kho (Thủ Kho)" {
+        usecase "UC04: Lập phiếu nhập kho (GoodsReceipt)" as UC_CreateReceipt
+        usecase "UC05: Trợ lý AI SmartPaste trích xuất báo giá NCC" as UC_AiSmartPaste
+        usecase "UC06: Lập phiếu xuất kho (GoodsIssue)" as UC_CreateIssue
+        usecase "UC07: Theo dõi trạng thái sổ phiếu" as UC_ViewReceipts
+    }
+
+    package "Phân Hệ Quản Trị & Kiểm Soát (Quản Lý)" {
+        usecase "UC08: Phê duyệt phiếu xuất kho (LUẬT 1: Chặn xuất âm)" as UC_ApproveIssue #fee2e2
+        usecase "UC09: Phê duyệt phiếu nhập kho (Tăng tồn kho)" as UC_ApproveReceipt
+        usecase "UC10: Báo cáo Nhập - Xuất - Tồn (LUẬT 2: Bảo toàn công thức)" as UC_Report #dcfce7
+        usecase "UC11: Kiểm tra đối soát chéo sổ cái kho" as UC_Audit
+        usecase "UC12: Xuất báo cáo dữ liệu thật ra Excel / CSV" as UC_Excel
+        usecase "UC13: Quản lý danh mục hàng hóa (CRUD + MinStock)" as UC_ManageProduct
+    }
+}
+
+' Quan hệ Thủ Kho
+Staff --> UC_Search
+Staff --> UC_Cart
+Staff --> UC_PosCheckout
+Staff --> UC_CreateReceipt
+Staff --> UC_CreateIssue
+Staff --> UC_ViewReceipts
+
+' Quan hệ AI
+UC_CreateReceipt ..> UC_AiSmartPaste : <<extend>>
+
+' Quan hệ Quản Lý
+Manager --> UC_Search
+Manager --> UC_ApproveIssue
+Manager --> UC_ApproveReceipt
+Manager --> UC_Report
+Manager --> UC_Audit
+Manager --> UC_Excel
+Manager --> UC_ManageProduct
+
+' Quan hệ Khách hàng
+Customer --> UC_Search
+Customer --> UC_PosCheckout
+
+' Quan hệ Báo cáo & Đối soát
+UC_Report ..> UC_Audit : <<include>>
+UC_Report ..> UC_Excel : <<extend>>
+
+note right of UC_ApproveIssue
+  **LUẬT NGHIỆP VỤ 1 (K1.3, K3.3):**
+  - Tồn kho CHỈ thay đổi khi Quản lý duyệt.
+  - Phiếu xuất có Quantity > CurrentStock bị CHẶN.
+  - Giao dịch thực hiện trong 1 Transaction an toàn.
+end note
+
+note right of UC_Report
+  **LUẬT NGHIỆP VỤ 2 (K1.3, K4.3):**
+  - Công thức bất biến:
+    Tồn cuối = Tồn đầu + Tổng nhập - Tổng xuất.
+  - Khóa chứng từ đã duyệt.
+end note
+
+@enduml

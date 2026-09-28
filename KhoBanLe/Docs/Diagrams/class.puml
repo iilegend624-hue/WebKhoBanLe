@@ -1,0 +1,275 @@
+@startuml class
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam roundcorner 8
+skinparam defaultFontName "Segoe UI"
+
+title SƠ ĐỒ LỚP CLEAN ARCHITECTURE 4 TẦNG (ECO2415 - K1.1, K1.2, K5.1)
+
+' ==========================================
+' 1. TẦNG CORE BUSINESS (KHÔNG THAM CHIẾU AI)
+' ==========================================
+package "1. KhoBanLe.CoreBusiness" #f8fafc {
+    enum ReceiptStatus {
+        Draft = 0
+        Approved = 1
+        Cancelled = 2
+    }
+
+    class Product {
+        +int Id
+        +string Sku
+        +string Name
+        +string Unit
+        +string Category
+        +double Price
+        +int CurrentStock
+        +int MinStockLevel
+        +string Description
+        +string ImageUrl
+    }
+
+    class Supplier {
+        +int Id
+        +string SupplierCode
+        +string Name
+        +string Phone
+        +string Email
+        +string Address
+        +bool IsActive
+    }
+
+    class Customer {
+        +int Id
+        +string CustomerCode
+        +string Name
+        +string Phone
+        +string Email
+        +string Address
+        +int Points
+    }
+
+    class GoodsReceipt {
+        +int Id
+        +string ReceiptNumber
+        +int SupplierId
+        +DateTime ReceiptDate
+        +string CreatedBy
+        +string ApprovedBy
+        +DateTime? ApprovedDate
+        +ReceiptStatus Status
+        +string Note
+        +Supplier Supplier
+        +List<GoodsReceiptLine> Lines
+        +double TotalAmount
+    }
+
+    class GoodsReceiptLine {
+        +int Id
+        +int GoodsReceiptId
+        +int ProductId
+        +int Quantity
+        +double UnitPrice
+        +double LineTotal
+        +Product Product
+    }
+
+    class GoodsIssue {
+        +int Id
+        +string IssueNumber
+        +string CustomerOrDepartment
+        +DateTime IssueDate
+        +string CreatedBy
+        +string ApprovedBy
+        +DateTime? ApprovedDate
+        +ReceiptStatus Status
+        +string Note
+        +int? PosOrderId
+        +List<GoodsIssueLine> Lines
+        +double TotalAmount
+    }
+
+    class GoodsIssueLine {
+        +int Id
+        +int GoodsIssueId
+        +int ProductId
+        +int Quantity
+        +double UnitPrice
+        +double LineTotal
+        +Product Product
+    }
+
+    class PosOrder {
+        +int Id
+        +string OrderNumber
+        +int? CustomerId
+        +string CustomerName
+        +DateTime OrderDate
+        +string CashierName
+        +string PaymentMethod
+        +double SubTotal
+        +double DiscountAmount
+        +double TotalAmount
+        +double ReceivedAmount
+        +double ChangeAmount
+        +int? GoodsIssueId
+        +string Status
+        +List<PosOrderLine> Lines
+    }
+
+    class PosOrderLine {
+        +int Id
+        +int PosOrderId
+        +int ProductId
+        +int Quantity
+        +double UnitPrice
+        +double LineTotal
+        +Product Product
+    }
+
+    class InventoryReportItem {
+        +int ProductId
+        +string Sku
+        +string ProductName
+        +string Unit
+        +string Category
+        +int BeginningStock
+        +int TotalImport
+        +int TotalExport
+        +int CurrentStock
+        +int EndingStock
+        +bool IsBalanced
+    }
+
+    GoodsReceipt "1" *-- "many" GoodsReceiptLine : Header-Line
+    GoodsIssue "1" *-- "many" GoodsIssueLine : Header-Line
+    PosOrder "1" *-- "many" PosOrderLine : Header-Line
+    GoodsReceipt --> Supplier : SupplierId
+    GoodsReceiptLine --> Product : ProductId
+    GoodsIssueLine --> Product : ProductId
+    PosOrderLine --> Product : ProductId
+    PosOrder "1" <--> "0..1" GoodsIssue : Liên kết giao dịch POS
+}
+
+' ==========================================
+' 2. TẦNG USE CASES (CHỈ THAM CHIẾU COREBUSINESS)
+' ==========================================
+package "2. KhoBanLe.UseCases" #f1f5f9 {
+    interface IProductRepository {
+        +GetProductsAsync(filter, category)
+        +GetProductByIdAsync(id)
+        +UpdateStockAsync(productId, quantityChange)
+    }
+
+    interface IGoodsReceiptRepository {
+        +GetGoodsReceiptsAsync(status)
+        +CreateGoodsReceiptAsync(receipt)
+        +ApproveReceiptTransactionAsync(receiptId, approvedBy)
+    }
+
+    interface IGoodsIssueRepository {
+        +GetGoodsIssuesAsync(status)
+        +CreateGoodsIssueAsync(issue)
+        +ApproveIssueTransactionAsync(issueId, approvedBy)
+    }
+
+    interface IInventoryReportRepository {
+        +GetInventoryReportAsync(fromDate, toDate)
+    }
+
+    class ApproveGoodsIssueUseCase <<LUẬT 1>> {
+        -IGoodsIssueRepository _issueRepo
+        -IProductRepository _productRepo
+        +ExecuteAsync(issueId, approvedBy) : ApproveGoodsIssueResult
+    }
+
+    class GetInventoryReportUseCase <<LUẬT 2>> {
+        -IInventoryReportRepository _reportRepo
+        +ExecuteAsync(fromDate, toDate) : InventoryAuditReport
+    }
+
+    class CreateGoodsReceiptUseCase {
+        -IGoodsReceiptRepository _receiptRepo
+        +ExecuteAsync(receipt) : int
+    }
+
+    class ParseSupplierQuoteUseCase <<AI SMARTPASTE>> {
+        -IProductRepository _productRepo
+        +ExecuteAsync(quoteRawText) : ParseQuoteResult
+    }
+
+    ApproveGoodsIssueUseCase ..> IGoodsIssueRepository
+    ApproveGoodsIssueUseCase ..> IProductRepository
+    GetInventoryReportUseCase ..> IInventoryReportRepository
+}
+
+' ==========================================
+' 3. TẦNG DATASTORE / PLUGINS (INFRASTRUCTURE)
+' ==========================================
+package "3. KhoBanLe.DataStore.HardCoded (Plugins)" #e2e8f0 {
+    class SqlProductRepository implements IProductRepository {
+        -ISqlConnectionFactory _factory
+    }
+
+    class SqlGoodsReceiptRepository implements IGoodsReceiptRepository {
+        -ISqlConnectionFactory _factory
+        +CreateGoodsReceiptAsync() <<1 Transaction>>
+        +ApproveReceiptTransactionAsync() <<1 Transaction>>
+    }
+
+    class SqlGoodsIssueRepository implements IGoodsIssueRepository {
+        -ISqlConnectionFactory _factory
+        +CreateGoodsIssueAsync() <<1 Transaction>>
+        +ApproveIssueTransactionAsync() <<1 Transaction>>
+    }
+
+    class SqlInventoryReportRepository implements IInventoryReportRepository {
+        -ISqlConnectionFactory _factory
+        +GetInventoryReportAsync() <<Parameterized SQL>>
+    }
+
+    class ProductRepository implements IProductRepository
+    class GoodsReceiptRepository implements IGoodsReceiptRepository
+    class GoodsIssueRepository implements IGoodsIssueRepository
+    class InventoryReportRepository implements IInventoryReportRepository
+}
+
+' ==========================================
+' 4. TẦNG WEB APP (COMPOSITION ROOT)
+' ==========================================
+package "4. KhoBanLe (WebApp)" #f8fafc {
+    class Program <<Composition Root>> {
+        +Main(args)
+    }
+
+    class UserRoleService <<Scoped Auth>> {
+        +CurrentRole
+        +IsManager
+        +Login()
+        +Logout()
+        +SwitchRole()
+    }
+
+    class ShoppingCartService <<Scoped Cart>> {
+        +Items
+        +TotalAmount
+        +AddToCart()
+    }
+
+    class ApprovalList_razor <<[Authorize] Quản lý>>
+    class CreateReceipt_razor <<EditForm + AI>>
+    class CreateIssue_razor <<EditForm + Demo Luật 1>>
+    class InventoryReport_razor <<Báo cáo + Excel>>
+
+    Program ..> SqlProductRepository : Register DI
+    Program ..> SqlGoodsReceiptRepository : Register DI
+    Program ..> SqlGoodsIssueRepository : Register DI
+    Program ..> ApproveGoodsIssueUseCase : Register DI
+    Program ..> GetInventoryReportUseCase : Register DI
+
+    ApprovalList_razor --> ApproveGoodsIssueUseCase : Inject
+    ApprovalList_razor --> UserRoleService : Inject (K4.2 Guard)
+    InventoryReport_razor --> GetInventoryReportUseCase : Inject
+}
+
+@enduml

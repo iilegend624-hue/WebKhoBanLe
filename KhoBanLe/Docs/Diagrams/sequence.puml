@@ -1,0 +1,85 @@
+@startuml sequence
+autonumber
+skinparam roundcorner 8
+skinparam defaultFontName "Segoe UI"
+skinparam sequenceMessageAlign center
+
+title SƠ ĐỒ TUẦN TỰ: DUYỆT PHIẾU XUẤT KHO & KIỂM TRA LUẬT 1 TRONG TRANSACTION (K1.3, K2.2, K5.1)
+
+actor "Quản Lý Kho\n(InventoryManager)" as Manager #ef4444
+participant "ApprovalList.razor\n(WebApp)" as UI #3b82f6
+participant "ApproveGoodsIssueUseCase\n(UseCases)" as UC #8b5cf6
+participant "SqlProductRepository\n(DataStore Plugin)" as ProdRepo #10b981
+participant "SqlGoodsIssueRepository\n(DataStore Plugin)" as IssueRepo #f59e0b
+database "SQL Server SSMS\n(KhoBanLe Database)" as DB #0284c7
+
+Manager -> UI: Nhấn nút [Duyệt Xuất] (issueId, approvedBy)
+activate UI
+
+UI -> UC: ExecuteAsync(issueId, approvedBy)
+activate UC
+
+UC -> IssueRepo: GetGoodsIssueByIdAsync(issueId)
+activate IssueRepo
+IssueRepo -> DB: SELECT Header & Lines WHERE Id = @Id
+DB --> IssueRepo: Trả về thông tin phiếu xuất và các dòng hàng
+IssueRepo --> UC: issue
+deactivate IssueRepo
+
+' ====================================================
+' BƯỚC KIỂM TRA LUẬT 1 (CHẶN XUẤT ÂM KHO)
+' ====================================================
+loop Duyệt từng dòng line trong issue.Lines
+    UC -> ProdRepo: GetProductByIdAsync(line.ProductId)
+    activate ProdRepo
+    ProdRepo -> DB: SELECT * FROM dbo.Product WHERE Id = @Id
+    DB --> ProdRepo: product
+    ProdRepo --> UC: product
+    deactivate ProdRepo
+
+    alt TRƯỜNG HỢP VI PHẠM LUẬT 1 (CurrentStock < Quantity)
+        note over UC, UI #fee2e2
+          **PHÁT HIỆN VI PHẠM LUẬT 1 (K1.3, K3.3):**
+          Số lượng yêu cầu xuất vượt quá tồn kho thực tế!
+          Ví dụ: Bút bi Thiên Long tồn 5, yêu cầu xuất 10.
+        end note
+        UC --> UI: Trả về ApproveGoodsIssueResult.Fail("Hàng Bút bi Thiên Long chỉ còn tồn 5, không đủ để xuất 10!")
+        UI --> Manager: Hiển thị Alert đỏ thân thiện (KHÔNG văng exception, KHÔNG sửa DB)
+    end
+end
+
+' ====================================================
+' BƯỚC HỢP LỆ -> THỰC THI TRANSACTION
+' ====================================================
+opt TẤT CẢ CÁC DÒNG HỢP LỆ (CurrentStock >= Quantity)
+    UC -> IssueRepo: ApproveIssueTransactionAsync(issueId, approvedBy)
+    activate IssueRepo
+
+    note over IssueRepo, DB #dcfce7
+      **TIÊU CHÍ K2.2:**
+      Bắt đầu 1 Transaction an toàn (ACID)
+      trên SQL Server: connection.BeginTransaction()
+    end note
+
+    IssueRepo -> DB: BEGIN TRANSACTION
+    
+    IssueRepo -> DB: UPDATE dbo.GoodsIssue SET Status = 1, ApprovedBy = @User WHERE Id = @Id
+    
+    loop Từng dòng hàng xuất
+        IssueRepo -> DB: UPDATE dbo.Product SET CurrentStock = CurrentStock - @Quantity WHERE Id = @ProductId
+    end
+
+    IssueRepo -> DB: COMMIT TRANSACTION
+    DB --> IssueRepo: Giao dịch thành công 100%
+
+    IssueRepo --> UC: Hoàn tất
+    deactivate IssueRepo
+
+    UC --> UI: ApproveGoodsIssueResult.Ok()
+    UI --> Manager: Hiển thị thông báo duyệt thành công, cập nhật tồn kho tức thì
+end
+
+deactivate UC
+deactivate UI
+
+@enduml
