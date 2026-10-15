@@ -722,3 +722,50 @@ body {
         text-align: left;
     }
 }
+
+/* Utilities for Dashboard & Interactive Cards */
+.transition-all {
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.border-hover-success:hover {
+    border-color: #00a651 !important;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px -3px rgba(0, 166, 81, 0.12) !important;
+}
+
+.border-hover-warning:hover {
+    border-color: #f59e0b !important;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px -3px rgba(245, 158, 11, 0.15) !important;
+}
+
+.border-hover-danger:hover {
+    border-color: #ef4444 !important;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px -3px rgba(239, 68, 68, 0.12) !important;
+}
+
+.nav-header-pill {
+    text-decoration: none !important;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.45rem 0.95rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    font-size: 0.86rem;
+    color: #334155;
+    transition: all 0.18s ease;
+    white-space: nowrap;
+}
+
+.nav-header-pill:hover {
+    color: #00a651;
+    background-color: #f0fdf4;
+}
+
+.nav-header-pill.active {
+    color: #00a651;
+    background-color: #e8f7ee;
+    font-weight: 700;
+}
