@@ -1,0 +1,87 @@
+@namespace KhoBanLe.Components.Controls
+
+<div class="reusable-search-bar bg-white p-2.5 rounded-3 border shadow-xs">
+    <div class="row g-2 align-items-center">
+        <!-- Input tìm kiếm -->
+        <div class="col-12 @(ShowCategoryFilter ? "col-md-7" : "col-md-12")">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0 text-muted">
+                    <i class="bi bi-search"></i>
+                </span>
+                <input type="text" 
+                       class="form-control border-start-0 ps-0" 
+                       placeholder="@Placeholder" 
+                       value="@SearchTerm" 
+                       @oninput="HandleInput" />
+                @if (!string.IsNullOrEmpty(SearchTerm))
+                {
+                    <button class="btn btn-outline-secondary border-start-0" type="button" @onclick="HandleClear">
+                        <i class="bi bi-x-lg"></i>
+                    </button>
+                }
+            </div>
+        </div>
+
+        <!-- Bộ lọc ngành hàng (tùy chọn) -->
+        @if (ShowCategoryFilter)
+        {
+            <div class="col-12 col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-white text-muted">
+                        <i class="bi bi-funnel me-1"></i>Ngành:
+                    </span>
+                    <select class="form-select" value="@SelectedCategory" @onchange="HandleCategoryChange">
+                        <option value="">-- Tất cả ngành hàng --</option>
+                        @foreach (var cat in Categories)
+                        {
+                            <option value="@cat">@cat</option>
+                        }
+                    </select>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter] public string SearchTerm { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> SearchTermChanged { get; set; }
+
+    [Parameter] public string SelectedCategory { get; set; } = string.Empty;
+    [Parameter] public EventCallback<string> SelectedCategoryChanged { get; set; }
+
+    [Parameter] public bool ShowCategoryFilter { get; set; } = true;
+    [Parameter] public string Placeholder { get; set; } = "Tìm kiếm theo mã SKU, tên hàng hóa...";
+    [Parameter] public List<string> Categories { get; set; } = new()
+    {
+        "Văn phòng phẩm",
+        "Thực phẩm",
+        "Sữa & Đồ uống",
+        "Hàng tiêu dùng",
+        "Hóa mỹ phẩm"
+    };
+
+    [Parameter] public EventCallback OnSearch { get; set; }
+    [Parameter] public EventCallback OnClear { get; set; }
+
+    private async Task HandleInput(ChangeEventArgs e)
+    {
+        SearchTerm = e.Value?.ToString() ?? string.Empty;
+        await SearchTermChanged.InvokeAsync(SearchTerm);
+        await OnSearch.InvokeAsync();
+    }
+
+    private async Task HandleCategoryChange(ChangeEventArgs e)
+    {
+        SelectedCategory = e.Value?.ToString() ?? string.Empty;
+        await SelectedCategoryChanged.InvokeAsync(SelectedCategory);
+        await OnSearch.InvokeAsync();
+    }
+
+    private async Task HandleClear()
+    {
+        SearchTerm = string.Empty;
+        await SearchTermChanged.InvokeAsync(string.Empty);
+        await OnClear.InvokeAsync();
+    }
+}

@@ -1,0 +1,48 @@
+@namespace KhoBanLe.Components.Controls
+
+<span class="badge @BadgeClass d-inline-flex align-items-center gap-1 px-2.5 py-1 rounded-pill fw-medium cursor-pointer" 
+      style="@(OnBadgeClick.HasDelegate ? "cursor: pointer;" : "")"
+      @onclick="HandleClick">
+    <i class="@IconClass fs-7"></i>
+    <span>@StatusText</span>
+    @if (ShowNumbers)
+    {
+        <span class="opacity-75 ms-1">(@CurrentStock/@MinStock)</span>
+    }
+</span>
+
+@code {
+    [Parameter] public int CurrentStock { get; set; }
+    [Parameter] public int MinStock { get; set; } = 10;
+    [Parameter] public bool ShowNumbers { get; set; } = false;
+    [Parameter] public EventCallback<int> OnBadgeClick { get; set; }
+
+    private string StatusText => CurrentStock switch
+    {
+        <= 0 => "Hết hàng",
+        _ when CurrentStock <= MinStock => "Sắp hết hàng",
+        _ => "Còn hàng"
+    };
+
+    private string BadgeClass => CurrentStock switch
+    {
+        <= 0 => "bg-danger-subtle text-danger border border-danger-subtle",
+        _ when CurrentStock <= MinStock => "bg-warning-subtle text-warning-emphasis border border-warning-subtle",
+        _ => "bg-success-subtle text-success border border-success-subtle"
+    };
+
+    private string IconClass => CurrentStock switch
+    {
+        <= 0 => "bi bi-x-circle-fill",
+        _ when CurrentStock <= MinStock => "bi bi-exclamation-triangle-fill",
+        _ => "bi bi-check-circle-fill"
+    };
+
+    private async Task HandleClick()
+    {
+        if (OnBadgeClick.HasDelegate)
+        {
+            await OnBadgeClick.InvokeAsync(CurrentStock);
+        }
+    }
+}

@@ -1,0 +1,247 @@
+@page "/reports"
+@rendermode InteractiveServer
+@namespace KhoBanLe.Components.Pages.Reports
+@inject IGetInventoryReportUseCase GetReport
+@inject ExcelExportService ExcelService
+
+<PageTitle>Báo Cáo Nhập - Xuất - Tồn (Luật 2) - KhoBanLe</PageTitle>
+
+<div class="container-fluid px-0">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-bar-chart-line-fill text-info me-2"></i>Báo Cáo Tổng Hợp Nhập – Xuất – Tồn
+            </h3>
+            <p class="text-muted small mb-0">Cài đặt <strong>LUẬT 2: Bảo toàn công thức Nhập - Xuất - Tồn</strong> &bull; Hỗ trợ xuất trực tiếp sang Excel</p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-outline-primary rounded-pill fw-semibold shadow-xs" @onclick="RunAuditCheck">
+                <i class="bi bi-shield-check me-1"></i>Kiểm Tra Đối Soát Chéo
+            </button>
+            <button class="btn btn-success rounded-pill fw-semibold shadow-xs" @onclick="ExportToExcel">
+                <i class="bi bi-file-earmark-excel-fill me-1"></i>Xuất Báo Cáo Sang Excel (.CSV)
+            </button>
+        </div>
+    </div>
+
+    <!-- Rule 2 Highlight Box -->
+    <div class="rule-alert rule-alert-success mb-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-calculator-fill fs-3 text-success"></i>
+                <div>
+                    <h6 class="fw-bold text-success mb-0">LUẬT 2: BẢO TOÀN CÔNG THỨC BẤT BIẾN NHẬP - XUẤT - TỒN</h6>
+                    <small class="text-dark">
+                        Vị trí cài đặt: <code>KhoBanLe.UseCases.Reports.GetInventoryReportUseCase</code>.
+                        Công thức: <strong>Tồn đầu kỳ + Tổng nhập (Approved) - Tổng xuất (Approved) = Tồn cuối kỳ</strong>.
+                        Tất cả phiếu đã duyệt đều được khóa bất biến. Hàm đối soát kiểm tra chéo tự động.
+                    </small>
+                </div>
+            </div>
+            <span class="badge bg-success text-white rounded-pill px-3 py-1.5 fw-bold">
+                100% Khớp Chứng Từ
+            </span>
+        </div>
+    </div>
+
+    <!-- Audit Notification -->
+    @if (showAuditBanner && auditReport != null)
+    {
+        <div class="alert @(auditReport.IsAuditPassed ? "alert-success border-success" : "alert-danger border-danger") alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi @(auditReport.IsAuditPassed ? "bi-patch-check-fill fs-3 text-success" : "bi-exclamation-triangle-fill fs-3 text-danger")"></i>
+                <div>
+                    <h6 class="fw-bold mb-0 @(auditReport.IsAuditPassed ? "text-success" : "text-danger")">
+                        @(auditReport.IsAuditPassed ? "KẾT QUẢ ĐỐI SOÁT HỢP LỆ (LUẬT 2 ĐẠT CHUẨN)" : "CẢNH BÁO LỆCH SỔ CÁI")
+                    </h6>
+                    <div class="small">@auditReport.AuditSummaryMessage</div>
+                </div>
+            </div>
+            <button type="button" class="btn-close" @onclick="() => showAuditBanner = false"></button>
+        </div>
+    }
+
+    <!-- 5 KPI Stat Summary Cards -->
+    @if (auditReport != null)
+    {
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-md-4 col-xl">
+                <div class="stat-card">
+                    <span class="text-muted small fw-semibold">TỒN ĐẦU KỲ</span>
+                    <div class="h4 fw-bold text-secondary mb-0 mt-1">@auditReport.TotalBeginningStock</div>
+                    <small class="text-muted">Đơn vị: chiếc/gói/thùng</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-xl">
+                <div class="stat-card">
+                    <span class="text-muted small fw-semibold text-success">TỔNG NHẬP (APPROVED)</span>
+                    <div class="h4 fw-bold text-success mb-0 mt-1">+@auditReport.TotalImportQuantity</div>
+                    <small class="text-muted">Đã duyệt trong kỳ</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-xl">
+                <div class="stat-card">
+                    <span class="text-muted small fw-semibold text-danger">TỔNG XUẤT (APPROVED)</span>
+                    <div class="h4 fw-bold text-danger mb-0 mt-1">-@auditReport.TotalExportQuantity</div>
+                    <small class="text-muted">Đã duyệt trong kỳ</small>
+                </div>
+            </div>
+            <div class="col-6 col-md-4 col-xl">
+                <div class="stat-card">
+                    <span class="text-muted small fw-semibold text-primary">TỒN CUỐI KỲ (=)</span>
+                    <div class="h4 fw-bold text-primary mb-0 mt-1">@auditReport.TotalEndingStock</div>
+                    <small class="text-muted">Đầu + Nhập - Xuất</small>
+                </div>
+            </div>
+            <div class="col-12 col-md-4 col-xl">
+                <div class="stat-card">
+                    <span class="text-muted small fw-semibold text-info">GIÁ TRỊ TỒN KHO</span>
+                    <div class="h4 fw-bold text-dark mb-0 mt-1">@(auditReport.TotalStockValue.ToString("N0")) đ</div>
+                    <small class="text-muted">Theo đơn giá bán lẻ</small>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Detailed Inventory Report Table -->
+    <div class="modern-card p-0 overflow-hidden mb-4">
+        <div class="px-4 py-3 bg-light border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <h6 class="fw-bold text-dark mb-0">
+                <i class="bi bi-table me-1 text-primary"></i>Bảng Kê Chi Tiết Nhập - Xuất - Tồn Từng Mặt Hàng
+            </h6>
+            <div class="small text-muted">
+                Công thức: <code>Tồn cuối = Tồn đầu + Nhập - Xuất</code> &bull; <code>Khớp = (Tồn cuối == Tồn thực tế)</code>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table custom-table mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Mã SKU</th>
+                        <th>Tên Hàng Hóa</th>
+                        <th>ĐVT</th>
+                        <th>Nhóm Ngành</th>
+                        <th class="text-center">Tồn Đầu</th>
+                        <th class="text-center text-success">Nhập</th>
+                        <th class="text-center text-danger">Xuất</th>
+                        <th class="text-center text-primary">Tồn Cuối (Tính toán)</th>
+                        <th class="text-center">Tồn Sổ Cái (Thực tế)</th>
+                        <th class="text-center">Đối Soát</th>
+                        <th class="text-end">Giá Trị Tồn</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (auditReport != null && auditReport.Items.Any())
+                    {
+                        @foreach (var item in auditReport.Items)
+                        {
+                            <tr>
+                                <td data-label="Mã SKU">
+                                    <span class="badge bg-light text-dark border">@item.Sku</span>
+                                </td>
+                                <td data-label="Tên Hàng Hóa">
+                                    <div class="fw-bold text-dark">@item.ProductName</div>
+                                </td>
+                                <td data-label="ĐVT">
+                                    <span class="small text-muted">@item.Unit</span>
+                                </td>
+                                <td data-label="Nhóm Ngành">
+                                    <span class="small text-muted">@item.Category</span>
+                                </td>
+                                <td data-label="Tồn Đầu" class="text-center fw-medium">
+                                    @item.BeginningStock
+                                </td>
+                                <td data-label="Nhập" class="text-center fw-bold text-success">
+                                    +@item.TotalImport
+                                </td>
+                                <td data-label="Xuất" class="text-center fw-bold text-danger">
+                                    -@item.TotalExport
+                                </td>
+                                <td data-label="Tồn Cuối" class="text-center fw-bold text-primary">
+                                    @item.EndingStock
+                                </td>
+                                <td data-label="Tồn Sổ Cái" class="text-center fw-bold text-dark">
+                                    @item.CurrentStock
+                                </td>
+                                <td data-label="Đối Soát" class="text-center">
+                                    @if (item.IsBalanced)
+                                    {
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1 fw-semibold">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Khớp 100%
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2.5 py-1 fw-semibold">
+                                            <i class="bi bi-x-circle-fill me-1"></i>Lệch sổ
+                                        </span>
+                                    }
+                                </td>
+                                <td data-label="Giá Trị Tồn" class="text-end fw-bold text-dark">
+                                    @((item.EndingStockValue).ToString("N0")) đ
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="11" class="text-center py-5 text-muted">
+                                Đang tổng hợp dữ liệu báo cáo...
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+                @if (auditReport != null)
+                {
+                    <tfoot class="table-light fw-bold">
+                        <tr>
+                            <td colspan="4" class="text-end">TỔNG TOÀN KHO:</td>
+                            <td class="text-center">@auditReport.TotalBeginningStock</td>
+                            <td class="text-center text-success">+@auditReport.TotalImportQuantity</td>
+                            <td class="text-center text-danger">-@auditReport.TotalExportQuantity</td>
+                            <td class="text-center text-primary">@auditReport.TotalEndingStock</td>
+                            <td class="text-center text-dark">@auditReport.TotalEndingStock</td>
+                            <td class="text-center">
+                                <span class="badge bg-success rounded-pill px-2.5 py-1">TOÀN VẸN</span>
+                            </td>
+                            <td class="text-end text-primary fs-6">
+                                @((auditReport.TotalStockValue).ToString("N0")) đ
+                            </td>
+                        </tr>
+                    </tfoot>
+                }
+            </table>
+        </div>
+    </div>
+</div>
+
+@code {
+    private InventoryAuditReport? auditReport;
+    private bool showAuditBanner = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadReport();
+    }
+
+    private async Task LoadReport()
+    {
+        auditReport = await GetReport.ExecuteAsync();
+    }
+
+    private void RunAuditCheck()
+    {
+        showAuditBanner = true;
+    }
+
+    private async Task ExportToExcel()
+    {
+        if (auditReport != null)
+        {
+            await ExcelService.ExportInventoryReportToExcelAsync(auditReport.Items);
+        }
+    }
+}

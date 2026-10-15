@@ -1,0 +1,836 @@
+@page "/cart"
+@page "/pos"
+@rendermode InteractiveServer
+@namespace KhoBanLe.Components.Pages.Cart
+@inject ShoppingCartService CartService
+@inject ISearchProductsUseCase SearchProducts
+@inject KhoBanLe.UseCases.Pos.IGetPosOrdersUseCase GetPosOrders
+@inject KhoBanLe.UseCases.Customers.IGetCustomersUseCase GetCustomers
+@inject ExcelExportService ExcelService
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+@implements IDisposable
+
+<PageTitle>Bán Lẻ Tại Quầy (POS) & Giỏ Hàng - KhoBanLe</PageTitle>
+
+<div class="container-fluid px-0">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-primary-subtle text-primary fw-bold px-2.5 py-1 rounded-pill">
+                    <i class="bi bi-shop me-1"></i>RETAIL POINT OF SALE (POS)
+                </span>
+                <span class="badge bg-success-subtle text-success fw-bold px-2.5 py-1 rounded-pill">
+                    <i class="bi bi-check-all me-1"></i>Đồng bộ CSDL SQL Server 100%
+                </span>
+            </div>
+            <h3 class="fw-bold text-dark mb-0">
+                <i class="bi bi-cart-check-fill text-primary me-2"></i>Hệ Thống Bán Hàng Tại Quầy (POS Terminal)
+            </h3>
+            <p class="text-muted small mb-0">Quản lý bán lẻ, in hóa đơn &bull; Tự động lập phiếu xuất và trừ tồn kho thời gian thực (Luật 1)</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn @(activeTab == "pos" ? "btn-primary shadow-xs" : "btn-outline-primary") rounded-pill fw-semibold"
+                    @onclick='() => activeTab = "pos"'>
+                <i class="bi bi-display me-1"></i>Màn hình Thu Ngân POS
+            </button>
+            <button class="btn @(activeTab == "history" ? "btn-primary shadow-xs" : "btn-outline-secondary") rounded-pill fw-semibold position-relative"
+                    @onclick='SwitchToHistoryTab'>
+                <i class="bi bi-journal-text me-1"></i>Sổ Hóa Đơn Bán Lẻ (@posOrders.Count)
+            </button>
+        </div>
+    </div>
+
+    <!-- Alert Message -->
+    @if (!string.IsNullOrEmpty(alertMessage))
+    {
+        <div class="alert @(isSuccessAlert ? "alert-success border-success" : "alert-danger border-danger") alert-dismissible fade show rounded-3 shadow-xs mb-3" role="alert">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi @(isSuccessAlert ? "bi-check-circle-fill text-success fs-5" : "bi-exclamation-triangle-fill text-danger fs-5")"></i>
+                <div class="fw-medium">@alertMessage</div>
+            </div>
+            <button type="button" class="btn-close" @onclick="() => alertMessage = string.Empty"></button>
+        </div>
+    }
+
+    <!-- TAB 1: POS TERMINAL -->
+    @if (activeTab == "pos")
+    {
+        <!-- Checkout Receipt Modal / Card (Khi vừa thanh toán thành công) -->
+        @if (lastReceipt != null)
+        {
+            <div class="modern-card p-4 mb-4 border-2 border-success bg-success-subtle bg-opacity-10 shadow-sm">
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 border-bottom pb-3 mb-3">
+                    <div>
+                        <div class="badge bg-success rounded-pill px-3 py-1 mb-2 fw-semibold">
+                            <i class="bi bi-patch-check-fill me-1"></i>GIAO DỊCH POS THÀNH CÔNG (1 TRANSACTION AN TOÀN)
+                        </div>
+                        <h4 class="fw-bold text-dark mb-1">
+                            Hóa Đơn Bán Lẻ: <span class="text-primary">@lastReceipt.PosOrderNumber</span>
+                        </h4>
+                        <div class="small text-muted">
+                            Đã tạo phiếu xuất kho liên kết: <strong class="text-dark">@lastReceipt.IssueNumber</strong> &bull; 
+                            Khách: <strong>@lastReceipt.CustomerName</strong> &bull;
+                            Thời gian: <strong>@lastReceipt.OrderDate.ToString("dd/MM/yyyy HH:mm:ss")</strong>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-primary rounded-pill btn-sm fw-semibold" @onclick="PrintReceipt">
+                            <i class="bi bi-printer-fill me-1"></i>In Phiếu / In Bill
+                        </button>
+                        <button class="btn btn-sm btn-secondary rounded-pill" @onclick="() => lastReceipt = null">
+                            <i class="bi bi-x-lg me-1"></i>Đóng
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Receipt Detail Preview -->
+                <div class="row g-3">
+                    <div class="col-md-7">
+                        <div class="table-responsive bg-white rounded-3 border p-2">
+                            <table class="table table-sm align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Sản phẩm</th>
+                                        <th class="text-center">Số lượng</th>
+                                        <th class="text-end">Đơn giá</th>
+                                        <th class="text-end">Thành tiền</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in lastReceipt.PurchasedItems)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="fw-bold">@item.Product?.Name</div>
+                                                <small class="text-muted"><code>@item.Product?.Sku</code></small>
+                                            </td>
+                                            <td class="text-center fw-semibold">@item.Quantity @item.Product?.Unit</td>
+                                            <td class="text-end">@item.UnitPrice.ToString("N0") đ</td>
+                                            <td class="text-end fw-bold text-dark">@item.LineTotal.ToString("N0") đ</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="p-3 bg-white rounded-3 border h-100 d-flex flex-column justify-content-between">
+                            <div>
+                                <div class="d-flex justify-content-between mb-1.5 small">
+                                    <span class="text-muted">Tạm tính:</span>
+                                    <strong>@lastReceipt.SubTotal.ToString("N0") đ</strong>
+                                </div>
+                                <div class="d-flex justify-content-between mb-1.5 small">
+                                    <span class="text-muted">Giảm giá:</span>
+                                    <span class="text-danger">-@lastReceipt.DiscountAmount.ToString("N0") đ</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="fw-bold text-dark">TỔNG TIỀN PHẢI THU:</span>
+                                    <span class="h5 fw-bold text-success mb-0">@lastReceipt.TotalAmount.ToString("N0") đ</span>
+                                </div>
+                                <hr class="my-2" />
+                                <div class="d-flex justify-content-between mb-1.5 small">
+                                    <span class="text-muted">Phương thức thanh toán:</span>
+                                    <span class="badge bg-light text-dark border">@lastReceipt.PaymentMethod</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-1.5 small">
+                                    <span class="text-muted">Tiền khách đưa:</span>
+                                    <strong>@lastReceipt.ReceivedAmount.ToString("N0") đ</strong>
+                                </div>
+                                <div class="d-flex justify-content-between small">
+                                    <span class="text-muted">Tiền thối lại khách:</span>
+                                    <strong class="text-primary fs-6">@lastReceipt.ChangeAmount.ToString("N0") đ</strong>
+                                </div>
+                            </div>
+                            <div class="mt-3 text-center">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle p-2 w-100">
+                                    <i class="bi bi-shield-check me-1"></i>Đã tự động trừ tồn kho & bảo toàn công thức Nhập - Xuất - Tồn!
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="row g-3">
+            <!-- Left: Products in Cart & Quick Catalog -->
+            <div class="col-lg-8">
+                <!-- Current Cart Items -->
+                <div class="modern-card p-4 mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <h5 class="fw-bold text-dark mb-0">
+                                <i class="bi bi-basket3-fill text-primary me-2"></i>Mặt Hàng Trong Đơn Bán Lẻ
+                            </h5>
+                            <span class="badge bg-primary rounded-pill px-2.5 py-1">
+                                @CartService.TotalItems sản phẩm (@CartService.Items.Count SKU)
+                            </span>
+                        </div>
+                        @if (CartService.Items.Any())
+                        {
+                            <button class="btn btn-sm btn-outline-danger rounded-pill fw-semibold" @onclick="CartService.ClearCart">
+                                <i class="bi bi-trash3 me-1"></i>Xóa sạch giỏ
+                            </button>
+                        }
+                    </div>
+
+                    @if (CartService.Items.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table custom-table align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th style="width: 70px;">Hình ảnh</th>
+                                        <th>Sản Phẩm</th>
+                                        <th class="text-end">Đơn Giá</th>
+                                        <th class="text-center" style="width: 140px;">Số Lượng</th>
+                                        <th class="text-end">Thành Tiền</th>
+                                        <th class="text-end" style="width: 45px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in CartService.Items)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <div class="rounded-3 overflow-hidden border shadow-xs" style="width: 55px; height: 55px; background: #f8fafc;">
+                                                    <img src="@(string.IsNullOrEmpty(item.Product?.ImageUrl) ? "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=200" : item.Product.ImageUrl)" 
+                                                         alt="@item.Product?.Name" 
+                                                         class="w-100 h-100 object-fit-cover" 
+                                                         onerror="this.src='favicon.png'" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="fw-bold text-dark">@(item.Product?.Name ?? "Sản phẩm")</div>
+                                                <div class="small text-muted">
+                                                    Mã: <code>@(item.Product?.Sku ?? "SKU")</code> &bull; ĐVT: @(item.Product?.Unit ?? "Cái") &bull;
+                                                    Tồn kho: <strong class="text-success">@(item.Product?.CurrentStock ?? 0)</strong>
+                                                </div>
+                                            </td>
+                                            <td class="text-end fw-semibold text-dark">
+                                                @item.UnitPrice.ToString("N0") đ
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="input-group input-group-sm justify-content-center" style="max-width: 110px; margin: 0 auto;">
+                                                    <button class="btn btn-outline-secondary" type="button" 
+                                                            @onclick="() => UpdateQty(item.ProductId, item.Quantity - 1)">-</button>
+                                                    <input type="number" class="form-control text-center fw-bold px-1" min="1" 
+                                                           value="@item.Quantity" 
+                                                           @onchange="(e) => OnInputQty(item.ProductId, e)" />
+                                                    <button class="btn btn-outline-secondary" type="button" 
+                                                            @onclick="() => UpdateQty(item.ProductId, item.Quantity + 1)">+</button>
+                                                </div>
+                                            </td>
+                                            <td class="text-end fw-bold text-primary fs-6">
+                                                @item.LineTotal.ToString("N0") đ
+                                            </td>
+                                            <td class="text-end">
+                                                <button class="btn btn-sm btn-outline-danger p-1 rounded-circle" 
+                                                        title="Xóa khỏi giỏ" 
+                                                        @onclick="() => CartService.RemoveFromCart(item.ProductId)">
+                                                    <i class="bi bi-x-lg"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4 text-muted bg-light rounded-3">
+                            <i class="bi bi-cart-x fs-1 text-secondary d-block mb-2"></i>
+                            <h6 class="fw-bold text-dark">Chưa có sản phẩm nào trong đơn POS!</h6>
+                            <p class="small text-muted mb-0">Bấm nút <strong>+ Thêm giỏ</strong> ở danh mục phía dưới để chọn hàng cho khách.</p>
+                        </div>
+                    }
+                </div>
+
+                <!-- Quick Product Catalog with Search & Filter -->
+                <div class="modern-card p-4">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 border-bottom pb-2">
+                        <h5 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-lightning-charge-fill text-warning me-2"></i>Chọn Nhanh Hàng Bán Lẻ Vào Giỏ
+                        </h5>
+                        <div class="input-group input-group-sm" style="max-width: 250px;">
+                            <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                            <input type="text" class="form-control" placeholder="Tìm tên, mã SKU..." @bind="searchFilter" @bind:event="oninput" />
+                        </div>
+                    </div>
+
+                    <div class="row g-2.5">
+                        @foreach (var prod in FilteredProducts)
+                        {
+                            <div class="col-6 col-md-4 col-xl-3">
+                                <div class="card h-100 border rounded-3 p-2 text-center modern-card-interactive position-relative">
+                                    <div class="rounded-2 overflow-hidden mb-2 position-relative" style="height: 100px; background: #f1f5f9;">
+                                        <img src="@(string.IsNullOrEmpty(prod.ImageUrl) ? "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=300" : prod.ImageUrl)" 
+                                             alt="@prod.Name" 
+                                             class="w-100 h-100 object-fit-cover" 
+                                             onerror="this.src='favicon.png'" />
+                                        <span class="position-absolute top-0 start-0 m-1 badge @(prod.CurrentStock <= 0 ? "bg-danger" : (prod.CurrentStock <= prod.MinStockLevel ? "bg-warning text-dark" : "bg-dark bg-opacity-75")) small">
+                                            Tồn: @prod.CurrentStock
+                                        </span>
+                                    </div>
+                                    <h6 class="fw-bold text-dark text-truncate mb-0 small" title="@prod.Name">@prod.Name</h6>
+                                    <div class="small text-muted mb-1"><code>@prod.Sku</code> &bull; @prod.Unit</div>
+                                    <div class="text-primary fw-bold small mb-2">@prod.Price.ToString("N0") đ</div>
+                                    <button class="btn btn-sm @(prod.CurrentStock > 0 ? "btn-outline-primary" : "btn-light text-muted disabled") rounded-pill w-100 py-1 small fw-semibold"
+                                            disabled="@(prod.CurrentStock <= 0)"
+                                            @onclick="() => QuickAdd(prod)">
+                                        @(prod.CurrentStock > 0 ? "+ Thêm giỏ" : "Hết hàng")
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: POS Payment & Checkout Panel -->
+            <div class="col-lg-4">
+                <div class="modern-card p-4 sticky-top" style="top: 80px;">
+                    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                        <h5 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-cash-coin text-success me-2"></i>Thanh Toán Tại Quầy POS
+                        </h5>
+                        <span class="badge bg-success-subtle text-success small fw-bold">Thu Ngân</span>
+                    </div>
+
+                    <!-- Customer Selector -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Khách hàng / Người nhận:</label>
+                        <select class="form-select form-select-sm" @onchange="OnCustomerSelected">
+                            <option value="0">-- Khách mua lẻ tại quầy (Vãng lai) --</option>
+                            @foreach (var cust in customersList)
+                            {
+                                <option value="@cust.Id">@cust.Name - @cust.Phone (@cust.CustomerCode)</option>
+                            }
+                        </select>
+                        <div class="mt-1">
+                            <input type="text" class="form-control form-control-sm" @bind="customerName" placeholder="Tên khách hàng in trên bill..." />
+                        </div>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-dark">Phương thức thanh toán:</label>
+                        <div class="btn-group w-100 btn-group-sm" role="group">
+                            <input type="radio" class="btn-check" name="paymethod" id="payCash" autocomplete="off" 
+                                   checked="@(paymentMethod == "Tiền mặt")" @onchange='() => SetPaymentMethod("Tiền mặt")'>
+                            <label class="btn btn-outline-secondary" for="payCash">💵 Tiền mặt</label>
+
+                            <input type="radio" class="btn-check" name="paymethod" id="payQR" autocomplete="off" 
+                                   checked="@(paymentMethod == "Chuyển khoản QR")" @onchange='() => SetPaymentMethod("Chuyển khoản QR")'>
+                            <label class="btn btn-outline-secondary" for="payQR">📱 VietQR</label>
+
+                            <input type="radio" class="btn-check" name="paymethod" id="payPOS" autocomplete="off" 
+                                   checked="@(paymentMethod == "Quẹt thẻ POS")" @onchange='() => SetPaymentMethod("Quẹt thẻ POS")'>
+                            <label class="btn btn-outline-secondary" for="payPOS">💳 Thẻ POS</label>
+                        </div>
+                    </div>
+
+                    <hr class="my-2" />
+
+                    <!-- Calculation details -->
+                    <div class="d-flex justify-content-between mb-1.5 small">
+                        <span class="text-muted">Tổng số lượng:</span>
+                        <strong class="text-dark">@CartService.TotalItems sản phẩm</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-1.5 small">
+                        <span class="text-muted">Tạm tính giỏ hàng:</span>
+                        <strong class="text-dark">@CartService.TotalAmount.ToString("N0") đ</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-2 small">
+                        <span class="text-muted">Giảm giá (VNĐ):</span>
+                        <div style="max-width: 120px;">
+                            <input type="number" class="form-control form-control-sm text-end" min="0" step="5000" 
+                                   @bind="discountAmount" @bind:event="oninput" placeholder="0" />
+                        </div>
+                    </div>
+
+                    <!-- Total Amount Payable -->
+                    <div class="p-3 bg-light rounded-3 border mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold text-dark fs-6">TỔNG PHẢI THU:</span>
+                            <span class="h4 fw-bold text-success mb-0">
+                                @PayableAmount.ToString("N0") đ
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Cash calculator (Nếu chọn Tiền mặt) -->
+                    @if (paymentMethod == "Tiền mặt")
+                    {
+                        <div class="p-2.5 bg-warning bg-opacity-10 rounded-3 border border-warning-subtle mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1.5">
+                                <span class="small fw-bold text-dark">Tiền khách đưa:</span>
+                                <div style="max-width: 140px;">
+                                    <input type="number" class="form-control form-control-sm text-end fw-bold" min="0" step="10000"
+                                           @bind="receivedCash" @bind:event="oninput" />
+                                </div>
+                            </div>
+                            <div class="d-flex flex-wrap gap-1 mb-2">
+                                <button type="button" class="btn btn-xs btn-outline-secondary rounded" @onclick="() => receivedCash = PayableAmount">
+                                    Đủ tiền
+                                </button>
+                                <button type="button" class="btn btn-xs btn-outline-secondary rounded" @onclick="() => receivedCash = RoundUpTo(PayableAmount, 50000)">
+                                    +50k
+                                </button>
+                                <button type="button" class="btn btn-xs btn-outline-secondary rounded" @onclick="() => receivedCash = RoundUpTo(PayableAmount, 100000)">
+                                    +100k
+                                </button>
+                                <button type="button" class="btn btn-xs btn-outline-secondary rounded" @onclick="() => receivedCash = RoundUpTo(PayableAmount, 500000)">
+                                    +500k
+                                </button>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center pt-1 border-top border-warning-subtle">
+                                <span class="small fw-bold text-muted">Tiền thối lại khách:</span>
+                                <span class="fw-bold @(ChangeAmount >= 0 ? "text-primary" : "text-danger") fs-6">
+                                    @ChangeAmount.ToString("N0") đ
+                                </span>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Checkout Button -->
+                    <button class="btn btn-success w-100 py-2.5 rounded-pill fw-bold shadow-sm mb-2"
+                            disabled="@(!CartService.Items.Any() || isCheckingOut || (paymentMethod == "Tiền mặt" && receivedCash < PayableAmount))"
+                            @onclick="HandleCheckout">
+                        @if (isCheckingOut)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                            <span>Đang giao dịch & trừ kho...</span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-check2-circle me-1"></i>
+                            <span>THANH TOÁN & TRỪ KHO NGAY</span>
+                        }
+                    </button>
+
+                    <small class="text-muted text-center d-block" style="font-size: 0.75rem;">
+                        <i class="bi bi-shield-check text-success me-1"></i>
+                        Tuân thủ <strong>Luật 1</strong>: Tự động trừ tồn kho và ghi nhận phiếu xuất kho bán lẻ trong 1 transaction an toàn.
+                    </small>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- TAB 2: POS ORDERS HISTORY -->
+    @if (activeTab == "history")
+    {
+        <div class="modern-card p-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3 border-bottom pb-3">
+                <div>
+                    <h5 class="fw-bold text-dark mb-1">
+                        <i class="bi bi-clock-history text-primary me-2"></i>Sổ Hóa Đơn Bán Lẻ POS & Thống Kê Doanh Thu
+                    </h5>
+                    <p class="text-muted small mb-0">Toàn bộ hóa đơn bán hàng tại quầy đồng bộ với các phiếu xuất kho tương ứng</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-success rounded-pill fw-semibold btn-sm" @onclick="ExportPosExcel">
+                        <i class="bi bi-file-earmark-excel-fill me-1"></i>Xuất Excel (.CSV UTF-8)
+                    </button>
+                    <button class="btn btn-outline-primary rounded-pill fw-semibold btn-sm" @onclick="LoadPosOrders">
+                        <i class="bi bi-arrow-clockwise me-1"></i>Làm mới
+                    </button>
+                </div>
+            </div>
+
+            <!-- Revenue KPI Cards -->
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <div class="small text-muted mb-1">TỔNG HÓA ĐƠN POS</div>
+                        <div class="h4 fw-bold text-dark mb-0">@posOrders.Count đơn</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <div class="small text-muted mb-1">TỔNG DOANH THU</div>
+                        <div class="h4 fw-bold text-success mb-0">@(posOrders.Sum(o => o.TotalAmount).ToString("N0")) đ</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <div class="small text-muted mb-1">THU TIỀN MẶT</div>
+                        <div class="h4 fw-bold text-primary mb-0">
+                            @(posOrders.Where(o => o.PaymentMethod == "Tiền mặt").Sum(o => o.TotalAmount).ToString("N0")) đ
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-3 bg-light rounded-3 border">
+                        <div class="small text-muted mb-1">THU VIETQR & THẺ</div>
+                        <div class="h4 fw-bold text-info mb-0">
+                            @(posOrders.Where(o => o.PaymentMethod != "Tiền mặt").Sum(o => o.TotalAmount).ToString("N0")) đ
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Orders Table -->
+            @if (posOrders.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table custom-table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Mã Đơn POS</th>
+                                <th>Thời Gian</th>
+                                <th>Khách Hàng</th>
+                                <th>Phương Thức</th>
+                                <th>Phiếu Xuất Kho</th>
+                                <th class="text-center">Số Mặt Hàng</th>
+                                <th class="text-end">Tổng Tiền</th>
+                                <th class="text-center">Trạng Thái</th>
+                                <th class="text-end">Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in posOrders)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong class="text-primary">@order.OrderNumber</strong>
+                                        <div class="small text-muted">@order.CashierName</div>
+                                    </td>
+                                    <td>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                    <td>
+                                        <div class="fw-semibold">@order.CustomerName</div>
+                                        @if (order.Customer != null)
+                                        {
+                                            <small class="text-muted"><code>@order.Customer.CustomerCode</code> - @order.Customer.Phone</small>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge @(order.PaymentMethod == "Tiền mặt" ? "bg-warning-subtle text-dark" : "bg-info-subtle text-dark")">
+                                            @order.PaymentMethod
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (order.GoodsIssue != null)
+                                        {
+                                            <a href="issues" class="badge bg-primary-subtle text-primary text-decoration-none">
+                                                <i class="bi bi-box-arrow-up-right me-1"></i>@order.GoodsIssue.IssueNumber
+                                            </a>
+                                        }
+                                        else if (order.GoodsIssueId.HasValue)
+                                        {
+                                            <span class="badge bg-secondary">PX-ID#@order.GoodsIssueId</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">N/A</span>
+                                        }
+                                    </td>
+                                    <td class="text-center fw-bold">@order.TotalItems</td>
+                                    <td class="text-end fw-bold text-success fs-6">
+                                        @order.TotalAmount.ToString("N0") đ
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-success rounded-pill px-2.5 py-1">
+                                            <i class="bi bi-check2 me-1"></i>@order.Status
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <button class="btn btn-sm btn-outline-primary rounded-pill" @onclick="() => ViewOrderModal(order)">
+                                            <i class="bi bi-eye me-1"></i>Chi tiết
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                    Chưa có hóa đơn bán lẻ POS nào được ghi nhận.
+                </div>
+            }
+        </div>
+    }
+</div>
+
+<!-- Modal xem chi tiết hóa đơn lịch sử -->
+@if (selectedOrderDetails != null)
+{
+    <div class="modal fade show d-block" style="background: rgba(0,0,0,0.5);" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content shadow-lg border-0 rounded-4">
+                <div class="modal-header border-bottom bg-light">
+                    <h5 class="modal-title fw-bold text-dark">
+                        <i class="bi bi-receipt text-primary me-2"></i>Hóa Đơn POS: @selectedOrderDetails.OrderNumber
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="() => selectedOrderDetails = null"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row g-2 mb-3 small">
+                        <div class="col-sm-6">
+                            <div>Khách hàng: <strong>@selectedOrderDetails.CustomerName</strong></div>
+                            <div>Thu ngân: <strong>@selectedOrderDetails.CashierName</strong></div>
+                            <div>Thời gian: <strong>@selectedOrderDetails.OrderDate.ToString("dd/MM/yyyy HH:mm:ss")</strong></div>
+                        </div>
+                        <div class="col-sm-6 text-sm-end">
+                            <div>Phương thức: <span class="badge bg-light text-dark border">@selectedOrderDetails.PaymentMethod</span></div>
+                            <div>Phiếu xuất kho: <strong class="text-primary">@(selectedOrderDetails.GoodsIssue?.IssueNumber ?? ("PX-ID#" + selectedOrderDetails.GoodsIssueId))</strong></div>
+                            <div>Trạng thái: <span class="badge bg-success">@selectedOrderDetails.Status</span></div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive border rounded-3 mb-3">
+                        <table class="table table-sm align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Mặt hàng</th>
+                                    <th class="text-center">Số lượng</th>
+                                    <th class="text-end">Đơn giá</th>
+                                    <th class="text-end">Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var line in selectedOrderDetails.Lines)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="fw-bold">@(line.Product?.Name ?? $"Mã hàng #{line.ProductId}")</div>
+                                            <small class="text-muted"><code>@(line.Product?.Sku ?? "")</code> &bull; @(line.Product?.Unit ?? "")</small>
+                                        </td>
+                                        <td class="text-center fw-semibold">@line.Quantity</td>
+                                        <td class="text-end">@line.UnitPrice.ToString("N0") đ</td>
+                                        <td class="text-end fw-bold text-dark">@line.LineTotal.ToString("N0") đ</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="p-3 bg-light rounded-3 border">
+                        <div class="d-flex justify-content-between mb-1.5 small">
+                            <span class="text-muted">Tạm tính:</span>
+                            <strong>@selectedOrderDetails.SubTotal.ToString("N0") đ</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1.5 small">
+                            <span class="text-muted">Giảm giá:</span>
+                            <span class="text-danger">-@selectedOrderDetails.DiscountAmount.ToString("N0") đ</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="fw-bold text-dark">TỔNG TIỀN ĐÃ THU:</span>
+                            <span class="h5 fw-bold text-success mb-0">@selectedOrderDetails.TotalAmount.ToString("N0") đ</span>
+                        </div>
+                        <div class="d-flex justify-content-between small pt-2 border-top">
+                            <span class="text-muted">Tiền khách đưa: @selectedOrderDetails.ReceivedAmount.ToString("N0") đ</span>
+                            <span class="text-muted">Tiền thối lại: @selectedOrderDetails.ChangeAmount.ToString("N0") đ</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top bg-light">
+                    <button type="button" class="btn btn-outline-primary rounded-pill btn-sm fw-semibold" @onclick="PrintReceipt">
+                        <i class="bi bi-printer me-1"></i>In Hóa Đơn
+                    </button>
+                    <button type="button" class="btn btn-secondary rounded-pill btn-sm" @onclick="() => selectedOrderDetails = null">
+                        Đóng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private string activeTab = "pos";
+    private List<Product> allProducts = new();
+    private List<Customer> customersList = new();
+    private List<PosOrder> posOrders = new();
+
+    private string searchFilter = string.Empty;
+    private string customerName = "Khách mua lẻ tại quầy";
+    private int? selectedCustomerId = null;
+    private string paymentMethod = "Tiền mặt";
+    private double discountAmount = 0;
+    private double receivedCash = 0;
+
+    private string alertMessage = string.Empty;
+    private bool isSuccessAlert = false;
+    private bool isCheckingOut = false;
+    private CheckoutResult? lastReceipt;
+    private PosOrder? selectedOrderDetails;
+
+    private IEnumerable<Product> FilteredProducts =>
+        string.IsNullOrWhiteSpace(searchFilter)
+            ? allProducts
+            : allProducts.Where(p => p.Name.Contains(searchFilter, StringComparison.OrdinalIgnoreCase) ||
+                                     p.Sku.Contains(searchFilter, StringComparison.OrdinalIgnoreCase));
+
+    private double PayableAmount => Math.Max(0, CartService.TotalAmount - discountAmount);
+
+    private double ChangeAmount => Math.Max(0, receivedCash - PayableAmount);
+
+    protected override async Task OnInitializedAsync()
+    {
+        CartService.OnChange += OnCartUpdated;
+        allProducts = (await SearchProducts.ExecuteAsync()).ToList();
+        customersList = (await GetCustomers.ExecuteAsync()).ToList();
+        await LoadPosOrders();
+        receivedCash = PayableAmount;
+    }
+
+    private async Task LoadPosOrders()
+    {
+        posOrders = (await GetPosOrders.ExecuteAsync()).ToList();
+    }
+
+    private async Task SwitchToHistoryTab()
+    {
+        activeTab = "history";
+        await LoadPosOrders();
+    }
+
+    private async void OnCartUpdated()
+    {
+        if (receivedCash < PayableAmount)
+        {
+            receivedCash = PayableAmount;
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void OnCustomerSelected(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int cId) && cId > 0)
+        {
+            selectedCustomerId = cId;
+            var cust = customersList.FirstOrDefault(c => c.Id == cId);
+            if (cust != null)
+            {
+                customerName = cust.Name;
+            }
+        }
+        else
+        {
+            selectedCustomerId = null;
+            customerName = "Khách mua lẻ tại quầy";
+        }
+    }
+
+    private void SetPaymentMethod(string method)
+    {
+        paymentMethod = method;
+        if (paymentMethod != "Tiền mặt")
+        {
+            receivedCash = PayableAmount;
+        }
+    }
+
+    private double RoundUpTo(double amount, double denomination)
+    {
+        if (amount <= 0) return denomination;
+        return Math.Ceiling(amount / denomination) * denomination;
+    }
+
+    private void QuickAdd(Product prod)
+    {
+        var err = CartService.AddToCart(prod, 1);
+        if (!string.IsNullOrEmpty(err))
+        {
+            alertMessage = err;
+            isSuccessAlert = false;
+        }
+        else
+        {
+            alertMessage = $"Đã thêm '{prod.Name}' vào giỏ POS!";
+            isSuccessAlert = true;
+            receivedCash = PayableAmount;
+        }
+    }
+
+    private void UpdateQty(int productId, int newQty)
+    {
+        var err = CartService.UpdateQuantity(productId, newQty);
+        if (!string.IsNullOrEmpty(err))
+        {
+            alertMessage = err;
+            isSuccessAlert = false;
+        }
+        else
+        {
+            receivedCash = PayableAmount;
+        }
+    }
+
+    private void OnInputQty(int productId, ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int qty))
+        {
+            UpdateQty(productId, qty);
+        }
+    }
+
+    private async Task HandleCheckout()
+    {
+        if (!CartService.Items.Any()) return;
+
+        isCheckingOut = true;
+        alertMessage = string.Empty;
+
+        var result = await CartService.CheckoutAsync(
+            customerName, 
+            paymentMethod, 
+            selectedCustomerId, 
+            paymentMethod == "Tiền mặt" ? receivedCash : PayableAmount, 
+            discountAmount
+        );
+
+        isCheckingOut = false;
+
+        if (result.Success)
+        {
+            lastReceipt = result;
+            alertMessage = $"Thanh toán thành công đơn {result.PosOrderNumber}! Phiếu xuất kho #{result.IssueNumber} đã được phê duyệt & trừ kho.";
+            isSuccessAlert = true;
+            // Làm mới tồn kho sản phẩm & danh sách đơn POS
+            allProducts = (await SearchProducts.ExecuteAsync()).ToList();
+            await LoadPosOrders();
+            discountAmount = 0;
+            receivedCash = 0;
+        }
+        else
+        {
+            alertMessage = result.ErrorMessage ?? "Thanh toán POS thất bại!";
+            isSuccessAlert = false;
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void ViewOrderModal(PosOrder order)
+    {
+        selectedOrderDetails = order;
+    }
+
+    private async Task ExportPosExcel()
+    {
+        await ExcelService.ExportPosOrdersToExcelAsync(posOrders);
+    }
+
+    private async Task PrintReceipt()
+    {
+        await JS.InvokeVoidAsync("window.print");
+    }
+
+    public void Dispose()
+    {
+        CartService.OnChange -= OnCartUpdated;
+    }
+}

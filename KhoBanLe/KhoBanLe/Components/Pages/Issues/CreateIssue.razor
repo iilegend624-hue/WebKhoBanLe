@@ -1,0 +1,353 @@
+@page "/issues/create"
+@rendermode InteractiveServer
+@namespace KhoBanLe.Components.Pages.Issues
+@using System.ComponentModel.DataAnnotations
+@inject ISearchProductsUseCase SearchProducts
+@inject ICreateGoodsIssueUseCase CreateIssueUseCase
+@inject NavigationManager Nav
+
+<PageTitle>Lập Phiếu Xuất Kho (EditForm + DataAnnotations) - KhoBanLe</PageTitle>
+
+<div class="container-fluid px-0">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-box-arrow-up text-danger me-2"></i>Lập Phiếu Xuất Hàng (Goods Issue)
+            </h3>
+            <p class="text-muted small mb-0">Xuất kho cho cửa hàng bán lẻ, chi nhánh hoặc đối tác &bull; Tiêu chí K3.2: <strong>EditForm + DataAnnotations</strong></p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="issues" class="btn btn-outline-secondary rounded-pill fw-semibold">
+                <i class="bi bi-arrow-left me-1"></i>Quay lại sổ phiếu
+            </a>
+            <button class="btn btn-warning rounded-pill fw-semibold shadow-xs text-dark" @onclick="LoadSampleRule1Violation">
+                <i class="bi bi-shield-exclamation me-1"></i>Nạp Dữ Liệu Demo Vi Phạm Luật 1
+            </button>
+        </div>
+    </div>
+
+    <!-- Alert error nếu có -->
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-xs mb-4" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            @errorMessage
+            <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
+        </div>
+    }
+
+    <!-- EditForm bao bọc phiếu xuất để đáp ứng K3.2: EditForm + DataAnnotations -->
+    <EditForm Model="issueModel" OnValidSubmit="SubmitIssue">
+        <DataAnnotationsValidator />
+
+        <div class="row g-4">
+            <!-- Main Form -->
+            <div class="col-lg-8">
+                <!-- Header Information -->
+                <div class="modern-card p-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                        <h5 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-info-circle text-primary me-2"></i>Thông Tin Phiếu Xuất (K3.2: EditForm + DataAnnotations)
+                        </h5>
+                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2.5 py-1 small">
+                            DataAnnotations Active
+                        </span>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Nơi nhận / Khách hàng / Chi nhánh *</label>
+                            <InputText class="form-control" @bind-Value="issueModel.CustomerOrDepartment" 
+                                       placeholder="VD: Cửa hàng Chi nhánh 1, Phòng Kế toán..." />
+                            <ValidationMessage For="@(() => issueModel.CustomerOrDepartment)" class="text-danger small mt-1" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Người lập phiếu *</label>
+                            <InputText class="form-control" @bind-Value="issueModel.CreatedBy" placeholder="Họ tên người lập" />
+                            <ValidationMessage For="@(() => issueModel.CreatedBy)" class="text-danger small mt-1" />
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label small fw-bold">Ghi chú phiếu xuất</label>
+                            <InputText class="form-control" @bind-Value="issueModel.Note" placeholder="Lý do xuất kho, địa chỉ giao hàng..." />
+                            <ValidationMessage For="@(() => issueModel.Note)" class="text-danger small mt-1" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Line Items -->
+                <div class="modern-card p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                        <div>
+                            <h5 class="fw-bold text-dark mb-0">
+                                <i class="bi bi-list-check text-primary me-2"></i>Danh Sách Mặt Hàng Xuất (@lines.Count dòng)
+                            </h5>
+                            <small class="text-muted">K3.1: Component tái sử dụng <code>LineItemEditor</code> có cảnh báo vượt tồn kho tức thì</small>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill fw-semibold" @onclick="OpenAddItemCard">
+                            <i class="bi bi-plus-lg me-1"></i>Thêm Mặt Hàng Xuất
+                        </button>
+                    </div>
+
+                    @if (!lines.Any())
+                    {
+                        <div class="alert alert-warning py-2.5 px-3 small rounded-3 mb-3">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                            Phiếu xuất chưa có mặt hàng nào. Vui lòng bấm <strong>[Thêm Mặt Hàng Xuất]</strong> hoặc nút <strong>[Nạp Dữ Liệu Demo Vi Phạm Luật 1]</strong>.
+                        </div>
+                    }
+
+                    <!-- Add item box -->
+                    @if (showAddItemBox)
+                    {
+                        <div class="p-3 mb-3 bg-light rounded-3 border border-danger-subtle">
+                            <div class="row g-2 align-items-end">
+                                <div class="col-md-5">
+                                    <label class="form-label small text-muted mb-1">Chọn mặt hàng</label>
+                                    <select class="form-select form-select-sm" @bind="selectedProductId" @bind:after="OnProductSelectionChanged">
+                                        @foreach (var p in availableProducts)
+                                        {
+                                            <option value="@p.Id">[@p.Sku] @p.Name (Tồn: @p.CurrentStock @p.Unit)</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small text-muted mb-1">Số lượng</label>
+                                    <input type="number" class="form-control form-control-sm" min="1" @bind="newQuantity" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small text-muted mb-1">Đơn giá bán (đ)</label>
+                                    <input type="number" class="form-control form-control-sm" min="0" step="500" @bind="newUnitPrice" />
+                                </div>
+                                <div class="col-md-2 d-flex gap-1">
+                                    <button type="button" class="btn btn-danger btn-sm w-100 fw-semibold" @onclick="AddLineItem">
+                                        Thêm
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="() => showAddItemBox = false">
+                                        Đóng
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Lines List using Reusable LineItemEditor (K3.1) -->
+                    @if (lines.Any())
+                    {
+                        <div class="lines-list">
+                            @for (int i = 0; i < lines.Count; i++)
+                            {
+                                int idx = i;
+                                var line = lines[idx];
+                                var prod = availableProducts.FirstOrDefault(p => p.Id == line.ProductId);
+
+                                <LineItemEditor 
+                                    ProductSku="@(prod?.Sku)"
+                                    ProductName="@(prod?.Name ?? "Hàng hóa")"
+                                    Unit="@(prod?.Unit ?? "Cái")"
+                                    CurrentStock="@(prod?.CurrentStock)"
+                                    IsGoodsIssue="true"
+                                    Quantity="@line.Quantity"
+                                    QuantityChanged="@((q) => { line.Quantity = q; StateHasChanged(); })"
+                                    UnitPrice="@line.UnitPrice"
+                                    UnitPriceChanged="@((p) => { line.UnitPrice = p; StateHasChanged(); })"
+                                    OnDelete="@(() => RemoveLine(idx))" />
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4 text-muted bg-light rounded-3">
+                            <i class="bi bi-inbox fs-2 text-secondary d-block mb-1"></i>
+                            Chưa có mặt hàng nào được chọn xuất.
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Summary Card -->
+            <div class="col-lg-4">
+                <div class="modern-card p-4 sticky-top" style="top: 80px;">
+                    <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                        <i class="bi bi-calculator text-primary me-2"></i>Tổng Kết Phiếu Xuất
+                    </h5>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Tổng số lượng xuất:</span>
+                        <strong class="text-dark">@lines.Sum(l => l.Quantity)</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Số loại mặt hàng:</span>
+                        <strong class="text-dark">@lines.Count SKU</strong>
+                    </div>
+
+                    <hr class="my-3" />
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span class="fw-bold text-dark fs-6">TỔNG GIÁ TRỊ XUẤT:</span>
+                        <span class="fw-bold text-danger fs-5">
+                            @((lines.Sum(l => l.LineTotal)).ToString("N0")) đ
+                        </span>
+                    </div>
+
+                    <div class="alert alert-warning py-2.5 px-3 small rounded-3 mb-4">
+                        <i class="bi bi-shield-lock-fill me-1"></i>
+                        <strong>LUẬT 1:</strong> Phiếu xuất lập xong ở trạng thái <strong>Chờ duyệt (Draft)</strong>. Tồn kho chỉ bị trừ khi Quản lý duyệt phiếu trong 1 Transaction an toàn.
+                    </div>
+
+                    <button type="submit" class="btn btn-danger w-100 py-2.5 rounded-pill fw-bold shadow-sm mb-2" 
+                            disabled="@(!lines.Any() || isSubmitting)">
+                        @if (isSubmitting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                            <span>Đang lưu phiếu vào SQL Server...</span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-check2-circle me-1"></i>
+                            <span>LƯU PHIẾU XUẤT (CHỜ DUYỆT)</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+@code {
+    public class IssueFormModel
+    {
+        [Required(ErrorMessage = "Nơi nhận / Khách hàng / Chi nhánh không được để trống")]
+        [StringLength(200, ErrorMessage = "Tên nơi nhận tối đa 200 ký tự")]
+        public string CustomerOrDepartment { get; set; } = "Khách bán lẻ Chi nhánh 1";
+
+        [Required(ErrorMessage = "Tên người lập phiếu không được để trống")]
+        [StringLength(100, ErrorMessage = "Tên người lập tối đa 100 ký tự")]
+        public string CreatedBy { get; set; } = "Thủ kho Nguyễn Văn A";
+
+        [StringLength(500, ErrorMessage = "Ghi chú tối đa 500 ký tự")]
+        public string? Note { get; set; }
+    }
+
+    private IssueFormModel issueModel = new();
+    private List<Product> availableProducts = new();
+    private List<GoodsIssueLine> lines = new();
+
+    private bool showAddItemBox = false;
+    private int selectedProductId = 1;
+    private int newQuantity = 1;
+    private double newUnitPrice = 0;
+
+    private string errorMessage = string.Empty;
+    private bool isSubmitting = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        availableProducts = (await SearchProducts.ExecuteAsync()).ToList();
+
+        if (availableProducts.Any())
+        {
+            selectedProductId = availableProducts.First().Id;
+            newUnitPrice = availableProducts.First().Price;
+        }
+    }
+
+    private void OnProductSelectionChanged()
+    {
+        var prod = availableProducts.FirstOrDefault(p => p.Id == selectedProductId);
+        if (prod != null)
+        {
+            newUnitPrice = prod.Price;
+        }
+    }
+
+    private void OpenAddItemCard()
+    {
+        showAddItemBox = true;
+        OnProductSelectionChanged();
+    }
+
+    private void AddLineItem()
+    {
+        var prod = availableProducts.FirstOrDefault(p => p.Id == selectedProductId);
+        if (prod == null || newQuantity <= 0) return;
+
+        var existing = lines.FirstOrDefault(l => l.ProductId == prod.Id);
+        if (existing != null)
+        {
+            existing.Quantity += newQuantity;
+            existing.UnitPrice = newUnitPrice;
+        }
+        else
+        {
+            lines.Add(new GoodsIssueLine
+            {
+                ProductId = prod.Id,
+                Product = prod,
+                Quantity = newQuantity,
+                UnitPrice = newUnitPrice
+            });
+        }
+
+        showAddItemBox = false;
+    }
+
+    private void RemoveLine(int index)
+    {
+        if (index >= 0 && index < lines.Count)
+        {
+            lines.RemoveAt(index);
+        }
+    }
+
+    private void LoadSampleRule1Violation()
+    {
+        // Demo case từ Slide 7: Bút bi Thiên Long tồn 5, yêu cầu xuất 10
+        var pen = availableProducts.FirstOrDefault(p => p.Sku == "TL-01") ?? availableProducts.FirstOrDefault();
+        if (pen != null)
+        {
+            issueModel.CustomerOrDepartment = "Bộ phận Hành chính - Văn phòng";
+            issueModel.Note = "DEMO LUẬT 1: Yêu cầu xuất 10 chiếc Bút bi Thiên Long (Tồn chỉ có 5) -> Duyệt sẽ bị chặn!";
+            lines.Clear();
+            lines.Add(new GoodsIssueLine
+            {
+                ProductId = pen.Id,
+                Product = pen,
+                Quantity = 10, // Xuất 10 > Tồn 5
+                UnitPrice = pen.Price
+            });
+        }
+    }
+
+    private async Task SubmitIssue()
+    {
+        if (!lines.Any())
+        {
+            errorMessage = "Vui lòng chọn ít nhất 1 mặt hàng để xuất kho!";
+            return;
+        }
+
+        isSubmitting = true;
+        try
+        {
+            var issue = new GoodsIssue
+            {
+                CustomerOrDepartment = issueModel.CustomerOrDepartment,
+                CreatedBy = issueModel.CreatedBy,
+                Note = issueModel.Note,
+                Lines = lines
+            };
+
+            await CreateIssueUseCase.ExecuteAsync(issue);
+            Nav.NavigateTo("issues");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Lỗi khi lưu phiếu xuất: {ex.Message}";
+            isSubmitting = false;
+        }
+    }
+}

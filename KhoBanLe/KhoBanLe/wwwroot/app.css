@@ -1,0 +1,724 @@
+/* =========================================================================
+   HỆ THỐNG KHO BÁN LẺ & GIAO DIỆN CHUYÊN NGHIỆP (THEMES.SAPO.VN STYLE)
+   Color Palette: Vibrant Sapo Emerald Green (#00a651), Pure Whites, Crisp Typography
+   ========================================================================= */
+
+:root {
+    --primary: #00a651;
+    --primary-hover: #008a43;
+    --primary-subtle: #dcfce7;
+    --primary-light: #f0fdf4;
+    --primary-dark: #007037;
+    --sapo-green: #00a651;
+    --sapo-green-hover: #008a43;
+    --sapo-green-light: #e8f7ee;
+    --sapo-green-border: #a7f3d0;
+    --sapo-green-dark: #00602f;
+    --sidebar-bg: #0f172a;
+    --sidebar-card: #1e293b;
+    --sidebar-hover: #334155;
+    --sidebar-active: #00a651;
+    --text-main: #1e293b;
+    --text-heading: #0f172a;
+    --text-muted: #64748b;
+    --bg-page: #f8fafc;
+    --card-bg: #ffffff;
+    --card-border: #edf2f7;
+    --success: #00a651;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --info: #0284c7;
+    --radius-pill: 9999px;
+    --radius-xl: 20px;
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    --shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.04);
+    --shadow-md: 0 4px 10px -1px rgba(0, 0, 0, 0.07), 0 2px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 10px 20px -3px rgba(0, 0, 0, 0.08), 0 4px 8px -4px rgba(0, 0, 0, 0.04);
+    --shadow-hover: 0 14px 28px -4px rgba(0, 166, 81, 0.16), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
+}
+
+body {
+    font-family: 'Be Vietnam Pro', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background-color: var(--bg-page);
+    color: var(--text-main);
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* =========================================================================
+   TOP NAVBAR (SAPO STYLE HEADER)
+   ========================================================================= */
+.sapo-top-header {
+    background: #ffffff;
+    border-bottom: 1px solid #edf2f7;
+    position: sticky;
+    top: 0;
+    z-index: 1040;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.sapo-brand-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    text-decoration: none;
+    color: inherit;
+}
+
+.sapo-brand-logo .brand-icon-box {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #00a651 0%, #008a43 100%);
+    color: #ffffff;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    box-shadow: 0 4px 10px rgba(0, 166, 81, 0.25);
+}
+
+.sapo-brand-logo .brand-text {
+    font-size: 1.15rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #0f172a;
+    line-height: 1.1;
+}
+
+.sapo-brand-logo .brand-subtext {
+    font-size: 0.72rem;
+    color: #00a651;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.sapo-nav-links {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.sapo-nav-link {
+    color: #334155;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    padding: 0.55rem 0.85rem;
+    border-radius: 8px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    position: relative;
+}
+
+.sapo-nav-link:hover {
+    color: #00a651;
+    background-color: #f0fdf4;
+}
+
+.sapo-nav-link.active {
+    color: #00a651;
+    background-color: #e8f7ee;
+    font-weight: 800;
+}
+
+.sapo-nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 20%;
+    right: 20%;
+    height: 3px;
+    background: #00a651;
+    border-radius: 2px;
+}
+
+/* =========================================================================
+   HERO BANNER (SAPO STYLE TITLE & SUBTITLE)
+   ========================================================================= */
+.sapo-hero-banner {
+    background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%);
+    padding: 2.25rem 1rem 1.25rem 1rem;
+    text-align: center;
+    border-bottom: 1px solid #edf2f7;
+    margin-bottom: 1.75rem;
+}
+
+.sapo-hero-title {
+    font-size: 2.15rem;
+    font-weight: 800;
+    color: #00a651;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.4rem;
+}
+
+.sapo-hero-subtitle {
+    font-size: 1rem;
+    color: #64748b;
+    max-width: 780px;
+    margin: 0 auto;
+    line-height: 1.5;
+}
+
+/* =========================================================================
+   LEFT SIDEBAR (DANH MỤC & KHOẢNG GIÁ)
+   ========================================================================= */
+.sapo-sidebar-box {
+    background: #ffffff;
+    border: 1px solid #edf2f7;
+    border-radius: 16px;
+    padding: 1.25rem;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 1.25rem;
+}
+
+.sapo-sidebar-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.85rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px solid #f1f5f9;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.sapo-cat-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    max-height: 520px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.sapo-cat-list::-webkit-scrollbar {
+    width: 4px;
+}
+.sapo-cat-list::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.sapo-cat-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.45rem 0.65rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    color: #475569;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-align: left;
+    background: transparent;
+    border: none;
+    width: 100%;
+}
+
+.sapo-cat-item:hover {
+    background-color: #f8fafc;
+    color: #00a651;
+}
+
+.sapo-cat-item.active {
+    background-color: #e8f7ee;
+    color: #00a651;
+    font-weight: 700;
+}
+
+.sapo-radio-bullet {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid #cbd5e1;
+    display: inline-block;
+    position: relative;
+    margin-right: 0.6rem;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.sapo-cat-item.active .sapo-radio-bullet {
+    border-color: #00a651;
+    background-color: #ffffff;
+}
+
+.sapo-cat-item.active .sapo-radio-bullet::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #00a651;
+}
+
+/* =========================================================================
+   SORTING TOOLBAR (SẮP XẾP THEO)
+   ========================================================================= */
+.sapo-sort-bar-container {
+    background: #ffffff;
+    border: 1px solid #edf2f7;
+    border-radius: 16px;
+    padding: 0.85rem 1.25rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.sapo-sort-pill {
+    cursor: pointer;
+    border-radius: 9999px;
+    padding: 0.38rem 0.95rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    color: #475569;
+    transition: all 0.18s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.sapo-sort-pill:hover {
+    border-color: #00a651;
+    color: #00a651;
+    background-color: #f0fdf4;
+}
+
+.sapo-sort-pill.active {
+    background-color: #00a651;
+    border-color: #00a651;
+    color: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 166, 81, 0.25);
+}
+
+/* =========================================================================
+   PRODUCT CARDS GRID (EXACT SAPO STYLE)
+   ========================================================================= */
+.sapo-product-card {
+    background: #ffffff;
+    border: 1px solid #edf2f7;
+    border-radius: 18px;
+    overflow: hidden;
+    transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    position: relative;
+    box-shadow: var(--shadow-sm);
+}
+
+.sapo-product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-hover);
+    border-color: #a7f3d0;
+}
+
+.sapo-card-image {
+    height: 205px;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.sapo-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+}
+
+.sapo-product-card:hover .sapo-card-image img {
+    transform: scale(1.06);
+}
+
+.sapo-card-body {
+    padding: 1.15rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.sapo-card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.35;
+    margin-bottom: 0.5rem;
+    min-height: 42px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.sapo-card-price-row {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    margin-bottom: 0.85rem;
+}
+
+.sapo-price-main {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #00a651;
+    letter-spacing: -0.01em;
+}
+
+.sapo-price-original {
+    font-size: 0.88rem;
+    color: #94a3b8;
+    text-decoration: line-through;
+    font-weight: 500;
+}
+
+.sapo-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: auto;
+    padding-top: 0.75rem;
+    border-top: 1px dashed #f1f5f9;
+}
+
+/* NÚT XEM THỬ - NÚT XANH ĐẶC CHUẨN SAPO */
+.btn-sapo-preview {
+    background: #00a651;
+    color: #ffffff !important;
+    border: none;
+    border-radius: 9999px;
+    padding: 0.48rem 1.15rem;
+    font-weight: 700;
+    font-size: 0.88rem;
+    flex: 1;
+    text-align: center;
+    transition: all 0.2s ease;
+    box-shadow: 0 3px 8px rgba(0, 166, 81, 0.22);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    text-decoration: none;
+}
+
+.btn-sapo-preview:hover {
+    background: #008a43;
+    color: #ffffff !important;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 12px rgba(0, 166, 81, 0.32);
+}
+
+/* NÚT CHI TIẾT - NÚT VIỀN XANH CHUẨN SAPO */
+.btn-sapo-detail {
+    background: #ffffff;
+    color: #00a651 !important;
+    border: 1.5px solid #00a651;
+    border-radius: 9999px;
+    padding: 0.48rem 1.15rem;
+    font-weight: 700;
+    font-size: 0.88rem;
+    flex: 1;
+    text-align: center;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    text-decoration: none;
+}
+
+.btn-sapo-detail:hover {
+    background: #e8f7ee;
+    color: #007037 !important;
+    border-color: #007037;
+    transform: translateY(-1px);
+}
+
+.btn-sapo-quick-cart {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #00a651;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.btn-sapo-quick-cart:hover {
+    background: #00a651;
+    color: #ffffff;
+    border-color: #00a651;
+    transform: scale(1.08);
+}
+
+/* =========================================================================
+   CARDS & COMMON COMPONENTS (RETAINED & ENHANCED)
+   ========================================================================= */
+.modern-card {
+    background-color: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.25s ease;
+}
+
+.modern-card:hover {
+    box-shadow: var(--shadow-md);
+}
+
+.product-badge-category {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.25rem 0.65rem;
+    border-radius: 9999px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+}
+
+.category-food { background-color: #fef3c7; color: #92400e; }
+.category-drink { background-color: #e0f2fe; color: #075985; }
+.category-stationery { background-color: #dbeafe; color: #1e40af; }
+.category-chemical { background-color: #f3e8ff; color: #6b21a8; }
+.category-general { background-color: #f1f5f9; color: #475569; }
+
+/* Stat Cards */
+.stat-card {
+    border-radius: var(--radius-lg);
+    padding: 1.25rem;
+    background: #ffffff;
+    border: 1px solid var(--card-border);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: var(--shadow-sm);
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.35rem;
+}
+
+/* Custom Table Styles */
+.custom-table {
+    width: 100%;
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.custom-table thead th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--card-border);
+    border-top: none;
+}
+
+.custom-table tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+.custom-table tbody tr:hover {
+    background-color: #f0fdf4;
+}
+
+.custom-table tbody td {
+    padding: 0.95rem 1rem;
+    vertical-align: middle;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 0.9rem;
+}
+
+/* Quick Cart Drawer & Backdrop */
+.cart-drawer-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(4px);
+    z-index: 1080;
+    animation: fadeIn 0.25s ease-out;
+}
+
+.cart-drawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 440px;
+    max-width: 95vw;
+    background: #ffffff;
+    z-index: 1090;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -8px 0 35px rgba(0, 0, 0, 0.22);
+    animation: drawerSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes drawerSlideIn {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+/* Toast alert notification */
+.toast-notice {
+    position: fixed;
+    top: 85px;
+    right: 25px;
+    z-index: 1060;
+    background: #ffffff;
+    border: 1px solid #00a651;
+    border-left: 5px solid #00a651;
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.12);
+    animation: toastIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes toastIn {
+    from { transform: translateX(80px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* Reusable buttons & pills */
+.btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-primary:hover, .btn-primary:focus {
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+}
+
+.btn-outline-primary {
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    color: #ffffff;
+}
+
+.text-primary {
+    color: var(--primary) !important;
+}
+
+.bg-primary {
+    background-color: var(--primary) !important;
+}
+
+.bg-primary-subtle {
+    background-color: var(--primary-subtle) !important;
+}
+
+.border-primary {
+    border-color: var(--primary) !important;
+}
+
+/* Mobile & 390px Responsive */
+@media (max-width: 991px) {
+    .sapo-nav-links {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .sapo-hero-title {
+        font-size: 1.65rem;
+    }
+
+    .custom-table thead {
+        display: none;
+    }
+
+    .custom-table, .custom-table tbody, .custom-table tr, .custom-table td {
+        display: block;
+        width: 100%;
+    }
+
+    .custom-table tr {
+        margin-bottom: 1rem;
+        background: #ffffff;
+        border: 1px solid var(--card-border);
+        border-radius: var(--radius-md);
+        padding: 0.75rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .custom-table td {
+        text-align: right;
+        padding: 0.5rem 0.25rem;
+        border-bottom: 1px dashed #f1f5f9;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .custom-table td::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: #64748b;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        text-align: left;
+    }
+}

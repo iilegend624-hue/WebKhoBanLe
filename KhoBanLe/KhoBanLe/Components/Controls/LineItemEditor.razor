@@ -1,0 +1,107 @@
+@namespace KhoBanLe.Components.Controls
+@using KhoBanLe.CoreBusiness
+
+<div class="line-item-card p-3 mb-2 rounded-3 border bg-white shadow-xs transition-all">
+    <div class="row align-items-center g-2">
+        <div class="col-12 col-md-4">
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-primary-subtle text-primary fw-semibold px-2 py-1 rounded">
+                    @(ProductSku ?? "SKU")
+                </span>
+                <div>
+                    <h6 class="mb-0 fw-semibold text-dark fs-6">@ProductName</h6>
+                    <small class="text-muted d-block">
+                        ĐVT: <span class="fw-medium text-dark">@Unit</span>
+                        @if (CurrentStock.HasValue)
+                        {
+                            <span class="ms-2">| Tồn hiện có: 
+                                <strong class="@(CurrentStock.Value < Quantity && IsGoodsIssue ? "text-danger" : "text-success")">
+                                    @CurrentStock.Value
+                                </strong>
+                            </span>
+                        }
+                    </small>
+                </div>
+            </div>
+            @if (IsGoodsIssue && CurrentStock.HasValue && Quantity > CurrentStock.Value)
+            {
+                <div class="mt-1 text-danger small d-flex align-items-center gap-1">
+                    <i class="bi bi-exclamation-octagon-fill"></i>
+                    <span>Cảnh báo: Xuất quá tồn (@Quantity > @CurrentStock.Value)!</span>
+                </div>
+            }
+        </div>
+
+        <div class="col-6 col-md-3">
+            <label class="form-label small text-muted mb-1">Số lượng</label>
+            <div class="input-group input-group-sm">
+                <button class="btn btn-outline-secondary" type="button" @onclick="DecreaseQuantity" disabled="@(Quantity <= 1)">-</button>
+                <input type="number" class="form-control text-center fw-semibold" min="1" @bind="Quantity" @bind:after="OnQuantityChanged" />
+                <button class="btn btn-outline-secondary" type="button" @onclick="IncreaseQuantity">+</button>
+            </div>
+        </div>
+
+        <div class="col-6 col-md-3">
+            <label class="form-label small text-muted mb-1">Đơn giá (VNĐ)</label>
+            <input type="number" class="form-control form-control-sm text-end fw-semibold" min="0" step="500" @bind="UnitPrice" @bind:after="OnPriceChanged" />
+        </div>
+
+        <div class="col-12 col-md-2 d-flex justify-content-between justify-content-md-end align-items-center gap-3">
+            <div class="text-end">
+                <div class="small text-muted mb-0">Thành tiền</div>
+                <div class="fw-bold text-primary">@((Quantity * UnitPrice).ToString("N0")) đ</div>
+            </div>
+            <button type="button" class="btn btn-outline-danger btn-sm p-1.5 rounded-2" title="Xóa dòng này" @onclick="HandleDelete">
+                <i class="bi bi-trash3"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string? ProductSku { get; set; }
+    [Parameter] public string ProductName { get; set; } = string.Empty;
+    [Parameter] public string Unit { get; set; } = "Cái";
+    [Parameter] public int? CurrentStock { get; set; }
+    [Parameter] public bool IsGoodsIssue { get; set; } = false;
+
+    [Parameter] public int Quantity { get; set; } = 1;
+    [Parameter] public EventCallback<int> QuantityChanged { get; set; }
+
+    [Parameter] public double UnitPrice { get; set; }
+    [Parameter] public EventCallback<double> UnitPriceChanged { get; set; }
+
+    [Parameter] public EventCallback OnDelete { get; set; }
+
+    private async Task IncreaseQuantity()
+    {
+        Quantity++;
+        await QuantityChanged.InvokeAsync(Quantity);
+    }
+
+    private async Task DecreaseQuantity()
+    {
+        if (Quantity > 1)
+        {
+            Quantity--;
+            await QuantityChanged.InvokeAsync(Quantity);
+        }
+    }
+
+    private async Task OnQuantityChanged()
+    {
+        if (Quantity < 1) Quantity = 1;
+        await QuantityChanged.InvokeAsync(Quantity);
+    }
+
+    private async Task OnPriceChanged()
+    {
+        if (UnitPrice < 0) UnitPrice = 0;
+        await UnitPriceChanged.InvokeAsync(UnitPrice);
+    }
+
+    private async Task HandleDelete()
+    {
+        await OnDelete.InvokeAsync();
+    }
+}

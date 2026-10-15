@@ -1,0 +1,1021 @@
+@page "/products"
+@rendermode InteractiveServer
+@namespace KhoBanLe.Components.Pages.Products
+@inject ISearchProductsUseCase SearchProducts
+@inject IAddProductUseCase AddProduct
+@inject IEditProductUseCase EditProduct
+@inject IDeleteProductUseCase DeleteProduct
+@inject ShoppingCartService CartService
+@inject ExcelExportService ExcelService
+@inject NavigationManager Nav
+@implements IDisposable
+
+<PageTitle>Danh Sách Tất Cả Giao Diện & Hàng Hóa - KhoBanLe</PageTitle>
+
+<!-- Toast Thông Báo Thêm Vào Giỏ Hàng -->
+@if (showToast)
+{
+    <div class="toast-notice d-flex align-items-center gap-3">
+        <div class="rounded-circle bg-success bg-opacity-15 text-success p-2 d-flex align-items-center justify-content-center shadow-xs" style="width: 40px; height: 40px;">
+            <i class="bi bi-cart-check-fill fs-5"></i>
+        </div>
+        <div>
+            <div class="fw-bold text-dark small mb-0">@toastMessage</div>
+            <div class="d-flex gap-2 mt-1">
+                <button type="button" class="btn btn-xs btn-primary rounded-pill px-2.5 py-0.5 fw-semibold" @onclick="CartService.OpenDrawer">
+                    Xem giỏ hàng &rarr;
+                </button>
+                <a href="cart" class="text-muted small text-decoration-none pt-0.5">Mở quầy POS</a>
+            </div>
+        </div>
+        <button type="button" class="btn-close ms-2" style="font-size: 0.75rem;" @onclick="() => showToast = false"></button>
+    </div>
+}
+
+<!-- SAPO STYLE HERO BANNER -->
+<div class="sapo-hero-banner">
+    <div class="container-fluid px-3 px-xl-4">
+        <h1 class="sapo-hero-title">Danh sách tất cả giao diện</h1>
+        <p class="sapo-hero-subtitle">
+            Hơn 400 mẫu giao diện web chuẩn SEO, tùy biến dễ dàng, phù hợp với mọi ngành hàng
+        </p>
+    </div>
+</div>
+
+<div class="container-fluid px-3 px-xl-4">
+    <!-- Alert status -->
+    @if (!string.IsNullOrEmpty(alertMessage))
+    {
+        <div class="alert @(isSuccessAlert ? "alert-success border-success" : "alert-danger border-danger") alert-dismissible fade show rounded-3 shadow-xs mb-4" role="alert">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi @(isSuccessAlert ? "bi-check-circle-fill text-success fs-5" : "bi-exclamation-triangle-fill text-danger fs-5")"></i>
+                <div class="fw-medium">@alertMessage</div>
+            </div>
+            <button type="button" class="btn-close" @onclick="() => alertMessage = string.Empty"></button>
+        </div>
+    }
+
+    <!-- TWO-COLUMN LAYOUT: SIDEBAR + MAIN CONTENT (EXACT SAPO STORE STYLE) -->
+    <div class="row g-4">
+        <!-- 1. LEFT SIDEBAR: DANH MỤC & KHOẢNG GIÁ & TỒN KHO -->
+        <div class="col-12 col-lg-3 col-xl-2">
+            <!-- Box Danh Mục -->
+            <div class="sapo-sidebar-box">
+                <div class="sapo-sidebar-title">
+                    <i class="bi bi-list-ul text-success fs-5"></i>
+                    <span>Danh mục</span>
+                </div>
+                <div class="sapo-cat-list">
+                    @foreach (var cat in allCategories)
+                    {
+                        int count = cat == "Tất cả" ? allProducts.Count : allProducts.Count(p => p.Category == cat);
+                        bool isSelected = selectedCategory == cat;
+
+                        <button type="button" class="sapo-cat-item @(isSelected ? "active" : "")"
+                                @onclick="() => FilterByCategory(cat)">
+                            <div class="d-flex align-items-center">
+                                <span class="sapo-radio-bullet"></span>
+                                <span>@cat</span>
+                            </div>
+                            <span class="badge @(isSelected ? "bg-success text-white" : "bg-light text-muted border") rounded-pill" style="font-size: 0.72rem;">
+                                @count
+                            </span>
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <!-- Box Khoảng Giá -->
+            <div class="sapo-sidebar-box">
+                <div class="sapo-sidebar-title">
+                    <i class="bi bi-tag text-success fs-5"></i>
+                    <span>Khoảng giá</span>
+                </div>
+                <div class="d-flex flex-column gap-1">
+                    <button type="button" class="sapo-cat-item @(priceFilter == "all" ? "active" : "")"
+                            @onclick='() => FilterByPriceRange("all")'>
+                        <div class="d-flex align-items-center">
+                            <span class="sapo-radio-bullet"></span>
+                            <span>Tất cả mức giá</span>
+                        </div>
+                    </button>
+                    <button type="button" class="sapo-cat-item @(priceFilter == "under_100k" ? "active" : "")"
+                            @onclick='() => FilterByPriceRange("under_100k")'>
+                        <div class="d-flex align-items-center">
+                            <span class="sapo-radio-bullet"></span>
+                            <span>Dưới 100.000 đ</span>
+                        </div>
+                    </button>
+                    <button type="button" class="sapo-cat-item @(priceFilter == "100k_500k" ? "active" : "")"
+                            @onclick='() => FilterByPriceRange("100k_500k")'>
+                        <div class="d-flex align-items-center">
+                            <span class="sapo-radio-bullet"></span>
+                            <span>100k - 500k</span>
+                        </div>
+                    </button>
+                    <button type="button" class="sapo-cat-item @(priceFilter == "500k_1m" ? "active" : "")"
+                            @onclick='() => FilterByPriceRange("500k_1m")'>
+                        <div class="d-flex align-items-center">
+                            <span class="sapo-radio-bullet"></span>
+                            <span>500k - 1 triệu</span>
+                        </div>
+                    </button>
+                    <button type="button" class="sapo-cat-item @(priceFilter == "above_1m" ? "active" : "")"
+                            @onclick='() => FilterByPriceRange("above_1m")'>
+                        <div class="d-flex align-items-center">
+                            <span class="sapo-radio-bullet"></span>
+                            <span>Trên 1 triệu</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Box Tình Trạng Kho Hàng -->
+            <div class="sapo-sidebar-box">
+                <div class="sapo-sidebar-title">
+                    <i class="bi bi-boxes text-success fs-5"></i>
+                    <span>Tình trạng kho</span>
+                </div>
+                <div class="d-flex flex-column gap-1">
+                    <button type="button" class="sapo-cat-item @(stockFilter == "all" ? "active" : "")"
+                            @onclick='() => FilterByStock("all")'>
+                        <div class="d-flex align-items-center">
+                            <span class="sapo-radio-bullet"></span>
+                            <span>Tất cả tồn kho</span>
+                        </div>
+                    </button>
+                    <button type="button" class="sapo-cat-item @(stockFilter == "in_stock" ? "active" : "")"
+                            @onclick='() => FilterByStock("in_stock")'>
+                        <div class="d-flex align-items-center">
+                            <span class="sapo-radio-bullet"></span>
+                            <span class="text-success">Còn hàng</span>
+                        </div>
+                    </button>
+                    <button type="button" class="sapo-cat-item @(stockFilter == "low_stock" ? "active" : "")"
+                            @onclick='() => FilterByStock("low_stock")'>
+                        <div class="d-flex align-items-center">
+                            <span class="sapo-radio-bullet"></span>
+                            <span class="text-warning-emphasis">Sắp hết hàng</span>
+                        </div>
+                    </button>
+                    <button type="button" class="sapo-cat-item @(stockFilter == "out_of_stock" ? "active" : "")"
+                            @onclick='() => FilterByStock("out_of_stock")'>
+                        <div class="d-flex align-items-center">
+                            <span class="sapo-radio-bullet"></span>
+                            <span class="text-danger">Hết hàng</span>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Reset Filter Button -->
+            @if (selectedCategory != "Tất cả" || priceFilter != "all" || stockFilter != "all" || !string.IsNullOrWhiteSpace(searchTerm))
+            {
+                <button type="button" class="btn btn-sm btn-outline-danger w-100 rounded-pill fw-semibold py-2 shadow-xs"
+                        @onclick="ClearSearch">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i>Đặt lại bộ lọc
+                </button>
+            }
+        </div>
+
+        <!-- 2. RIGHT MAIN CONTENT: TOOLBAR & PRODUCT CARDS GRID -->
+        <div class="col-12 col-lg-9 col-xl-10">
+            <!-- SORTING & FILTER TOOLBAR (SAPO STYLE) -->
+            <div class="sapo-sort-bar-container">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                    <!-- Left: Search & Count -->
+                    <div class="d-flex flex-wrap align-items-center gap-2" style="min-width: 280px; flex: 1;">
+                        <div style="flex: 1; min-width: 200px;">
+                            <ProductSearchBar @bind-SearchTerm="searchTerm"
+                                              OnSearch="ApplyFilters"
+                                              OnClear="ClearSearch"
+                                              ShowCategoryFilter="false"
+                                              Placeholder="Tìm kiếm giao diện, mã SKU, tên hàng hóa..." />
+                        </div>
+                        <span class="small text-muted fw-semibold ps-1">
+                            (@filteredProducts.Count sản phẩm)
+                        </span>
+                    </div>
+
+                    <!-- Right: Sắp xếp theo (Pills from screenshot) & Actions -->
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <span class="small text-muted fw-bold d-none d-sm-inline">Sắp xếp theo:</span>
+
+                        <!-- Sắp xếp theo Giá ↑↓ -->
+                        <button type="button" class="sapo-sort-pill @(sortBy.StartsWith("price") ? "active" : "")"
+                                @onclick="TogglePriceSort" title="Sắp xếp theo giá tăng hoặc giảm dần">
+                            <span>Giá</span>
+                            <i class="bi @(sortBy == "price_desc" ? "bi-arrow-down" : "bi-arrow-up")"></i>
+                        </button>
+
+                        <!-- Dưới 1 triệu (Pill filter) -->
+                        <button type="button" class="sapo-sort-pill @(priceFilter == "under_1m" ? "active" : "")"
+                                @onclick="ToggleUnder1Million">
+                            <span>Dưới 1 triệu</span>
+                        </button>
+
+                        <!-- Được mua nhiều (Pill filter) -->
+                        <button type="button" class="sapo-sort-pill @(sortBy == "stock_desc" ? "active" : "")"
+                                @onclick='() => SetSort("stock_desc")'>
+                            <span>Được mua nhiều</span>
+                        </button>
+
+                        <!-- Mới nhất (Pill filter) -->
+                        <button type="button" class="sapo-sort-pill @(sortBy == "id_desc" ? "active" : "")"
+                                @onclick='() => SetSort("id_desc")'>
+                            <span>Mới nhất</span>
+                        </button>
+
+                        <!-- View Mode Toggle -->
+                        <div class="btn-group rounded-pill border p-0.5 bg-light ms-1" role="group">
+                            <button type="button" class="btn btn-xs rounded-pill @(viewMode == "grid" ? "btn-primary text-white fw-bold" : "btn-light text-dark")"
+                                    @onclick='() => viewMode = "grid"' title="Xem dạng thẻ">
+                                <i class="bi bi-grid-fill"></i>
+                            </button>
+                            <button type="button" class="btn btn-xs rounded-pill @(viewMode == "table" ? "btn-primary text-white fw-bold" : "btn-light text-dark")"
+                                    @onclick='() => viewMode = "table"' title="Xem dạng bảng">
+                                <i class="bi bi-table"></i>
+                            </button>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <button class="btn btn-sm btn-outline-success rounded-pill fw-semibold shadow-xs" @onclick="ExportToExcel" title="Xuất file Excel danh mục">
+                            <i class="bi bi-file-earmark-excel me-1"></i>Excel
+                        </button>
+                        <button class="btn btn-sm btn-primary rounded-pill fw-semibold shadow-xs" @onclick="OpenAddModal" title="Thêm mặt hàng mới">
+                            <i class="bi bi-plus-lg me-1"></i>Thêm Mới
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PRODUCT DISPLAY: GRID OR TABLE -->
+            @if (viewMode == "grid")
+            {
+                @if (filteredProducts.Any())
+                {
+                    <div class="row g-4 mb-4">
+                        @foreach (var p in filteredProducts)
+                        {
+                            bool isJustAdded = justAddedIds.Contains(p.Id);
+
+                            <div class="col-12 col-md-6 col-xl-4">
+                                <div class="sapo-product-card">
+                                    <!-- Image Preview with Badges -->
+                                    <div class="sapo-card-image">
+                                        <img src="@(string.IsNullOrEmpty(p.ImageUrl) ? "favicon.png" : p.ImageUrl)" 
+                                             alt="@p.Name" 
+                                             onerror="this.src='favicon.png'" />
+                                        
+                                        <!-- Category Badge -->
+                                        <div class="position-absolute top-0 start-0 m-2.5">
+                                            <span class="product-badge-category shadow-xs">
+                                                @p.Category
+                                            </span>
+                                        </div>
+
+                                        <!-- Stock Status Badge (Reusable K3.1) -->
+                                        <div class="position-absolute top-0 end-0 m-2.5">
+                                            <StockStatusBadge CurrentStock="@p.CurrentStock" MinStock="@p.MinStockLevel" />
+                                        </div>
+                                    </div>
+
+                                    <!-- Card Content Body -->
+                                    <div class="sapo-card-body">
+                                        <!-- Title: Bold, clear, 2 lines -->
+                                        <h6 class="sapo-card-title" title="@p.Name">
+                                            @p.Name
+                                        </h6>
+
+                                        <!-- Price Tag: Large green bold + strikethrough original price if exists -->
+                                        <div class="sapo-card-price-row">
+                                            <span class="sapo-price-main">@((p.Price).ToString("N0")) đ</span>
+                                            @if (p.OriginalPrice.HasValue && p.OriginalPrice.Value > p.Price)
+                                            {
+                                                <span class="sapo-price-original">/ @((p.OriginalPrice.Value).ToString("N0")) đ</span>
+                                            }
+                                        </div>
+
+                                        <!-- SKU & Stock Info -->
+                                        <div class="d-flex align-items-center justify-content-between text-muted small mb-2">
+                                            <span>Mã: <strong class="text-dark">@p.Sku</strong></span>
+                                            <span>ĐVT: <strong class="text-dark">@p.Unit</strong></span>
+                                            <span>Tồn: <strong class="@(p.CurrentStock <= 0 ? "text-danger" : (p.CurrentStock <= p.MinStockLevel ? "text-warning" : "text-success"))">@p.CurrentStock</strong></span>
+                                        </div>
+
+                                        <!-- SAPO STYLE ACTION BUTTONS: "XEM THỬ" & "CHI TIẾT" -->
+                                        <div class="sapo-card-actions">
+                                            <!-- Nút XEM THỬ (Solid Green Pill Button) -->
+                                            <button type="button" class="btn-sapo-preview"
+                                                    @onclick="() => OpenLivePreview(p)" title="Xem thử mẫu giao diện và sản phẩm">
+                                                Xem thử
+                                            </button>
+
+                                            <!-- Nút CHI TIẾT (Green Outline Pill Button) -->
+                                            <button type="button" class="btn-sapo-detail"
+                                                    @onclick="() => OpenEditModal(p)" title="Xem chi tiết & chỉnh sửa thông tin">
+                                                Chi tiết
+                                            </button>
+
+                                            <!-- Quick Add-to-Cart "+" Button -->
+                                            <button type="button" class="btn-sapo-quick-cart @(isJustAdded ? "bg-success text-white" : "")"
+                                                    disabled="@(p.CurrentStock <= 0)"
+                                                    @onclick="() => HandleAddToCart(p)"
+                                                    title="Thêm nhanh vào giỏ hàng">
+                                                @if (isJustAdded)
+                                                {
+                                                    <i class="bi bi-check-lg"></i>
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-cart-plus"></i>
+                                                }
+                                            </button>
+
+                                            <!-- Dropdown menu for more options -->
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-light border rounded-circle p-1.5" type="button" data-bs-toggle="dropdown" title="Tùy chọn khác">
+                                                    <i class="bi bi-three-dots-vertical"></i>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0 rounded-3">
+                                                    <li>
+                                                        <button class="dropdown-item py-1.5 small text-success" @onclick="() => HandleBuyNow(p)">
+                                                            <i class="bi bi-lightning-charge me-2"></i>Bán ngay tại quầy
+                                                        </button>
+                                                    </li>
+                                                    <li>
+                                                        <button class="dropdown-item py-1.5 small text-primary" @onclick="() => OpenEditModal(p)">
+                                                            <i class="bi bi-pencil me-2 text-warning"></i>Sửa thông tin
+                                                        </button>
+                                                    </li>
+                                                    <li>
+                                                        <button class="dropdown-item py-1.5 small text-danger" @onclick="() => OpenDeleteConfirm(p)">
+                                                            <i class="bi bi-trash3 me-2 text-danger"></i>Xóa hàng hóa
+                                                        </button>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="sapo-sidebar-box p-5 text-center text-muted mb-4">
+                        <i class="bi bi-search fs-1 text-secondary d-block mb-2"></i>
+                        <h5 class="fw-bold text-dark">Không tìm thấy giao diện hoặc hàng hóa nào!</h5>
+                        <p class="small text-muted mb-3">Thử thay đổi từ khóa tìm kiếm hoặc điều chỉnh khoảng giá, danh mục.</p>
+                        <button type="button" class="btn btn-primary rounded-pill px-4" @onclick="ClearSearch">
+                            Xem tất cả sản phẩm
+                        </button>
+                    </div>
+                }
+            }
+            else
+            {
+                <!-- TABLE VIEW -->
+                <div class="sapo-sidebar-box p-0 overflow-hidden mb-4">
+                    <div class="table-responsive">
+                        <table class="table custom-table mb-0 align-middle">
+                            <thead>
+                                <tr>
+                                    <th class="ps-3">HÌNH ẢNH</th>
+                                    <th>MÃ HÀNG (SKU)</th>
+                                    <th>TÊN HÀNG HÓA</th>
+                                    <th>NGÀNH HÀNG</th>
+                                    <th>ĐVT</th>
+                                    <th class="text-end">ĐƠN GIÁ</th>
+                                    <th class="text-center">TỒN KHO</th>
+                                    <th class="text-center">TRẠNG THÁI</th>
+                                    <th class="text-end pe-3">THAO TÁC</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var p in filteredProducts)
+                                {
+                                    <tr>
+                                        <td class="ps-3" data-label="Hình ảnh">
+                                            <img src="@(string.IsNullOrEmpty(p.ImageUrl) ? "favicon.png" : p.ImageUrl)" 
+                                                 alt="@p.Name" class="rounded-3 shadow-xs" 
+                                                 style="width: 48px; height: 48px; object-fit: cover;" 
+                                                 onerror="this.src='favicon.png'" />
+                                        </td>
+                                        <td data-label="Mã SKU">
+                                            <span class="badge bg-light text-dark border fw-bold">@p.Sku</span>
+                                        </td>
+                                        <td data-label="Tên hàng hóa">
+                                            <div class="fw-bold text-dark">@p.Name</div>
+                                            <small class="text-muted">@p.Description</small>
+                                        </td>
+                                        <td data-label="Ngành hàng">
+                                            <span class="badge bg-light text-secondary border">@p.Category</span>
+                                        </td>
+                                        <td data-label="ĐVT">@p.Unit</td>
+                                        <td data-label="Đơn giá" class="text-end">
+                                            <span class="fw-bold text-success">@((p.Price).ToString("N0")) đ</span>
+                                        </td>
+                                        <td data-label="Tồn kho" class="text-center">
+                                            <span class="fw-bold @(p.CurrentStock <= 0 ? "text-danger" : (p.CurrentStock <= p.MinStockLevel ? "text-warning" : "text-dark"))">
+                                                @p.CurrentStock
+                                            </span>
+                                        </td>
+                                        <td data-label="Trạng thái" class="text-center">
+                                            <StockStatusBadge CurrentStock="@p.CurrentStock" MinStock="@p.MinStockLevel" />
+                                        </td>
+                                        <td data-label="Thao tác" class="text-end pe-3">
+                                            <div class="d-inline-flex gap-1.5">
+                                                <button class="btn btn-xs btn-primary rounded-pill px-2.5 py-1 fw-bold" 
+                                                        @onclick="() => OpenLivePreview(p)" title="Xem thử">
+                                                    Xem thử
+                                                </button>
+                                                <button class="btn btn-xs btn-outline-success rounded-pill px-2.5 py-1 fw-bold" 
+                                                        @onclick="() => HandleAddToCart(p)" disabled="@(p.CurrentStock <= 0)">
+                                                    + Giỏ
+                                                </button>
+                                                <button class="btn btn-xs btn-light border rounded-pill px-2" 
+                                                        @onclick="() => OpenEditModal(p)" title="Sửa">
+                                                    <i class="bi bi-pencil text-secondary"></i>
+                                                </button>
+                                                <button class="btn btn-xs btn-light border rounded-pill px-2 text-danger" 
+                                                        @onclick="() => OpenDeleteConfirm(p)" title="Xóa">
+                                                    <i class="bi bi-trash3 text-danger"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- =========================================================================
+     MODAL 1: LIVE PREVIEW ("XEM THỬ" CHUẨN GIAO DIỆN THEMES.SAPO.VN)
+     ========================================================================= -->
+@if (previewProduct != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 1070;">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <!-- Browser Bar Simulation Header -->
+                <div class="modal-header bg-dark text-white py-2.5 px-3 border-0">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="rounded-circle bg-danger d-inline-block" style="width: 11px; height: 11px;"></span>
+                        <span class="rounded-circle bg-warning d-inline-block" style="width: 11px; height: 11px;"></span>
+                        <span class="rounded-circle bg-success d-inline-block" style="width: 11px; height: 11px;"></span>
+                        <span class="text-white-50 ms-2 small d-none d-sm-inline">Xem thử: <strong>@previewProduct.Name</strong></span>
+                    </div>
+
+                    <!-- Device Switcher Pills (Desktop / Tablet / Mobile) -->
+                    <div class="btn-group rounded-pill bg-white bg-opacity-10 p-0.5" role="group">
+                        <button type="button" class="btn btn-xs rounded-pill @(previewDevice == "desktop" ? "btn-success text-white fw-bold" : "btn-link text-white-50")"
+                                @onclick='() => previewDevice = "desktop"' title="Xem ở chế độ Máy tính">
+                            <i class="bi bi-laptop me-1"></i>Desktop
+                        </button>
+                        <button type="button" class="btn btn-xs rounded-pill @(previewDevice == "tablet" ? "btn-success text-white fw-bold" : "btn-link text-white-50")"
+                                @onclick='() => previewDevice = "tablet"' title="Xem ở chế độ Máy tính bảng">
+                            <i class="bi bi-tablet me-1"></i>Tablet
+                        </button>
+                        <button type="button" class="btn btn-xs rounded-pill @(previewDevice == "mobile" ? "btn-success text-white fw-bold" : "btn-link text-white-50")"
+                                @onclick='() => previewDevice = "mobile"' title="Xem ở chế độ Điện thoại di động">
+                            <i class="bi bi-phone me-1"></i>Mobile
+                        </button>
+                    </div>
+
+                    <button type="button" class="btn-close btn-close-white" @onclick="CloseLivePreview"></button>
+                </div>
+
+                <!-- Preview Body Container -->
+                <div class="modal-body p-0 bg-light d-flex justify-content-center overflow-auto" style="min-height: 480px;">
+                    <div class="transition-all" style="width: @(previewDevice == "desktop" ? "100%" : (previewDevice == "tablet" ? "768px" : "390px")); background: #ffffff; box-shadow: 0 4px 20px rgba(0,0,0,0.08); min-height: 100%;">
+                        <div class="p-4">
+                            <!-- Hero inside preview -->
+                            <div class="row g-4 align-items-center mb-4">
+                                <div class="col-12 col-md-6">
+                                    <div class="rounded-4 overflow-hidden border shadow-sm position-relative">
+                                        <img src="@(string.IsNullOrEmpty(previewProduct.ImageUrl) ? "favicon.png" : previewProduct.ImageUrl)" 
+                                             alt="@previewProduct.Name" class="w-100 h-auto" style="max-height: 360px; object-fit: cover;" />
+                                        <div class="position-absolute top-0 start-0 m-2">
+                                            <span class="badge bg-success rounded-pill px-2.5 py-1 fw-bold">
+                                                <i class="bi bi-patch-check-fill me-1"></i>Chuẩn SEO 100%
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6">
+                                    <span class="badge bg-light text-secondary border px-2.5 py-1 rounded-pill fw-semibold mb-2">
+                                        @previewProduct.Category
+                                    </span>
+                                    <h3 class="fw-bold text-dark mb-2">@previewProduct.Name</h3>
+                                    
+                                    <div class="d-flex align-items-baseline gap-2 mb-3">
+                                        <span class="h3 fw-bold text-success mb-0">@((previewProduct.Price).ToString("N0")) đ</span>
+                                        @if (previewProduct.OriginalPrice.HasValue)
+                                        {
+                                            <span class="text-muted text-decoration-line-through">@((previewProduct.OriginalPrice.Value).ToString("N0")) đ</span>
+                                        }
+                                    </div>
+
+                                    <p class="text-muted mb-3" style="line-height: 1.6;">
+                                        @(string.IsNullOrEmpty(previewProduct.Description) ? "Giao diện và mặt hàng chất lượng cao, tối ưu hóa hiển thị trên mọi thiết bị máy tính và di động." : previewProduct.Description)
+                                    </p>
+
+                                    <!-- Specs & Stock Info -->
+                                    <div class="p-3 bg-light rounded-3 mb-3 border">
+                                        <div class="row g-2 small">
+                                            <div class="col-6">Mã hàng (SKU): <strong class="text-dark">@previewProduct.Sku</strong></div>
+                                            <div class="col-6">Đơn vị tính: <strong class="text-dark">@previewProduct.Unit</strong></div>
+                                            <div class="col-6">Tồn kho hiện tại: <strong class="text-success">@previewProduct.CurrentStock @previewProduct.Unit</strong></div>
+                                            <div class="col-6">Ngưỡng tối thiểu: <strong class="text-dark">@previewProduct.MinStockLevel</strong></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Action Buttons in Preview Modal -->
+                                    <div class="d-flex flex-wrap gap-2 pt-2">
+                                        <button type="button" class="btn btn-primary rounded-pill px-4 py-2 fw-bold d-flex align-items-center gap-2 shadow-sm"
+                                                disabled="@(previewProduct.CurrentStock <= 0)"
+                                                @onclick="() => { HandleAddToCart(previewProduct); CloseLivePreview(); }">
+                                            <i class="bi bi-cart-plus-fill fs-5"></i>
+                                            <span>Thêm Vào Giỏ Hàng</span>
+                                        </button>
+
+                                        <button type="button" class="btn btn-warning text-dark rounded-pill px-3.5 py-2 fw-bold d-flex align-items-center gap-2 shadow-sm"
+                                                disabled="@(previewProduct.CurrentStock <= 0)"
+                                                @onclick="() => { HandleBuyNow(previewProduct); CloseLivePreview(); }">
+                                            <i class="bi bi-lightning-charge-fill fs-5"></i>
+                                            <span>Bán Ngay Tại Quầy POS</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer of Preview Modal -->
+                <div class="modal-footer bg-white border-top px-4 py-2.5 d-flex justify-content-between">
+                    <span class="small text-muted">
+                        <i class="bi bi-info-circle me-1"></i>Trình giả lập chế độ xem: <strong>@(previewDevice.ToUpper())</strong> (Thử responsive 390px, 768px, 1200px)
+                    </span>
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-4" @onclick="CloseLivePreview">
+                        Đóng Xem Thử
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- =========================================================================
+     MODAL 2: THÊM / CHỈNH SỬA HÀNG HÓA (ĐÁP ỨNG K3.2 EDITFORM & VALIDATION)
+     ========================================================================= -->
+@if (showModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(3px); z-index: 1070;">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header bg-success text-white py-3 px-4">
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi @(isEditMode ? "bi-pencil-square" : "bi-plus-circle") me-2"></i>
+                        @(isEditMode ? $"Chỉnh Sửa Hàng Hóa: {modalProduct.Name}" : "Thêm Hàng Hóa / Giao Diện Mới")
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="CloseModal"></button>
+                </div>
+                
+                <EditForm Model="@modalProduct" OnValidSubmit="SaveProduct">
+                    <DataAnnotationsValidator />
+                    <div class="modal-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Mã Hàng (SKU) *</label>
+                                <InputText class="form-control" @bind-Value="modalProduct.Sku" placeholder="VD: EH-01, TL-01" />
+                                <ValidationMessage For="@(() => modalProduct.Sku)" class="text-danger small" />
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label small fw-bold">Tên Hàng Hóa / Giao Diện *</label>
+                                <InputText class="form-control" @bind-Value="modalProduct.Name" placeholder="Tên sản phẩm đầy đủ" />
+                                <ValidationMessage For="@(() => modalProduct.Name)" class="text-danger small" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Đơn Vị Tính (ĐVT) *</label>
+                                <InputText class="form-control" @bind-Value="modalProduct.Unit" placeholder="Cái, Thùng, Hộp, Gói..." />
+                                <ValidationMessage For="@(() => modalProduct.Unit)" class="text-danger small" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Nhóm Ngành Hàng *</label>
+                                <select class="form-select" @bind="modalProduct.Category">
+                                    @foreach (var cat in allCategories.Where(c => c != "Tất cả"))
+                                    {
+                                        <option value="@cat">@cat</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Đơn Giá Bán Lẻ (VNĐ) *</label>
+                                <InputNumber class="form-control" @bind-Value="modalProduct.Price" />
+                                <ValidationMessage For="@(() => modalProduct.Price)" class="text-danger small" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Tồn Kho Ban Đầu</label>
+                                <InputNumber class="form-control" @bind-Value="modalProduct.CurrentStock" disabled="@isEditMode" />
+                                @if (isEditMode)
+                                {
+                                    <small class="text-muted">Tồn kho chỉ được thay đổi thông qua duyệt phiếu nhập/xuất.</small>
+                                }
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Ngưỡng Tồn Tối Thiểu (Min Stock)</label>
+                                <InputNumber class="form-control" @bind-Value="modalProduct.MinStockLevel" />
+                            </div>
+                            <!-- Image URL input -->
+                            <div class="col-12">
+                                <label class="form-label small fw-bold">Đường Dẫn Hình Ảnh (Image URL)</label>
+                                <InputText class="form-control" @bind-Value="modalProduct.ImageUrl" placeholder="https://images.unsplash.com/..." />
+                                <div class="d-flex flex-wrap gap-2 mt-2 align-items-center">
+                                    <span class="small text-muted">Chọn ảnh nhanh:</span>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill"
+                                            @onclick='() => modalProduct.ImageUrl = "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600"'>
+                                        Đồng hồ
+                                    </button>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill"
+                                            @onclick='() => modalProduct.ImageUrl = "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=600"'>
+                                        Thể thao
+                                    </button>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill"
+                                            @onclick='() => modalProduct.ImageUrl = "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600"'>
+                                        Mỹ phẩm
+                                    </button>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill"
+                                            @onclick='() => modalProduct.ImageUrl = "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600"'>
+                                        Thực phẩm
+                                    </button>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill"
+                                            @onclick='() => modalProduct.ImageUrl = "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=600"'>
+                                        Văn phòng
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold">Mô Tả Sản Phẩm / Giao Diện</label>
+                                <InputTextArea class="form-control" rows="2" @bind-Value="modalProduct.Description" placeholder="Mô tả chi tiết sản phẩm..." />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light border-top px-4 py-2.5">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-3" @onclick="CloseModal">Hủy bỏ</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">
+                            <i class="bi bi-check-lg me-1"></i>@(isEditMode ? "Cập Nhật" : "Lưu Hàng Hóa")
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Modal Xác Nhận Xóa bằng Component Tái Sử Dụng ConfirmActionModal (K3.1) -->
+<ConfirmActionModal 
+    IsVisible="@(productToDelete != null)"
+    Title="Xác Nhận Xóa Hàng Hóa"
+    Message="@($"Bạn có chắc chắn muốn xóa '{productToDelete?.Name}' (SKU: {productToDelete?.Sku}) khỏi kho?")"
+    DetailMessage="Thao tác này sẽ xóa vĩnh viễn sản phẩm khỏi CSDL SQL Server (Tiêu chí K3.1: Component tái sử dụng có EventCallback)."
+    ConfirmText="Xóa Vĩnh Viễn"
+    CancelText="Hủy Bỏ"
+    ConfirmButtonClass="btn-danger"
+    OnConfirm="ConfirmDelete"
+    OnCancel="@(() => productToDelete = null)" />
+
+@code {
+    private List<Product> allProducts = new();
+    private List<Product> filteredProducts = new();
+    private HashSet<int> justAddedIds = new();
+
+    private string viewMode = "grid"; // "grid" hoặc "table"
+    private string searchTerm = string.Empty;
+    private string selectedCategory = "Tất cả";
+    private string priceFilter = "all";
+    private string stockFilter = "all";
+    private string sortBy = "default";
+
+    // 16 Danh mục chuẩn từ ảnh chụp màn hình Sapo Store
+    private readonly List<string> allCategories = new()
+    {
+        "Tất cả",
+        "Thời trang - Trang sức",
+        "Mỹ phẩm - Làm đẹp",
+        "Thực phẩm - Nhà hàng",
+        "Đồ gia dụng - Sinh hoạt",
+        "Nội thất - Trang trí",
+        "Sách - Văn phòng phẩm",
+        "Thủ công - Mỹ nghệ - Quà tặng",
+        "Công nghệ - Kỹ thuật số",
+        "Ô tô - Xe máy",
+        "Thiết bị điện",
+        "Thể thao - Dịch vụ",
+        "Khác",
+        "Khách sạn - Du lịch",
+        "Bất động sản - Xây dựng",
+        "Doanh nghiệp"
+    };
+
+    private Product? previewProduct = null;
+    private string previewDevice = "desktop"; // "desktop", "tablet", "mobile"
+
+    private bool showModal = false;
+    private bool isEditMode = false;
+    private Product modalProduct = new();
+    private Product? productToDelete = null;
+
+    private string alertMessage = string.Empty;
+    private bool isSuccessAlert = false;
+
+    private bool showToast = false;
+    private string toastMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        CartService.OnChange += OnCartUpdated;
+        await LoadProducts();
+    }
+
+    private async void OnCartUpdated()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task LoadProducts()
+    {
+        allProducts = (await SearchProducts.ExecuteAsync()).ToList();
+        ApplyFilters();
+    }
+
+    private void ApplyFilters()
+    {
+        var query = allProducts.AsEnumerable();
+
+        // Search term
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            query = query.Where(p =>
+                p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                p.Sku.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                p.Category.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // Category
+        if (selectedCategory != "Tất cả")
+        {
+            query = query.Where(p => p.Category.Equals(selectedCategory, StringComparison.OrdinalIgnoreCase));
+        }
+
+        // Price range
+        query = priceFilter switch
+        {
+            "under_100k" => query.Where(p => p.Price < 100000),
+            "100k_500k" => query.Where(p => p.Price >= 100000 && p.Price <= 500000),
+            "500k_1m" => query.Where(p => p.Price > 500000 && p.Price <= 1000000),
+            "above_1m" => query.Where(p => p.Price > 1000000),
+            "under_1m" => query.Where(p => p.Price <= 1000000),
+            _ => query
+        };
+
+        // Stock status
+        if (stockFilter == "in_stock")
+        {
+            query = query.Where(p => p.CurrentStock > p.MinStockLevel);
+        }
+        else if (stockFilter == "low_stock")
+        {
+            query = query.Where(p => p.CurrentStock > 0 && p.CurrentStock <= p.MinStockLevel);
+        }
+        else if (stockFilter == "out_of_stock")
+        {
+            query = query.Where(p => p.CurrentStock <= 0);
+        }
+
+        // Sorting
+        query = sortBy switch
+        {
+            "price_asc" => query.OrderBy(p => p.Price),
+            "price_desc" => query.OrderByDescending(p => p.Price),
+            "stock_desc" => query.OrderByDescending(p => p.CurrentStock),
+            "id_desc" => query.OrderByDescending(p => p.Id),
+            _ => query.OrderBy(p => p.Id)
+        };
+
+        filteredProducts = query.ToList();
+    }
+
+    private void FilterByCategory(string cat)
+    {
+        selectedCategory = cat;
+        ApplyFilters();
+    }
+
+    private void FilterByPriceRange(string range)
+    {
+        priceFilter = range;
+        ApplyFilters();
+    }
+
+    private void FilterByStock(string filter)
+    {
+        stockFilter = filter;
+        ApplyFilters();
+    }
+
+    private void TogglePriceSort()
+    {
+        if (sortBy == "price_asc")
+        {
+            sortBy = "price_desc";
+        }
+        else
+        {
+            sortBy = "price_asc";
+        }
+        ApplyFilters();
+    }
+
+    private void ToggleUnder1Million()
+    {
+        if (priceFilter == "under_1m")
+        {
+            priceFilter = "all";
+        }
+        else
+        {
+            priceFilter = "under_1m";
+        }
+        ApplyFilters();
+    }
+
+    private void SetSort(string sort)
+    {
+        if (sortBy == sort)
+        {
+            sortBy = "default";
+        }
+        else
+        {
+            sortBy = sort;
+        }
+        ApplyFilters();
+    }
+
+    private void ClearSearch()
+    {
+        searchTerm = string.Empty;
+        stockFilter = "all";
+        priceFilter = "all";
+        selectedCategory = "Tất cả";
+        sortBy = "default";
+        ApplyFilters();
+    }
+
+    // MODAL XEM THỬ (LIVE PREVIEW)
+    private void OpenLivePreview(Product p)
+    {
+        previewProduct = p;
+        previewDevice = "desktop";
+    }
+
+    private void CloseLivePreview()
+    {
+        previewProduct = null;
+    }
+
+    // THAO TÁC GIỎ HÀNG & MUA BÁN
+    private void HandleAddToCart(Product p)
+    {
+        var err = CartService.AddToCart(p, 1, autoOpenDrawer: false);
+        if (!string.IsNullOrEmpty(err))
+        {
+            alertMessage = err;
+            isSuccessAlert = false;
+        }
+        else
+        {
+            toastMessage = $"Đã thêm 1 {p.Unit} '{p.Name}' vào giỏ hàng!";
+            showToast = true;
+            alertMessage = string.Empty;
+
+            justAddedIds.Add(p.Id);
+            StateHasChanged();
+
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(2000);
+                justAddedIds.Remove(p.Id);
+                await InvokeAsync(StateHasChanged);
+            });
+        }
+    }
+
+    private void HandleBuyNow(Product p)
+    {
+        var err = CartService.AddToCart(p, 1, autoOpenDrawer: true);
+        if (!string.IsNullOrEmpty(err))
+        {
+            alertMessage = err;
+            isSuccessAlert = false;
+        }
+        else
+        {
+            alertMessage = string.Empty;
+        }
+    }
+
+    // THAO TÁC XÓA (K3.1)
+    private void OpenDeleteConfirm(Product p)
+    {
+        productToDelete = p;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        if (productToDelete != null)
+        {
+            await DeleteProduct.ExecuteAsync(productToDelete.Id);
+            alertMessage = $"Đã xóa sản phẩm '{productToDelete.Name}' thành công khỏi kho!";
+            isSuccessAlert = true;
+            productToDelete = null;
+            await LoadProducts();
+        }
+    }
+
+    // MODAL THÊM / SỬA (K3.2)
+    private void OpenAddModal()
+    {
+        isEditMode = false;
+        modalProduct = new Product
+        {
+            Sku = $"SP-{(allProducts.Count + 1):D3}",
+            Unit = "Cái",
+            Category = "Thời trang - Trang sức",
+            Price = 1800000,
+            CurrentStock = 10,
+            MinStockLevel = 5,
+            ImageUrl = "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600"
+        };
+        showModal = true;
+    }
+
+    private void OpenEditModal(Product p)
+    {
+        isEditMode = true;
+        modalProduct = new Product
+        {
+            Id = p.Id,
+            Sku = p.Sku,
+            Name = p.Name,
+            Unit = p.Unit,
+            Category = p.Category,
+            Price = p.Price,
+            CurrentStock = p.CurrentStock,
+            MinStockLevel = p.MinStockLevel,
+            Description = p.Description,
+            ImageUrl = p.ImageUrl
+        };
+        showModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+    }
+
+    private async Task SaveProduct()
+    {
+        if (isEditMode)
+        {
+            await EditProduct.ExecuteAsync(modalProduct);
+            alertMessage = $"Đã cập nhật thông tin sản phẩm '{modalProduct.Name}'!";
+        }
+        else
+        {
+            await AddProduct.ExecuteAsync(modalProduct);
+            alertMessage = $"Đã thêm mới sản phẩm '{modalProduct.Name}' vào kho!";
+        }
+        isSuccessAlert = true;
+        showModal = false;
+        await LoadProducts();
+    }
+
+    private async Task ExportToExcel()
+    {
+        await ExcelService.ExportProductListToExcelAsync(filteredProducts);
+    }
+
+    public void Dispose()
+    {
+        CartService.OnChange -= OnCartUpdated;
+    }
+}

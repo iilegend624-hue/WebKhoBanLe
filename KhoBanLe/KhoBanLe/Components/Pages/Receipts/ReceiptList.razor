@@ -1,0 +1,232 @@
+@page "/receipts"
+@namespace KhoBanLe.Components.Pages.Receipts
+@inject IViewGoodsReceiptUseCase ViewReceipts
+
+<PageTitle>Sổ Phiếu Nhập Kho - KhoBanLe</PageTitle>
+
+<div class="container-fluid px-0">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-receipt text-success me-2"></i>Sổ Quản Lý Phiếu Nhập Kho
+            </h3>
+            <p class="text-muted small mb-0">Theo dõi toàn bộ chứng từ nhập hàng, đối tác cung ứng và tiến trình phê duyệt</p>
+        </div>
+        <a href="receipts/create" class="btn btn-success rounded-pill fw-semibold shadow-xs">
+            <i class="bi bi-plus-lg me-1"></i>Lập Phiếu Nhập Mới
+        </a>
+    </div>
+
+    <!-- Filter toolbar -->
+    <div class="modern-card p-3 mb-4">
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <span class="small text-muted fw-semibold">Lọc theo trạng thái:</span>
+            <button class="btn btn-sm rounded-pill @(filterStatus == null ? "btn-dark" : "btn-light border")"
+                    @onclick="() => FilterByStatus(null)">
+                Tất cả (@allReceipts.Count)
+            </button>
+            <button class="btn btn-sm rounded-pill @(filterStatus == ReceiptStatus.Draft ? "btn-warning text-dark" : "btn-light border")"
+                    @onclick="() => FilterByStatus(ReceiptStatus.Draft)">
+                Chờ duyệt (@allReceipts.Count(r => r.Status == ReceiptStatus.Draft))
+            </button>
+            <button class="btn btn-sm rounded-pill @(filterStatus == ReceiptStatus.Approved ? "btn-success" : "btn-light border")"
+                    @onclick="() => FilterByStatus(ReceiptStatus.Approved)">
+                Đã duyệt (@allReceipts.Count(r => r.Status == ReceiptStatus.Approved))
+            </button>
+            <button class="btn btn-sm rounded-pill @(filterStatus == ReceiptStatus.Cancelled ? "btn-secondary" : "btn-light border")"
+                    @onclick="() => FilterByStatus(ReceiptStatus.Cancelled)">
+                Đã hủy (@allReceipts.Count(r => r.Status == ReceiptStatus.Cancelled))
+            </button>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="modern-card p-0 overflow-hidden mb-4">
+        <div class="table-responsive">
+            <table class="table custom-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Mã Phiếu</th>
+                        <th>Nhà Cung Cấp</th>
+                        <th>Ngày Nhập</th>
+                        <th>Người Lập</th>
+                        <th class="text-center">Số Mặt Hàng</th>
+                        <th class="text-end">Tổng Giá Trị</th>
+                        <th class="text-center">Trạng Thái</th>
+                        <th class="text-end">Chi Tiết</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (filteredReceipts.Any())
+                    {
+                        @foreach (var r in filteredReceipts)
+                        {
+                            <tr>
+                                <td data-label="Mã Phiếu">
+                                    <span class="fw-bold text-primary">@r.ReceiptNumber</span>
+                                </td>
+                                <td data-label="Nhà Cung Cấp">
+                                    <div class="fw-semibold text-dark">@(r.Supplier?.Name ?? "Nhà cung cấp")</div>
+                                    <small class="text-muted">Mã: @(r.Supplier?.SupplierCode ?? "N/A")</small>
+                                </td>
+                                <td data-label="Ngày Nhập">
+                                    <span class="small text-muted">@r.ReceiptDate.ToString("dd/MM/yyyy HH:mm")</span>
+                                </td>
+                                <td data-label="Người Lập">
+                                    <span class="small">@r.CreatedBy</span>
+                                </td>
+                                <td data-label="Số Mặt Hàng" class="text-center">
+                                    <span class="badge bg-light text-dark border">@r.Lines.Count SKU (@r.Lines.Sum(l => l.Quantity) cái)</span>
+                                </td>
+                                <td data-label="Tổng Giá Trị" class="text-end fw-bold text-success">
+                                    @((r.TotalAmount).ToString("N0")) đ
+                                </td>
+                                <td data-label="Trạng Thái" class="text-center">
+                                    <ReceiptStatusBadge Status="@r.Status" />
+                                </td>
+                                <td data-label="Chi Tiết" class="text-end">
+                                    <button class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1"
+                                            @onclick="() => ViewDetails(r)">
+                                        <i class="bi bi-eye me-1"></i>Xem
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                Không có phiếu nhập kho nào thỏa mãn điều kiện lọc.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Xem Chi Tiết Phiếu -->
+@if (selectedReceipt != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(2px);">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header bg-light px-4 py-3 border-bottom">
+                    <div>
+                        <h5 class="modal-title fw-bold text-dark mb-0">
+                            Chi Tiết Phiếu Nhập: <span class="text-primary">@selectedReceipt.ReceiptNumber</span>
+                        </h5>
+                        <small class="text-muted">Ngày tạo: @selectedReceipt.ReceiptDate.ToString("dd/MM/yyyy HH:mm:ss")</small>
+                    </div>
+                    <button type="button" class="btn-close" @onclick="() => selectedReceipt = null"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row g-3 mb-4 p-3 bg-light rounded-3">
+                        <div class="col-md-6">
+                            <div class="small text-muted">Nhà cung cấp:</div>
+                            <div class="fw-bold text-dark">@(selectedReceipt.Supplier?.Name ?? "Chưa rõ")</div>
+                            <small class="text-muted">Đ/c: @(selectedReceipt.Supplier?.Address ?? "N/A")</small>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="small text-muted">Người lập:</div>
+                            <div class="fw-semibold text-dark">@selectedReceipt.CreatedBy</div>
+                            <div class="small text-muted mt-1">Trạng thái:</div>
+                            <ReceiptStatusBadge Status="@selectedReceipt.Status" />
+                        </div>
+                        <div class="col-md-3">
+                            <div class="small text-muted">Người duyệt:</div>
+                            <div class="fw-semibold text-dark">@(selectedReceipt.ApprovedBy ?? "Chưa duyệt")</div>
+                            @if (selectedReceipt.ApprovedDate.HasValue)
+                            {
+                                <small class="text-muted d-block">Lúc: @selectedReceipt.ApprovedDate.Value.ToString("dd/MM/yyyy HH:mm")</small>
+                            }
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold text-dark mb-3">Danh Sách Mặt Hàng Nhập Kho</h6>
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Mã SKU</th>
+                                    <th>Tên Hàng Hóa</th>
+                                    <th>ĐVT</th>
+                                    <th class="text-center">Số Lượng</th>
+                                    <th class="text-end">Đơn Giá Nhập</th>
+                                    <th class="text-end">Thành Tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var line in selectedReceipt.Lines)
+                                {
+                                    <tr>
+                                        <td><code>@(line.Product?.Sku ?? "SKU")</code></td>
+                                        <td class="fw-semibold">@(line.Product?.Name ?? "Hàng hóa")</td>
+                                        <td>@(line.Product?.Unit ?? "Cái")</td>
+                                        <td class="text-center fw-bold">@line.Quantity</td>
+                                        <td class="text-end">@line.UnitPrice.ToString("N0") đ</td>
+                                        <td class="text-end fw-bold text-primary">@line.LineTotal.ToString("N0") đ</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-light">
+                                    <td colspan="5" class="text-end fw-bold">TỔNG CỘNG:</td>
+                                    <td class="text-end fw-bold text-success fs-6">
+                                        @selectedReceipt.TotalAmount.ToString("N0") đ
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light px-4 py-2.5">
+                    <button type="button" class="btn btn-secondary rounded-pill" @onclick="() => selectedReceipt = null">Đóng</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<GoodsReceipt> allReceipts = new();
+    private List<GoodsReceipt> filteredReceipts = new();
+    private ReceiptStatus? filterStatus = null;
+    private GoodsReceipt? selectedReceipt = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadReceipts();
+    }
+
+    private async Task LoadReceipts()
+    {
+        allReceipts = (await ViewReceipts.ExecuteListAsync()).ToList();
+        ApplyFilter();
+    }
+
+    private void FilterByStatus(ReceiptStatus? status)
+    {
+        filterStatus = status;
+        ApplyFilter();
+    }
+
+    private void ApplyFilter()
+    {
+        if (filterStatus.HasValue)
+        {
+            filteredReceipts = allReceipts.Where(r => r.Status == filterStatus.Value).ToList();
+        }
+        else
+        {
+            filteredReceipts = allReceipts;
+        }
+    }
+
+    private void ViewDetails(GoodsReceipt r)
+    {
+        selectedReceipt = r;
+    }
+}

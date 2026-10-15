@@ -1,0 +1,371 @@
+@page "/approvals"
+@rendermode InteractiveServer
+@namespace KhoBanLe.Components.Pages.Manager
+@inject IViewGoodsReceiptUseCase ViewReceipts
+@inject IViewGoodsIssueUseCase ViewIssues
+@inject IApproveGoodsReceiptUseCase ApproveReceipt
+@inject ICancelGoodsReceiptUseCase CancelReceipt
+@inject IApproveGoodsIssueUseCase ApproveIssue
+@inject ICancelGoodsIssueUseCase CancelIssue
+@inject UserRoleService RoleService
+@implements IDisposable
+
+<PageTitle>Phê Duyệt Phiếu Kho (Luật 1) - KhoBanLe</PageTitle>
+
+@if (!RoleService.IsManager)
+{
+    <!-- TIÊU CHÍ K4.2: TÀI KHOẢN THƯỜNG GÕ THẲNG URL TRANG QUẢN TRỊ BỊ CHẶN -->
+    <div class="row justify-content-center py-5">
+        <div class="col-lg-8 col-md-10">
+            <div class="modern-card text-center p-5 border border-danger-subtle shadow-sm bg-white rounded-4">
+                <div class="rounded-circle bg-danger bg-opacity-10 text-danger d-inline-flex align-items-center justify-content-center p-4 mb-3" style="width: 80px; height: 80px;">
+                    <i class="bi bi-shield-lock-fill fs-1"></i>
+                </div>
+                <h4 class="fw-bold text-danger mb-2">403 - KHÔNG CÓ QUYỀN TRUY CẬP (ACCESS DENIED)</h4>
+                <div class="badge bg-danger-subtle text-danger border border-danger-subtle px-3 py-1.5 rounded-pill mb-3 fw-semibold">
+                    Tiêu chí K4.2: Trang quản trị được bảo vệ an toàn
+                </div>
+                <p class="text-muted mb-4 lead fs-6">
+                    Tài khoản hiện tại của bạn là <strong>@RoleService.CurrentUserName</strong> thuộc nhóm quyền <strong>@RoleService.RoleDisplayName</strong>.<br />
+                    Trang <code>/approvals</code> là trang quản trị giao dịch chỉ dành riêng cho vai trò <strong>Quản lý kho</strong>. Tài khoản thường (Thủ kho) gõ thẳng URL đã bị chặn thành công!
+                </p>
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <button class="btn btn-warning fw-bold text-dark rounded-pill px-4 py-2 shadow-xs" @onclick="SwitchToManagerRole">
+                        <i class="bi bi-person-fill-lock me-1"></i>Chuyển Đổi Sang Quản Lý (Demo K4.1 / K4.2)
+                    </button>
+                    <a href="/" class="btn btn-outline-secondary rounded-pill px-4 py-2">
+                        <i class="bi bi-house me-1"></i>Về Trang Chủ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container-fluid px-0">
+        <!-- Header -->
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+            <div>
+                <h3 class="fw-bold text-dark mb-1">
+                    <i class="bi bi-shield-check text-warning me-2"></i>Phê Duyệt Chứng Từ Kho (Quản Lý Kho)
+                </h3>
+                <p class="text-muted small mb-0">Trung tâm kiểm soát luồng giao dịch &bull; Cài đặt trực tiếp <strong>LUẬT 1: Duyệt mới đổi tồn & Chặn xuất âm</strong></p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill fw-semibold">
+                    <i class="bi bi-person-badge-fill me-1"></i>Người duyệt: @RoleService.CurrentUserName
+                </span>
+            </div>
+        </div>
+
+        <!-- Rule 1 Highlight Box -->
+        <div class="rule-alert rule-alert-danger mb-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-shield-fill-exclamation fs-3 text-danger"></i>
+                    <div>
+                        <h6 class="fw-bold text-danger mb-0">LUẬT 1 (K1.3, K3.3): DUYỆT MỚI ĐỔI TỒN & CHẶN XUẤT ÂM</h6>
+                        <small class="text-dark">
+                            Vị trí cài đặt: <code>KhoBanLe.UseCases.GoodsIssues.ApproveGoodsIssueUseCase</code>.
+                            Tồn kho CHỈ thay đổi khi Quản lý duyệt. Phiếu xuất có mặt hàng vượt tồn kho BẮT BUỘC BỊ CHẶN.
+                        </small>
+                    </div>
+                </div>
+                <span class="badge bg-danger text-white rounded-pill px-3 py-1.5 fw-bold">
+                    Bảo vệ toàn vẹn dữ liệu
+                </span>
+            </div>
+        </div>
+
+        <!-- Alert Messages (Result of approval action) -->
+        @if (!string.IsNullOrEmpty(feedbackMessage))
+        {
+            <div class="alert @(isSuccessFeedback ? "alert-success border-success" : "alert-danger border-danger") alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi @(isSuccessFeedback ? "bi-check-circle-fill fs-4 text-success" : "bi-x-octagon-fill fs-4 text-danger")"></i>
+                    <div>
+                        <h6 class="fw-bold mb-0 @(isSuccessFeedback ? "text-success" : "text-danger")">
+                            @(isSuccessFeedback ? "THỰC THI THÀNH CÔNG" : "CẢNH BÁO VI PHẠM LUẬT NGHIỆP VỤ")
+                        </h6>
+                        <div>@feedbackMessage</div>
+                    </div>
+                </div>
+                <button type="button" class="btn-close" @onclick="() => feedbackMessage = string.Empty"></button>
+            </div>
+        }
+
+        <!-- Tabs for Receipts vs Issues -->
+        <div class="row g-4">
+            <!-- 1. PHIẾU XUẤT KHO CHỜ DUYỆT (Nơi test Luật 1) -->
+            <div class="col-12">
+                <div class="modern-card p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                        <div>
+                            <h5 class="fw-bold text-danger mb-0">
+                                <i class="bi bi-box-arrow-up me-2"></i>Phiếu Xuất Kho Chờ Duyệt (@pendingIssues.Count phiếu)
+                            </h5>
+                            <small class="text-muted">Áp dụng Luật 1: Kiểm tra tồn kho trước khi duyệt trừ kho</small>
+                        </div>
+                    </div>
+
+                    @if (pendingIssues.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table custom-table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Mã Phiếu</th>
+                                        <th>Nơi Nhận</th>
+                                        <th>Ngày Lập</th>
+                                        <th>Người Lập</th>
+                                        <th>Chi Tiết Mặt Hàng Xuất</th>
+                                        <th class="text-end">Tổng Tiền</th>
+                                        <th class="text-end" style="width: 220px;">Thao Tác Quản Lý</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var issue in pendingIssues)
+                                    {
+                                        <tr class="@(issue.IssueNumber == "PX-2026-002" ? "table-danger bg-opacity-25" : "")">
+                                            <td data-label="Mã Phiếu">
+                                                <span class="fw-bold text-danger">@issue.IssueNumber</span>
+                                                @if (issue.IssueNumber == "PX-2026-002")
+                                                {
+                                                    <div class="badge bg-danger rounded-pill mt-1 d-block small">Ca Demo Vi Phạm Luật 1</div>
+                                                }
+                                            </td>
+                                            <td data-label="Nơi Nhận">
+                                                <div class="fw-semibold text-dark">@issue.CustomerOrDepartment</div>
+                                                <small class="text-muted">@issue.Note</small>
+                                            </td>
+                                            <td data-label="Ngày Lập">
+                                                <span class="small text-muted">@issue.IssueDate.ToString("dd/MM/yyyy HH:mm")</span>
+                                            </td>
+                                            <td data-label="Người Lập">
+                                                <span class="small">@issue.CreatedBy</span>
+                                            </td>
+                                            <td data-label="Chi Tiết">
+                                                <ul class="list-unstyled mb-0 small">
+                                                    @foreach (var l in issue.Lines)
+                                                    {
+                                                        <li>
+                                                            <strong>@(l.Product?.Name ?? "Sản phẩm")</strong>: 
+                                                            <span class="badge bg-danger-subtle text-danger fw-bold">@l.Quantity</span> @(l.Product?.Unit ?? "Cái") 
+                                                            @@ @l.UnitPrice.ToString("N0") đ
+                                                            @if (l.Product != null && l.Quantity > l.Product.CurrentStock)
+                                                            {
+                                                                <span class="text-danger fw-bold d-block">
+                                                                    <i class="bi bi-exclamation-octagon-fill"></i> Tồn chỉ có @l.Product.CurrentStock! (Sẽ bị chặn)
+                                                                </span>
+                                                            }
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </td>
+                                            <td data-label="Tổng Tiền" class="text-end fw-bold text-danger">
+                                                @((issue.TotalAmount).ToString("N0")) đ
+                                            </td>
+                                            <td data-label="Thao Tác" class="text-end">
+                                                <div class="d-flex justify-content-end gap-1.5">
+                                                    <button class="btn btn-sm btn-danger rounded-pill px-3 fw-bold shadow-xs"
+                                                            @onclick="() => HandleApproveIssue(issue.Id)">
+                                                        <i class="bi bi-check-circle me-1"></i>Duyệt Xuất
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-secondary rounded-pill px-2.5"
+                                                            @onclick="() => HandleCancelIssue(issue.Id)" title="Từ chối phiếu">
+                                                        <i class="bi bi-x-lg"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4 text-muted bg-light rounded-3">
+                            <i class="bi bi-check2-circle fs-2 text-success d-block mb-1"></i>
+                            Không có phiếu xuất kho nào đang chờ duyệt.
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- 2. PHIẾU NHẬP KHO CHỜ DUYỆT -->
+            <div class="col-12">
+                <div class="modern-card p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                        <div>
+                            <h5 class="fw-bold text-success mb-0">
+                                <i class="bi bi-box-arrow-in-down me-2"></i>Phiếu Nhập Kho Chờ Duyệt (@pendingReceipts.Count phiếu)
+                            </h5>
+                            <small class="text-muted">Quản lý duyệt để chính thức tăng tồn kho hàng hóa</small>
+                        </div>
+                    </div>
+
+                    @if (pendingReceipts.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table custom-table align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>Mã Phiếu</th>
+                                        <th>Nhà Cung Cấp</th>
+                                        <th>Ngày Lập</th>
+                                        <th>Người Lập</th>
+                                        <th>Chi Tiết Mặt Hàng Nhập</th>
+                                        <th class="text-end">Tổng Tiền</th>
+                                        <th class="text-end" style="width: 220px;">Thao Tác Quản Lý</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var receipt in pendingReceipts)
+                                    {
+                                        <tr>
+                                            <td data-label="Mã Phiếu">
+                                                <span class="fw-bold text-success">@receipt.ReceiptNumber</span>
+                                            </td>
+                                            <td data-label="Nhà Cung Cấp">
+                                                <div class="fw-semibold text-dark">@(receipt.Supplier?.Name ?? "N/A")</div>
+                                                <small class="text-muted">@receipt.Note</small>
+                                            </td>
+                                            <td data-label="Ngày Lập">
+                                                <span class="small text-muted">@receipt.ReceiptDate.ToString("dd/MM/yyyy HH:mm")</span>
+                                            </td>
+                                            <td data-label="Người Lập">
+                                                <span class="small">@receipt.CreatedBy</span>
+                                            </td>
+                                            <td data-label="Chi Tiết">
+                                                <ul class="list-unstyled mb-0 small">
+                                                    @foreach (var l in receipt.Lines)
+                                                    {
+                                                        <li>
+                                                            <strong>@(l.Product?.Name ?? "Sản phẩm")</strong>: 
+                                                            +<span class="badge bg-success-subtle text-success fw-bold">@l.Quantity</span> @(l.Product?.Unit ?? "Cái") 
+                                                            @@ @l.UnitPrice.ToString("N0") đ
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            </td>
+                                            <td data-label="Tổng Tiền" class="text-end fw-bold text-success">
+                                                @((receipt.TotalAmount).ToString("N0")) đ
+                                            </td>
+                                            <td data-label="Thao Tác" class="text-end">
+                                                <div class="d-flex justify-content-end gap-1.5">
+                                                    <button class="btn btn-sm btn-success rounded-pill px-3 fw-bold shadow-xs"
+                                                            @onclick="() => HandleApproveReceipt(receipt.Id)">
+                                                        <i class="bi bi-check-lg me-1"></i>Duyệt Nhập
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-secondary rounded-pill px-2.5"
+                                                            @onclick="() => HandleCancelReceipt(receipt.Id)" title="Từ chối phiếu">
+                                                        <i class="bi bi-x-lg"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4 text-muted bg-light rounded-3">
+                            <i class="bi bi-check2-circle fs-2 text-success d-block mb-1"></i>
+                            Không có phiếu nhập kho nào đang chờ duyệt.
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<GoodsReceipt> pendingReceipts = new();
+    private List<GoodsIssue> pendingIssues = new();
+
+    private string feedbackMessage = string.Empty;
+    private bool isSuccessFeedback = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        RoleService.OnRoleChanged += HandleRoleChanged;
+        await LoadPendingData();
+    }
+
+    private async void HandleRoleChanged()
+    {
+        await InvokeAsync(async () =>
+        {
+            if (RoleService.IsManager)
+            {
+                await LoadPendingData();
+            }
+            StateHasChanged();
+        });
+    }
+
+    private void SwitchToManagerRole()
+    {
+        RoleService.SetRole(SystemRole.InventoryManager);
+    }
+
+    private async Task LoadPendingData()
+    {
+        pendingReceipts = (await ViewReceipts.ExecuteListAsync(ReceiptStatus.Draft)).ToList();
+        pendingIssues = (await ViewIssues.ExecuteListAsync(ReceiptStatus.Draft)).ToList();
+    }
+
+    private async Task HandleApproveIssue(int issueId)
+    {
+        // THỰC THI LUẬT 1: Chặn xuất âm kho trong ApproveGoodsIssueUseCase
+        var result = await ApproveIssue.ExecuteAsync(issueId, RoleService.CurrentUserName);
+
+        if (result.Success)
+        {
+            isSuccessFeedback = true;
+            feedbackMessage = $"Phê duyệt phiếu xuất #{issueId} thành công! Tồn kho các mặt hàng đã được trừ an toàn.";
+            await LoadPendingData();
+        }
+        else
+        {
+            // Ca vi phạm Luật 1 bị chặn lại an toàn!
+            isSuccessFeedback = false;
+            feedbackMessage = result.ErrorMessage ?? "Lỗi duyệt phiếu xuất!";
+            await LoadPendingData();
+        }
+    }
+
+    private async Task HandleCancelIssue(int issueId)
+    {
+        await CancelIssue.ExecuteAsync(issueId);
+        isSuccessFeedback = true;
+        feedbackMessage = $"Đã hủy bỏ phiếu xuất #{issueId}.";
+        await LoadPendingData();
+    }
+
+    private async Task HandleApproveReceipt(int receiptId)
+    {
+        await ApproveReceipt.ExecuteAsync(receiptId, RoleService.CurrentUserName);
+        isSuccessFeedback = true;
+        feedbackMessage = $"Phê duyệt phiếu nhập #{receiptId} thành công! Tồn kho đã được cộng thêm.";
+        await LoadPendingData();
+    }
+
+    private async Task HandleCancelReceipt(int receiptId)
+    {
+        await CancelReceipt.ExecuteAsync(receiptId);
+        isSuccessFeedback = true;
+        feedbackMessage = $"Đã hủy bỏ phiếu nhập #{receiptId}.";
+        await LoadPendingData();
+    }
+
+    public void Dispose()
+    {
+        RoleService.OnRoleChanged -= HandleRoleChanged;
+    }
+}

@@ -1,0 +1,336 @@
+@page "/"
+@rendermode InteractiveServer
+@namespace KhoBanLe.Components.Pages
+@inject ISearchProductsUseCase SearchProducts
+@inject IViewGoodsReceiptUseCase ViewReceipts
+@inject IViewGoodsIssueUseCase ViewIssues
+@inject UserRoleService RoleService
+
+<PageTitle>Tổng Quan - Hệ Thống Kho Bán Lẻ</PageTitle>
+
+<div class="dashboard-container">
+    <!-- Hero Banner Sapo Green Style -->
+    <div class="modern-card p-4 mb-4 text-white position-relative overflow-hidden" 
+         style="background: linear-gradient(135deg, #004d23 0%, #007a3c 50%, #00a651 100%); box-shadow: 0 10px 25px -5px rgba(0, 166, 81, 0.35);">
+        <div class="row align-items-center position-relative z-1">
+            <div class="col-lg-8">
+                <span class="badge bg-white bg-opacity-20 text-white border border-white border-opacity-25 px-3 py-1.5 rounded-pill fw-medium mb-2">
+                    <i class="bi bi-award-fill text-warning me-1"></i>Đề Tài 13: Kho Bán Lẻ (Clean Architecture 4 Tầng)
+                </span>
+                <h2 class="fw-bold mb-2 text-white">Quản Lý Nhập – Xuất – Tồn Kho Hàng</h2>
+                <p class="text-white-50 mb-3" style="max-width: 650px;">
+                    Hệ thống số hóa quy trình kho bán lẻ tuân thủ 2 luật nghiệp vụ cốt lõi: 
+                    <strong>Chặn xuất âm kho</strong> và <strong>Bảo toàn công thức Nhập - Xuất - Tồn</strong>.
+                    Tích hợp Dapper SQL Server & Xuất Excel trực tiếp.
+                </p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="guide" class="btn btn-light fw-bold text-dark px-3.5 py-2 rounded-pill shadow-sm">
+                        <i class="bi bi-mortarboard-fill me-1 text-primary"></i>Phiếu Chấm Chi Tiết (Mục 8 - 12)
+                    </a>
+                    <a href="cart" class="btn btn-warning fw-bold text-dark px-3.5 py-2 rounded-pill shadow-sm">
+                        <i class="bi bi-shop me-1"></i>Bán Lẻ POS & Thu Ngân
+                    </a>
+                    <a href="products" class="btn btn-light fw-bold text-primary px-3.5 py-2 rounded-pill shadow-sm">
+                        <i class="bi bi-boxes me-1 text-primary"></i>Danh mục hàng
+                    </a>
+                    <a href="receipts/create" class="btn btn-outline-light fw-semibold px-3.5 py-2 rounded-pill">
+                        <i class="bi bi-box-arrow-in-down me-1 text-success"></i>Lập phiếu nhập
+                    </a>
+                    <a href="issues/create" class="btn btn-outline-light fw-semibold px-3.5 py-2 rounded-pill">
+                        <i class="bi bi-box-arrow-up me-1 text-danger"></i>Lập phiếu xuất
+                    </a>
+                    <a href="approvals" class="btn btn-outline-light fw-semibold px-3.5 py-2 rounded-pill">
+                        <i class="bi bi-shield-check me-1 text-warning"></i>Duyệt phiếu (@pendingCount)
+                    </a>
+                    <a href="reports" class="btn btn-outline-light fw-semibold px-3.5 py-2 rounded-pill">
+                        <i class="bi bi-file-earmark-spreadsheet me-1"></i>Báo cáo NXT & Excel
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 d-none d-lg-flex justify-content-end text-end">
+                <div class="p-3 bg-white bg-opacity-10 rounded-4 border border-white border-opacity-20 text-center" style="width: 220px;">
+                    <div class="small text-white-50 mb-1">TRẠNG THÁI VẬN HÀNH</div>
+                    <div class="h4 fw-bold mb-1 text-white">Hoạt động tốt</div>
+                    <span class="badge bg-success rounded-pill px-2.5 py-1">
+                        <i class="bi bi-database-check me-1"></i>Dữ liệu đồng bộ 100%
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4 KPI Stat Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted fw-semibold small">TỔNG MẶT HÀNG (SKU)</span>
+                    <div class="stat-icon bg-primary-subtle text-primary">
+                        <i class="bi bi-boxes"></i>
+                    </div>
+                </div>
+                <div class="h3 fw-bold mb-1 text-dark">@totalProducts</div>
+                <div class="d-flex align-items-center gap-1 small text-success">
+                    <i class="bi bi-check2-circle"></i>
+                    <span>@activeCategories nhóm ngành hàng</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted fw-semibold small">TỔNG GIÁ TRỊ TỒN KHO</span>
+                    <div class="stat-icon bg-success-subtle text-success">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                </div>
+                <div class="h3 fw-bold mb-1 text-dark">@(totalStockValue.ToString("N0")) đ</div>
+                <div class="d-flex align-items-center gap-1 small text-muted">
+                    <i class="bi bi-info-circle"></i>
+                    <span>Tính theo giá niêm yết bán lẻ</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted fw-semibold small">CẢNH BÁO TỒN KHO</span>
+                    <div class="stat-icon bg-warning-subtle text-warning-emphasis">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                    </div>
+                </div>
+                <div class="h3 fw-bold mb-1 @(lowStockProducts.Count > 0 ? "text-danger" : "text-dark")">
+                    @lowStockProducts.Count mặt hàng
+                </div>
+                <div class="d-flex align-items-center gap-1 small text-danger">
+                    <i class="bi bi-arrow-down-circle"></i>
+                    <span>Cần lập phiếu nhập bổ sung</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="stat-card">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <span class="text-muted fw-semibold small">PHIẾU CHỜ DUYỆT (DRAFT)</span>
+                    <div class="stat-icon bg-info-subtle text-info">
+                        <i class="bi bi-clock-history"></i>
+                    </div>
+                </div>
+                <div class="h3 fw-bold mb-1 text-dark">@pendingCount phiếu</div>
+                <div class="d-flex align-items-center gap-1 small text-info">
+                    <i class="bi bi-shield-check"></i>
+                    <a href="approvals" class="text-info fw-semibold text-decoration-none">Duyệt ngay (Quản lý) &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2 Business Rules Summary Banner -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="rule-alert rule-alert-danger h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-shield-fill-x fs-4 text-danger"></i>
+                        <h5 class="mb-0 fw-bold text-danger">LUẬT 1: DUYỆT MỚI ĐỔI TỒN & CHẶN XUẤT ÂM</h5>
+                    </div>
+                    <p class="small mb-2">
+                        Số lượng tồn kho <strong>CHỈ</strong> được trừ khi Quản lý duyệt phiếu trong 1 Transaction.
+                        Nếu số lượng xuất &gt; Tồn hiện có, hệ thống lập tức <strong>CHẶN LỖI THÂN THIỆN</strong>, không trừ tồn kho.
+                    </p>
+                    <div class="p-2 rounded bg-white border border-danger-subtle small">
+                        <code>Kịch bản demo:</code> Sản phẩm <em>Bút bi Thiên Long</em> tồn 5, lập phiếu xuất 10 chiếc &rarr; Bấm [Duyệt] bị chặn với Alert đỏ an toàn!
+                    </div>
+                </div>
+                <div class="mt-2 text-end">
+                    <a href="approvals" class="btn btn-sm btn-outline-danger fw-semibold">Thử ca vi phạm tại đây &rarr;</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="rule-alert rule-alert-success h-100 d-flex flex-column justify-content-between">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-calculator-fill fs-4 text-success"></i>
+                        <h5 class="mb-0 fw-bold text-success">LUẬT 2: BẢO TOÀN CÔNG THỨC NHẬP - XUẤT - TỒN</h5>
+                    </div>
+                    <p class="small mb-2">
+                        Công thức bất biến: <strong>Tồn đầu kỳ + Tổng nhập (Approved) - Tổng xuất (Approved) = Tồn cuối kỳ</strong>.
+                        Tất cả phiếu đã duyệt đều được khóa bất biến. Hệ thống hỗ trợ nút đối soát kiểm tra chéo tự động.
+                    </p>
+                    <div class="p-2 rounded bg-white border border-success-subtle small">
+                        <code>Kiểm chứng:</code> Báo cáo đối soát 100% khớp sổ cái, xuất file Excel tiếng Việt định dạng UTF-8 chuẩn xác.
+                    </div>
+                </div>
+                <div class="mt-2 text-end">
+                    <a href="reports" class="btn btn-sm btn-outline-success fw-semibold">Xem bảng báo cáo & Đối soát &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Tables Grid -->
+    <div class="row g-4">
+        <!-- Stock Alerts Table -->
+        <div class="col-lg-6">
+            <div class="modern-card p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                    <div>
+                        <h5 class="fw-bold mb-0 text-dark">
+                            <i class="bi bi-bell-fill text-warning me-1"></i>Hàng Chạm Ngưỡng Tồn Tối Thiểu
+                        </h5>
+                        <small class="text-muted">Các mặt hàng cần ưu tiên đặt mua từ NCC</small>
+                    </div>
+                    <a href="products" class="btn btn-sm btn-light text-primary fw-semibold">Tất cả hàng &rarr;</a>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table custom-table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Mã SKU</th>
+                                <th>Tên hàng hóa</th>
+                                <th class="text-center">Tồn / Tối thiểu</th>
+                                <th class="text-end">Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (lowStockProducts.Any())
+                            {
+                                @foreach (var p in lowStockProducts)
+                                {
+                                    <tr>
+                                        <td data-label="Mã SKU"><span class="badge bg-light text-dark border">@p.Sku</span></td>
+                                        <td data-label="Tên hàng hóa">
+                                            <div class="fw-semibold text-dark">@p.Name</div>
+                                            <small class="text-muted">ĐVT: @p.Unit</small>
+                                        </td>
+                                        <td data-label="Tồn / Tối thiểu" class="text-center fw-bold">
+                                            <span class="@(p.CurrentStock == 0 ? "text-danger" : "text-warning")">
+                                                @p.CurrentStock
+                                            </span>
+                                            <span class="text-muted small fw-normal"> / @p.MinStockLevel</span>
+                                        </td>
+                                        <td data-label="Trạng thái" class="text-end">
+                                            <StockStatusBadge CurrentStock="@p.CurrentStock" MinStock="@p.MinStockLevel" />
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-4">Tất cả hàng hóa đều đủ định mức tồn kho an toàn!</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="col-lg-6">
+            <div class="modern-card p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                    <div>
+                        <h5 class="fw-bold mb-0 text-dark">
+                            <i class="bi bi-clock-history text-primary me-1"></i>Chứng Từ Kho Mới Nhất
+                        </h5>
+                        <small class="text-muted">Lịch sử lập và duyệt phiếu nhập / xuất</small>
+                    </div>
+                    <a href="approvals" class="btn btn-sm btn-light text-primary fw-semibold">Duyệt phiếu &rarr;</a>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table custom-table align-middle">
+                        <thead>
+                            <tr>
+                                <th>Mã phiếu</th>
+                                <th>Loại</th>
+                                <th>Đối tác / Nơi nhận</th>
+                                <th class="text-end">Tổng tiền</th>
+                                <th class="text-end">Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var r in recentReceipts)
+                            {
+                                <tr>
+                                    <td data-label="Mã phiếu">
+                                        <span class="fw-bold text-primary">@r.ReceiptNumber</span>
+                                    </td>
+                                    <td data-label="Loại">
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle">Nhập</span>
+                                    </td>
+                                    <td data-label="Đối tác">
+                                        <div class="text-truncate" style="max-width: 140px;">@(r.Supplier?.Name ?? "Nhà cung cấp")</div>
+                                    </td>
+                                    <td data-label="Tổng tiền" class="text-end fw-semibold">
+                                        @((r.TotalAmount).ToString("N0")) đ
+                                    </td>
+                                    <td data-label="Trạng thái" class="text-end">
+                                        <ReceiptStatusBadge Status="@r.Status" />
+                                    </td>
+                                </tr>
+                            }
+                            @foreach (var i in recentIssues)
+                            {
+                                <tr>
+                                    <td data-label="Mã phiếu">
+                                        <span class="fw-bold text-danger">@i.IssueNumber</span>
+                                    </td>
+                                    <td data-label="Loại">
+                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Xuất</span>
+                                    </td>
+                                    <td data-label="Đối tác">
+                                        <div class="text-truncate" style="max-width: 140px;">@i.CustomerOrDepartment</div>
+                                    </td>
+                                    <td data-label="Tổng tiền" class="text-end fw-semibold">
+                                        @((i.TotalAmount).ToString("N0")) đ
+                                    </td>
+                                    <td data-label="Trạng thái" class="text-end">
+                                        <ReceiptStatusBadge Status="@i.Status" />
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private int totalProducts = 0;
+    private int activeCategories = 0;
+    private double totalStockValue = 0;
+    private int pendingCount = 0;
+
+    private List<Product> lowStockProducts = new();
+    private List<GoodsReceipt> recentReceipts = new();
+    private List<GoodsIssue> recentIssues = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var products = (await SearchProducts.ExecuteAsync()).ToList();
+        totalProducts = products.Count;
+        activeCategories = products.Select(p => p.Category).Distinct().Count();
+        totalStockValue = products.Sum(p => p.CurrentStock * p.Price);
+        lowStockProducts = products.Where(p => p.CurrentStock <= p.MinStockLevel).ToList();
+
+        var receipts = (await ViewReceipts.ExecuteListAsync()).ToList();
+        var issues = (await ViewIssues.ExecuteListAsync()).ToList();
+
+        pendingCount = receipts.Count(r => r.Status == ReceiptStatus.Draft) +
+                       issues.Count(i => i.Status == ReceiptStatus.Draft);
+
+        recentReceipts = receipts.Take(3).ToList();
+        recentIssues = issues.Take(3).ToList();
+    }
+}

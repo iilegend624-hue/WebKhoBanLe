@@ -1,0 +1,40 @@
+@namespace KhoBanLe.Components.Controls
+@using KhoBanLe.CoreBusiness
+
+<span class="badge @BadgeClass d-inline-flex align-items-center gap-1.5 px-3 py-1.5 rounded-pill fw-medium fs-7 shadow-xs">
+    <i class="@IconClass"></i>
+    <span>@StatusText</span>
+</span>
+
+@code {
+    [Parameter] public ReceiptStatus? Status { get; set; }
+    [Parameter] public string? StatusString { get; set; }
+
+    private ReceiptStatus ResolvedStatus => Status ?? (StatusString?.ToLowerInvariant() switch
+    {
+        "approved" or "đã duyệt" or "1" => ReceiptStatus.Approved,
+        "cancelled" or "đã hủy" or "hủy" or "2" => ReceiptStatus.Cancelled,
+        _ => ReceiptStatus.Draft
+    });
+
+    private string StatusText => ResolvedStatus switch
+    {
+        ReceiptStatus.Approved => "Đã duyệt",
+        ReceiptStatus.Cancelled => "Đã hủy",
+        _ => "Chờ duyệt"
+    };
+
+    private string BadgeClass => ResolvedStatus switch
+    {
+        ReceiptStatus.Approved => "bg-success-subtle text-success border border-success-subtle",
+        ReceiptStatus.Cancelled => "bg-secondary-subtle text-secondary border border-secondary-subtle",
+        _ => "bg-warning-subtle text-warning-emphasis border border-warning-subtle"
+    };
+
+    private string IconClass => ResolvedStatus switch
+    {
+        ReceiptStatus.Approved => "bi bi-check2-all text-success",
+        ReceiptStatus.Cancelled => "bi bi-slash-circle text-secondary",
+        _ => "bi bi-clock-history text-warning-emphasis"
+    };
+}

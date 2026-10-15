@@ -1,0 +1,504 @@
+@page "/receipts/create"
+@rendermode InteractiveServer
+@namespace KhoBanLe.Components.Pages.Receipts
+@using System.ComponentModel.DataAnnotations
+@inject IGetSuppliersUseCase GetSuppliers
+@inject ISearchProductsUseCase SearchProducts
+@inject ICreateGoodsReceiptUseCase CreateReceiptUseCase
+@inject IParseSupplierQuoteUseCase ParseQuote
+@inject NavigationManager Nav
+
+<PageTitle>Lập Phiếu Nhập Kho (EditForm + DataAnnotations) - KhoBanLe</PageTitle>
+
+<div class="container-fluid px-0">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-box-arrow-in-down text-success me-2"></i>Lập Phiếu Nhập Hàng (Goods Receipt)
+            </h3>
+            <p class="text-muted small mb-0">Tạo phiếu nhập từ nhà cung cấp &bull; Tiêu chí K3.2: <strong>EditForm + DataAnnotations</strong> &bull; Tiêu chí K4.3 & Mục 10: <strong>AI SmartPaste</strong></p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="receipts" class="btn btn-outline-secondary rounded-pill fw-semibold">
+                <i class="bi bi-arrow-left me-1"></i>Quay lại sổ phiếu
+            </a>
+            <button class="btn btn-info text-white rounded-pill fw-semibold shadow-xs" @onclick="ToggleAiModal">
+                <i class="bi bi-magic me-1"></i>AI SmartPaste Báo Giá
+            </button>
+        </div>
+    </div>
+
+    <!-- Alert status -->
+    @if (!string.IsNullOrEmpty(alertMessage))
+    {
+        <div class="alert @(isSuccessAlert ? "alert-success" : "alert-danger") alert-dismissible fade show rounded-3 shadow-xs mb-4" role="alert">
+            <i class="bi @(isSuccessAlert ? "bi-check-circle-fill" : "bi-exclamation-triangle-fill") me-2"></i>
+            @alertMessage
+            <button type="button" class="btn-close" @onclick="() => alertMessage = string.Empty"></button>
+        </div>
+    }
+
+    <!-- EditForm bao bọc phiếu nhập để đáp ứng K3.2: EditForm + DataAnnotations -->
+    <EditForm Model="receiptModel" OnValidSubmit="SubmitReceipt">
+        <DataAnnotationsValidator />
+
+        <div class="row g-4">
+            <!-- Main Form (Header & Lines) -->
+            <div class="col-lg-8">
+                <!-- Header Information Card -->
+                <div class="modern-card p-4 mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                        <h5 class="fw-bold text-dark mb-0">
+                            <i class="bi bi-info-circle text-primary me-2"></i>Thông Tin Phiếu Nhập (K3.2: EditForm + DataAnnotations)
+                        </h5>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2.5 py-1 small">
+                            DataAnnotations Active
+                        </span>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Nhà cung cấp *</label>
+                            <InputSelect class="form-select" @bind-Value="receiptModel.SupplierId">
+                                @foreach (var s in suppliers)
+                                {
+                                    <option value="@s.Id">@s.SupplierCode - @s.Name</option>
+                                }
+                            </InputSelect>
+                            <ValidationMessage For="@(() => receiptModel.SupplierId)" class="text-danger small mt-1" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-bold">Người lập phiếu *</label>
+                            <InputText class="form-control" @bind-Value="receiptModel.CreatedBy" placeholder="Họ tên người lập" />
+                            <ValidationMessage For="@(() => receiptModel.CreatedBy)" class="text-danger small mt-1" />
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label small fw-bold">Ghi chú phiếu nhập</label>
+                            <InputText class="form-control" @bind-Value="receiptModel.Note" placeholder="Nhập số hóa đơn VAT, hợp đồng hoặc lý do nhập..." />
+                            <ValidationMessage For="@(() => receiptModel.Note)" class="text-danger small mt-1" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Line Items Card -->
+                <div class="modern-card p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                        <div>
+                            <h5 class="fw-bold text-dark mb-0">
+                                <i class="bi bi-list-check text-primary me-2"></i>Chi Tiết Mặt Hàng Nhập (@lines.Count dòng)
+                            </h5>
+                            <small class="text-muted">K3.1: Sử dụng component tái sử dụng <code>LineItemEditor</code> có [Parameter] & EventCallback</small>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill fw-semibold" @onclick="OpenAddItemCard">
+                            <i class="bi bi-plus-lg me-1"></i>Thêm Mặt Hàng
+                        </button>
+                    </div>
+
+                    @if (!lines.Any())
+                    {
+                        <div class="alert alert-warning py-2.5 px-3 small rounded-3 mb-3">
+                            <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                            Phiếu chưa có mặt hàng nào. Vui lòng bấm <strong>[Thêm Mặt Hàng]</strong> hoặc dùng <strong>[AI SmartPaste Báo Giá]</strong>.
+                        </div>
+                    }
+
+                    <!-- Add item box -->
+                    @if (showAddItemBox)
+                    {
+                        <div class="p-3 mb-3 bg-light rounded-3 border border-primary-subtle">
+                            <div class="row g-2 align-items-end">
+                                <div class="col-md-5">
+                                    <label class="form-label small text-muted mb-1">Chọn mặt hàng</label>
+                                    <select class="form-select form-select-sm" @bind="selectedProductId" @bind:after="OnProductSelectionChanged">
+                                        @foreach (var p in availableProducts)
+                                        {
+                                            <option value="@p.Id">[@p.Sku] @p.Name (Tồn: @p.CurrentStock @p.Unit)</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label class="form-label small text-muted mb-1">Số lượng</label>
+                                    <input type="number" class="form-control form-control-sm" min="1" @bind="newQuantity" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small text-muted mb-1">Đơn giá nhập (đ)</label>
+                                    <input type="number" class="form-control form-control-sm" min="0" step="500" @bind="newUnitPrice" />
+                                </div>
+                                <div class="col-md-2 d-flex gap-1">
+                                    <button type="button" class="btn btn-success btn-sm w-100 fw-semibold" @onclick="AddLineItem">
+                                        Thêm
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="() => showAddItemBox = false">
+                                        Đóng
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Lines List using Reusable LineItemEditor (K3.1) -->
+                    @if (lines.Any())
+                    {
+                        <div class="lines-list">
+                            @for (int i = 0; i < lines.Count; i++)
+                            {
+                                int idx = i;
+                                var line = lines[idx];
+                                var prod = availableProducts.FirstOrDefault(p => p.Id == line.ProductId);
+
+                                <LineItemEditor 
+                                    ProductSku="@(prod?.Sku)"
+                                    ProductName="@(prod?.Name ?? "Hàng hóa")"
+                                    Unit="@(prod?.Unit ?? "Cái")"
+                                    CurrentStock="@(prod?.CurrentStock)"
+                                    Quantity="@line.Quantity"
+                                    QuantityChanged="@((q) => { line.Quantity = q; StateHasChanged(); })"
+                                    UnitPrice="@line.UnitPrice"
+                                    UnitPriceChanged="@((p) => { line.UnitPrice = p; StateHasChanged(); })"
+                                    OnDelete="@(() => RemoveLine(idx))" />
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4 text-muted bg-light rounded-3">
+                            <i class="bi bi-inbox fs-2 text-secondary d-block mb-1"></i>
+                            Chưa có mặt hàng nào trong phiếu nhập.
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Summary & Submission Card -->
+            <div class="col-lg-4">
+                <div class="modern-card p-4 sticky-top" style="top: 80px;">
+                    <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                        <i class="bi bi-calculator text-primary me-2"></i>Tổng Kết Phiếu Nhập
+                    </h5>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Tổng số lượng nhập:</span>
+                        <strong class="text-dark">@lines.Sum(l => l.Quantity)</strong>
+                    </div>
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Số loại mặt hàng:</span>
+                        <strong class="text-dark">@lines.Count SKU</strong>
+                    </div>
+
+                    <hr class="my-3" />
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span class="fw-bold text-dark fs-6">TỔNG GIÁ TRỊ NHẬP:</span>
+                        <span class="fw-bold text-success fs-5">
+                            @((lines.Sum(l => l.LineTotal)).ToString("N0")) đ
+                        </span>
+                    </div>
+
+                    <div class="alert alert-info py-2 px-3 small rounded-3 mb-4">
+                        <i class="bi bi-info-circle-fill me-1"></i>
+                        Phiếu sẽ được lưu ở trạng thái <strong>Chờ duyệt (Draft)</strong>. Tồn kho chỉ tăng khi Quản lý duyệt phiếu (Luật 1).
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100 py-2.5 rounded-pill fw-bold shadow-sm mb-2" 
+                            disabled="@(!lines.Any() || isSubmitting)">
+                        @if (isSubmitting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                            <span>Đang lưu phiếu vào SQL Server...</span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-check2-circle me-1"></i>
+                            <span>LƯU PHIẾU NHẬP (CHỜ DUYỆT)</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        </div>
+    </EditForm>
+</div>
+
+<!-- AI SmartPaste Modal (Mục 10 & K4.3: Human-in-the-loop & Graceful degradation) -->
+@if (showAiModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(2px);">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0 shadow-lg">
+                <div class="modal-header bg-gradient bg-primary text-white px-4 py-3">
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-stars text-warning me-2"></i>Trợ Lý AI SmartPaste: Nhập Phiếu Từ Báo Giá NCC (Mục 10)
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="ToggleAiModal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="alert alert-primary bg-primary-subtle border-0 rounded-3 small mb-3">
+                        <i class="bi bi-lightbulb-fill text-primary me-1"></i>
+                        <strong>Mục 10 & Slide 9:</strong> Báo giá gửi qua email/Zalo (văn bản thô). 
+                        AI phân tích trích xuất gợi ý; tuân thủ nguyên tắc <em>Human-in-the-loop</em>: bạn xem lại bản xem trước và bấm xác nhận trước khi áp dụng vào phiếu!
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Dán văn bản báo giá NCC tại đây:</label>
+                        <textarea class="form-control" rows="3" @bind="quoteRawText" 
+                                  placeholder="Ví dụ: Giao 20 thùng mì Hảo Hảo giá 110k, 10 hộp sữa tươi Vinamilk giá 32k..."></textarea>
+                    </div>
+
+                    <div class="d-flex flex-wrap gap-2 mb-3">
+                        <span class="small text-muted">Văn bản mẫu thử nghiệm:</span>
+                        <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill" 
+                                @onclick="@(() => quoteRawText = "Giao 20 thùng mì Hảo Hảo giá 110k, 10 hộp sữa tươi Vinamilk giá 32k")">
+                            Mẫu 1: Mì Hảo Hảo & Sữa Vinamilk
+                        </button>
+                        <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill" 
+                                @onclick="@(() => quoteRawText = "Giao 50 cây Bút bi Thiên Long giá 4200, 15 túi gạo ST25 giá 180k")">
+                            Mẫu 2: Bút bi Thiên Long & Gạo ST25
+                        </button>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(aiResultNotice))
+                    {
+                        <div class="alert @(isAiSuccess ? "alert-success" : "alert-warning") py-2 px-3 small rounded-3 mb-3">
+                            <i class="bi @(isAiSuccess ? "bi-check-circle" : "bi-exclamation-triangle") me-1"></i>
+                            @aiResultNotice
+                        </div>
+                    }
+
+                    @if (aiExtractedPreview.Any())
+                    {
+                        <div class="card border rounded-3 p-3 bg-light mb-0">
+                            <h6 class="fw-bold text-dark mb-2 small">
+                                <i class="bi bi-eye-fill text-primary me-1"></i>Bản Xem Trước Gợi Ý AI (Xác nhận trước khi áp dụng):
+                            </h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered bg-white small mb-0">
+                                    <thead>
+                                        <tr class="table-light">
+                                            <th>Mặt Hàng Gợi Ý</th>
+                                            <th>Mã SKU</th>
+                                            <th class="text-center">Số Lượng</th>
+                                            <th class="text-end">Đơn Giá Gợi Ý</th>
+                                            <th class="text-end">Thành Tiền</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in aiExtractedPreview)
+                                        {
+                                            <tr>
+                                                <td>@item.ProductName</td>
+                                                <td><code>@item.Sku</code></td>
+                                                <td class="text-center fw-bold text-primary">@item.Quantity</td>
+                                                <td class="text-end">@item.UnitPrice.ToString("N0") đ</td>
+                                                <td class="text-end fw-bold text-success">@((item.Quantity * item.UnitPrice).ToString("N0")) đ</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer bg-light px-4 py-2.5">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill" @onclick="ToggleAiModal">Đóng</button>
+                    @if (aiExtractedPreview.Any())
+                    {
+                        <button type="button" class="btn btn-success rounded-pill fw-bold" @onclick="ConfirmApplyAiItems">
+                            <i class="bi bi-check-lg me-1"></i>Xác Nhận Áp Dụng Vào Phiếu
+                        </button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-primary rounded-pill fw-bold" @onclick="RunAiExtraction">
+                            <i class="bi bi-magic me-1"></i>AI Phân Tích Gợi Ý
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    public class ReceiptFormModel
+    {
+        [Required(ErrorMessage = "Vui lòng chọn nhà cung cấp")]
+        [Range(1, int.MaxValue, ErrorMessage = "Vui lòng chọn nhà cung cấp")]
+        public int SupplierId { get; set; } = 1;
+
+        [Required(ErrorMessage = "Tên người lập phiếu không được để trống")]
+        [StringLength(100, ErrorMessage = "Tên người lập tối đa 100 ký tự")]
+        public string CreatedBy { get; set; } = "Thủ kho Nguyễn Văn A";
+
+        [StringLength(500, ErrorMessage = "Ghi chú tối đa 500 ký tự")]
+        public string? Note { get; set; }
+    }
+
+    private ReceiptFormModel receiptModel = new();
+    private List<Supplier> suppliers = new();
+    private List<Product> availableProducts = new();
+    private List<GoodsReceiptLine> lines = new();
+
+    private bool showAddItemBox = false;
+    private int selectedProductId = 1;
+    private int newQuantity = 10;
+    private double newUnitPrice = 0;
+
+    private bool showAiModal = false;
+    private string quoteRawText = "Giao 20 thùng mì Hảo Hảo giá 110k, 10 hộp sữa tươi Vinamilk giá 32k";
+    private string aiResultNotice = string.Empty;
+    private bool isAiSuccess = false;
+    private List<ParsedQuoteItem> aiExtractedPreview = new();
+
+    private string alertMessage = string.Empty;
+    private bool isSuccessAlert = false;
+    private bool isSubmitting = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        suppliers = (await GetSuppliers.ExecuteAsync()).ToList();
+        availableProducts = (await SearchProducts.ExecuteAsync()).ToList();
+
+        if (availableProducts.Any())
+        {
+            selectedProductId = availableProducts.First().Id;
+            newUnitPrice = availableProducts.First().Price;
+        }
+
+        if (suppliers.Any())
+        {
+            receiptModel.SupplierId = suppliers.First().Id;
+        }
+    }
+
+    private void OnProductSelectionChanged()
+    {
+        var prod = availableProducts.FirstOrDefault(p => p.Id == selectedProductId);
+        if (prod != null)
+        {
+            newUnitPrice = prod.Price;
+        }
+    }
+
+    private void OpenAddItemCard()
+    {
+        showAddItemBox = true;
+        OnProductSelectionChanged();
+    }
+
+    private void AddLineItem()
+    {
+        var prod = availableProducts.FirstOrDefault(p => p.Id == selectedProductId);
+        if (prod == null || newQuantity <= 0) return;
+
+        var existing = lines.FirstOrDefault(l => l.ProductId == prod.Id);
+        if (existing != null)
+        {
+            existing.Quantity += newQuantity;
+            existing.UnitPrice = newUnitPrice;
+        }
+        else
+        {
+            lines.Add(new GoodsReceiptLine
+            {
+                ProductId = prod.Id,
+                Product = prod,
+                Quantity = newQuantity,
+                UnitPrice = newUnitPrice
+            });
+        }
+
+        showAddItemBox = false;
+    }
+
+    private void RemoveLine(int index)
+    {
+        if (index >= 0 && index < lines.Count)
+        {
+            lines.RemoveAt(index);
+        }
+    }
+
+    private void ToggleAiModal()
+    {
+        showAiModal = !showAiModal;
+        aiResultNotice = string.Empty;
+        aiExtractedPreview.Clear();
+    }
+
+    private async Task RunAiExtraction()
+    {
+        var result = await ParseQuote.ExecuteAsync(quoteRawText);
+        isAiSuccess = result.Success;
+        aiResultNotice = result.Message;
+
+        if (result.Success && result.Items.Any())
+        {
+            aiExtractedPreview = result.Items;
+        }
+    }
+
+    private void ConfirmApplyAiItems()
+    {
+        foreach (var item in aiExtractedPreview)
+        {
+            var prod = availableProducts.FirstOrDefault(p => p.Id == item.ProductId);
+            if (prod != null)
+            {
+                var existing = lines.FirstOrDefault(l => l.ProductId == prod.Id);
+                if (existing != null)
+                {
+                    existing.Quantity += item.Quantity;
+                    existing.UnitPrice = item.UnitPrice;
+                }
+                else
+                {
+                    lines.Add(new GoodsReceiptLine
+                    {
+                        ProductId = prod.Id,
+                        Product = prod,
+                        Quantity = item.Quantity,
+                        UnitPrice = item.UnitPrice
+                    });
+                }
+            }
+        }
+        showAiModal = false;
+        alertMessage = $"Đã xác nhận và áp dụng {aiExtractedPreview.Count} mặt hàng AI trích xuất vào phiếu thành công!";
+        isSuccessAlert = true;
+        aiExtractedPreview.Clear();
+    }
+
+    private async Task SubmitReceipt()
+    {
+        if (!lines.Any())
+        {
+            alertMessage = "Vui lòng thêm ít nhất 1 mặt hàng vào phiếu nhập trước khi lưu!";
+            isSuccessAlert = false;
+            return;
+        }
+
+        isSubmitting = true;
+        try
+        {
+            var receipt = new GoodsReceipt
+            {
+                SupplierId = receiptModel.SupplierId,
+                CreatedBy = receiptModel.CreatedBy,
+                Note = receiptModel.Note,
+                Lines = lines
+            };
+
+            int newId = await CreateReceiptUseCase.ExecuteAsync(receipt);
+            Nav.NavigateTo("receipts");
+        }
+        catch (Exception ex)
+        {
+            alertMessage = $"Lỗi khi lưu phiếu: {ex.Message}";
+            isSuccessAlert = false;
+            isSubmitting = false;
+        }
+    }
+}

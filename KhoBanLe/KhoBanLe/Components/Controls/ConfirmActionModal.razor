@@ -1,0 +1,69 @@
+@namespace KhoBanLe.Components.Controls
+
+@if (IsVisible)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); z-index: 1060;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-xl overflow-hidden">
+                <div class="modal-header @HeaderClass px-4 py-3">
+                    <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                        <i class="@IconClass"></i>
+                        <span>@Title</span>
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="HandleCancel"></button>
+                </div>
+                <div class="modal-body p-4 text-center">
+                    <div class="rounded-circle @IconBgClass d-inline-flex align-items-center justify-content-center p-3 mb-3" style="width: 64px; height: 64px;">
+                        <i class="@BodyIconClass fs-2"></i>
+                    </div>
+                    <h6 class="fw-bold text-dark mb-2">@Message</h6>
+                    @if (!string.IsNullOrEmpty(DetailMessage))
+                    {
+                        <p class="small text-muted mb-0">@DetailMessage</p>
+                    }
+                </div>
+                <div class="modal-footer bg-light px-4 py-3 d-flex justify-content-end gap-2 border-top">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-3 fw-semibold" @onclick="HandleCancel">
+                        @CancelText
+                    </button>
+                    <button type="button" class="btn @ConfirmButtonClass rounded-pill px-4 fw-bold shadow-xs" @onclick="HandleConfirm">
+                        @ConfirmText
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsVisible { get; set; } = false;
+    [Parameter] public EventCallback<bool> IsVisibleChanged { get; set; }
+
+    [Parameter] public string Title { get; set; } = "Xác nhận hành động";
+    [Parameter] public string Message { get; set; } = "Bạn có chắc chắn muốn thực hiện hành động này?";
+    [Parameter] public string? DetailMessage { get; set; }
+    [Parameter] public string ConfirmText { get; set; } = "Xác nhận";
+    [Parameter] public string CancelText { get; set; } = "Hủy bỏ";
+    [Parameter] public string ConfirmButtonClass { get; set; } = "btn-danger";
+    [Parameter] public string HeaderClass { get; set; } = "bg-light border-bottom";
+    [Parameter] public string IconClass { get; set; } = "bi bi-exclamation-triangle-fill text-warning";
+    [Parameter] public string IconBgClass { get; set; } = "bg-danger bg-opacity-10 text-danger";
+    [Parameter] public string BodyIconClass { get; set; } = "bi bi-question-lg text-danger";
+
+    [Parameter] public EventCallback OnConfirm { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    private async Task HandleConfirm()
+    {
+        await OnConfirm.InvokeAsync();
+        IsVisible = false;
+        await IsVisibleChanged.InvokeAsync(false);
+    }
+
+    private async Task HandleCancel()
+    {
+        await OnCancel.InvokeAsync();
+        IsVisible = false;
+        await IsVisibleChanged.InvokeAsync(false);
+    }
+}

@@ -1,0 +1,118 @@
+@namespace KhoBanLe.Components.Layout
+@inject UserRoleService RoleService
+@implements IDisposable
+
+<div class="sidebar-header px-4 py-3 d-flex align-items-center justify-content-between border-bottom border-secondary border-opacity-25">
+    <div class="d-flex align-items-center gap-2">
+        <div class="brand-icon bg-primary text-white rounded-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 38px; height: 38px;">
+            <i class="bi bi-box-seam-fill fs-5"></i>
+        </div>
+        <div>
+            <div class="fw-bold text-white fs-6 lh-1">KHOBANLE</div>
+            <small class="text-white-50" style="font-size: 0.72rem;">Retail Inventory System</small>
+        </div>
+    </div>
+</div>
+
+<!-- Role Switcher in Sidebar -->
+<div class="px-3 pt-3 pb-2">
+    <div class="p-2.5 rounded-3 bg-secondary bg-opacity-25 border border-secondary border-opacity-25">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="text-white-50 small fw-medium" style="font-size: 0.75rem;">VAI TRÒ HIỆN TẠI</span>
+            <button class="btn btn-xs btn-outline-info py-0 px-1.5 rounded" style="font-size: 0.7rem;" @onclick="RoleService.SwitchRole" title="Chuyển đổi nhanh vai trò">
+                <i class="bi bi-arrow-repeat me-1"></i>Đổi
+            </button>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge @(RoleService.CurrentRole == SystemRole.WarehouseStaff ? "bg-primary" : "bg-warning text-dark") fw-semibold">
+                @(RoleService.CurrentRole == SystemRole.WarehouseStaff ? "Thủ kho" : "Quản lý")
+            </span>
+            <span class="text-white small text-truncate fw-medium">@RoleService.CurrentUserName</span>
+        </div>
+    </div>
+</div>
+
+<div class="nav-scrollable flex-grow-1 px-1 py-2">
+    <div class="nav-section-title px-3 pt-2 pb-1 text-white-50 fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.05em;">
+        TỔNG QUAN
+    </div>
+    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+        <i class="bi bi-grid-1x2-fill"></i>
+        <span>Bảng điều khiển</span>
+    </NavLink>
+    <NavLink class="nav-link" href="products">
+        <i class="bi bi-boxes"></i>
+        <span>Hàng hóa & Tồn kho</span>
+    </NavLink>
+
+    <div class="nav-section-title px-3 pt-3 pb-1 text-white-50 fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.05em;">
+        BÁN HÀNG TẠI QUẦY (POS)
+    </div>
+    <NavLink class="nav-link" href="cart">
+        <i class="bi bi-shop text-warning"></i>
+        <span>Thu Ngân & Bán Lẻ (POS)</span>
+    </NavLink>
+
+    <div class="nav-section-title px-3 pt-3 pb-1 text-white-50 fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.05em;">
+        PHIẾU NHẬP (GOODS RECEIPT)
+    </div>
+    <NavLink class="nav-link" href="receipts/create">
+        <i class="bi bi-plus-circle-fill text-success"></i>
+        <span>Lập phiếu nhập (AI)</span>
+    </NavLink>
+    <NavLink class="nav-link" href="receipts">
+        <i class="bi bi-receipt"></i>
+        <span>Sổ phiếu nhập</span>
+    </NavLink>
+
+    <div class="nav-section-title px-3 pt-3 pb-1 text-white-50 fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.05em;">
+        PHIẾU XUẤT (GOODS ISSUE)
+    </div>
+    <NavLink class="nav-link" href="issues/create">
+        <i class="bi bi-dash-circle-fill text-danger"></i>
+        <span>Lập phiếu xuất kho</span>
+    </NavLink>
+    <NavLink class="nav-link" href="issues">
+        <i class="bi bi-journal-arrow-up"></i>
+        <span>Sổ phiếu xuất</span>
+    </NavLink>
+
+    <div class="nav-section-title px-3 pt-3 pb-1 text-white-50 fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.05em;">
+        QUẢN LÝ & BÁO CÁO (2 LUẬT)
+    </div>
+    <NavLink class="nav-link" href="approvals">
+        <i class="bi bi-shield-check text-warning"></i>
+        <span>Duyệt phiếu (Luật 1)</span>
+    </NavLink>
+    <NavLink class="nav-link" href="reports">
+        <i class="bi bi-bar-chart-line-fill text-info"></i>
+        <span>Báo cáo NXT (Luật 2)</span>
+    </NavLink>
+
+    <div class="nav-section-title px-3 pt-3 pb-1 text-white-50 fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.05em;">
+        HƯỚNG DẪN & SQL
+    </div>
+    <NavLink class="nav-link" href="guide">
+        <i class="bi bi-mortarboard-fill text-warning"></i>
+        <span>Phiếu Chấm Chi Tiết (8-12)</span>
+    </NavLink>
+</div>
+
+<div class="p-3 border-top border-secondary border-opacity-25 text-white-50 small" style="font-size: 0.75rem;">
+    <div class="d-flex align-items-center gap-1.5 text-white-50">
+        <i class="bi bi-code-slash text-info"></i>
+        <span>Clean Architecture .NET 8</span>
+    </div>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        RoleService.OnRoleChanged += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        RoleService.OnRoleChanged -= StateHasChanged;
+    }
+}

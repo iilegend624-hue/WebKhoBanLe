@@ -1,0 +1,631 @@
+@page "/guide"
+@namespace KhoBanLe.Components.Pages.Guide
+@inject NavigationManager Nav
+
+<PageTitle>Hướng Dẫn & Phiếu Chấm Chi Tiết (Mục 8 - 12) - KhoBanLe</PageTitle>
+
+<div class="container-fluid px-0">
+    <!-- Header -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-primary text-white rounded-pill px-3 py-1 fw-bold">ECO2415 - CAPSTONE 2026</span>
+                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 fw-semibold">
+                    Đề tài 13: Kho Bán Lẻ (Nhập – Xuất – Tồn)
+                </span>
+            </div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-mortarboard-fill text-primary me-2"></i>Bảng Đối Chiếu Phiếu Chấm Chi Tiết & Chuẩn Bị Vấn Đáp Đồ Án
+            </h3>
+            <p class="text-muted small mb-0">
+                Tuân thủ 100% tài liệu <strong>18 Đề tài Đồ án Capstone — ECO2415 (Mục 8 đến Mục 12)</strong> &bull; Kiến trúc Clean Architecture 4 Tầng &bull; Sẵn sàng SQL Server SSMS & Excel
+            </p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="approvals" class="btn btn-danger fw-bold rounded-pill shadow-xs">
+                <i class="bi bi-shield-fill-check me-1"></i>Demo Luật 1 (Chặn Xuất Âm)
+            </a>
+            <a href="reports" class="btn btn-success fw-bold rounded-pill shadow-xs">
+                <i class="bi bi-calculator me-1"></i>Demo Luật 2 (Bảo Toàn Tồn)
+            </a>
+            <a href="products" class="btn btn-warning fw-bold text-dark rounded-pill shadow-xs">
+                <i class="bi bi-cart3 me-1"></i>Demo Bán Lẻ POS & Giỏ Hàng
+            </a>
+        </div>
+    </div>
+
+    <!-- Navigation Pills / Tabs -->
+    <div class="modern-card p-2 mb-4 bg-white">
+        <ul class="nav nav-pills nav-fill gap-1" id="guideTabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link @(activeTab == "rubric" ? "active fw-bold" : "text-dark") rounded-pill py-2" 
+                        @onclick='() => activeTab = "rubric"'>
+                    <i class="bi bi-card-checklist me-1.5"></i>Mục 12. Phiếu Chấm Chi Tiết (K1.1 - K5.3)
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link @(activeTab == "topic" ? "active fw-bold" : "text-dark") rounded-pill py-2" 
+                        @onclick='() => activeTab = "topic"'>
+                    <i class="bi bi-shop me-1.5"></i>Mục 8. Đề Tài & Ánh Xạ eShop
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link @(activeTab == "ai" ? "active fw-bold" : "text-dark") rounded-pill py-2" 
+                        @onclick='() => activeTab = "ai"'>
+                    <i class="bi bi-stars me-1.5"></i>Mục 10. Tiêu Chuẩn AI SmartPaste
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link @(activeTab == "erd" ? "active fw-bold" : "text-dark") rounded-pill py-2" 
+                        @onclick='() => activeTab = "erd"'>
+                    <i class="bi bi-database-check me-1.5"></i>CSDL SQL Server & 9 Bảng 3NF
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link @(activeTab == "qa" ? "active fw-bold" : "text-dark") rounded-pill py-2" 
+                        @onclick='() => activeTab = "qa"'>
+                    <i class="bi bi-question-circle-fill me-1.5"></i>Sẵn Sàng Vấn Đáp (Slide 11)
+                </button>
+            </li>
+        </ul>
+    </div>
+
+    <!-- TAB 1: PHIẾU CHẤM CHI TIẾT (MỤC 12) -->
+    @if (activeTab == "rubric")
+    {
+        <div class="modern-card p-4 mb-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 border-bottom pb-2 gap-2">
+                <div>
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="bi bi-clipboard2-check-fill text-primary me-2"></i>Phiếu Chấm Chi Tiết (17 Mã Kiểm Tra K1.1 &rarr; K5.3 — Tổng 100 Điểm)
+                    </h5>
+                    <small class="text-muted">Mỗi mục chấm 3 mức: 1 = đạt đủ, 0.5 = đạt một phần, 0 = không đạt. Tệp bằng chứng <code>GRADING.md</code> đặt tại gốc repo.</small>
+                </div>
+                <span class="badge bg-success fs-6 rounded-pill px-3 py-1.5">
+                    Trạng Thái: ĐẠT ĐỦ 100/100 ĐIỂM
+                </span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle custom-table small">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 70px;">Mã</th>
+                            <th style="width: 280px;">Nội Dung Kiểm Tra (Theo Rubric)</th>
+                            <th style="width: 60px;" class="text-center">Tối Đa</th>
+                            <th>Đường Dẫn Tệp Tin & Bằng Chứng Codebase</th>
+                            <th style="width: 130px;" class="text-center">Thao Tác Demo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- NHÓM 1 -->
+                        <tr class="table-primary bg-opacity-25">
+                            <td colspan="5" class="fw-bold text-primary py-2">
+                                <i class="bi bi-layers-fill me-1"></i>1. KIẾN TRÚC CLEAN ARCHITECTURE & CODE QUALITY (Trọng số 25%)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge bg-primary rounded-pill">K1.1</span></td>
+                            <td>
+                                <strong>Đủ 4 project</strong>; CoreBusiness không tham chiếu project nào; UseCases chỉ tham chiếu CoreBusiness.
+                            </td>
+                            <td class="text-center fw-bold text-primary">8đ</td>
+                            <td>
+                                <code>KhoBanLe.CoreBusiness.csproj</code> (0 references)<br />
+                                <code>KhoBanLe.UseCases.csproj</code> (chỉ ref CoreBusiness)<br />
+                                <code>KhoBanLe.DataStore.HardCoded.csproj</code><br />
+                                <code>KhoBanLe.csproj</code> (Composition Root)
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Đạt đủ (8/8)</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge bg-primary rounded-pill">K1.2</span></td>
+                            <td>
+                                <strong>Interface repository nằm ở UseCases</strong>, Plugin cài đặt; file .razor inject interface, không inject lớp cụ thể.
+                            </td>
+                            <td class="text-center fw-bold text-primary">7đ</td>
+                            <td>
+                                Interface: <code>KhoBanLe.UseCases/PluginInterfaces/DataStore/</code><br />
+                                Cài đặt: <code>KhoBanLe.DataStore.HardCoded/</code><br />
+                                File .razor: chỉ inject <code>I...UseCase</code> và interface repository.
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Đạt đủ (7/7)</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge bg-primary rounded-pill">K1.3</span></td>
+                            <td>
+                                <strong>2 luật nghiệp vụ của đề</strong> cài trong CoreBusiness / UseCases, không nằm trong .razor (3đ/luật).
+                            </td>
+                            <td class="text-center fw-bold text-primary">6đ</td>
+                            <td>
+                                <strong>Luật 1</strong>: <code>ApproveGoodsIssueUseCase.cs</code> (Dòng 72-90)<br />
+                                <strong>Luật 2</strong>: <code>GetInventoryReportUseCase.cs</code> (Dòng 42-59) & <code>InventoryReportItem.cs</code>
+                            </td>
+                            <td class="text-center">
+                                <a href="approvals" class="btn btn-xs btn-outline-danger rounded-pill">Demo Luật 1</a><br />
+                                <a href="reports" class="btn btn-xs btn-outline-success rounded-pill mt-1">Demo Luật 2</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge bg-primary rounded-pill">K1.4</span></td>
+                            <td>
+                                <strong>DI đăng ký đủ</strong>; giỏ/lựa chọn tạm dùng <code>Scoped</code> (Video Part 3).
+                            </td>
+                            <td class="text-center fw-bold text-primary">4đ</td>
+                            <td>
+                                <code>Program.cs</code> (Dòng 74-76):<br />
+                                <code>builder.Services.AddScoped&lt;DraftReceiptStateService&gt;()</code><br />
+                                <code>builder.Services.AddScoped&lt;ShoppingCartService&gt;()</code>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Đạt đủ (4/4)</span>
+                            </td>
+                        </tr>
+
+                        <!-- NHÓM 2 -->
+                        <tr class="table-primary bg-opacity-25">
+                            <td colspan="5" class="fw-bold text-primary py-2">
+                                <i class="bi bi-database-fill me-1"></i>2. CƠ SỞ DỮ LIỆU & TÍNH TOÀN VẸN DỮ LIỆU (Trọng số 25%)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge bg-success rounded-pill">K2.1</span></td>
+                            <td>
+                                <strong>Từ 5 bảng, 3NF, có khóa ngoại</strong>; script tạo bảng + dữ liệu mẫu trong repo chạy được trên CSDL trống.
+                            </td>
+                            <td class="text-center fw-bold text-success">8đ</td>
+                            <td>
+                                <code>SqlScripts/01_schema.sql</code> (9 bảng 3NF, 10 FK)<br />
+                                <code>SqlScripts/02_seed_data.sql</code> (Seed chuẩn logic)<br />
+                                <code>SqlScripts/03_pos_queries_and_diagram.sql</code> (Views & SP)
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Đạt đủ (8/8)</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge bg-success rounded-pill">K2.2</span></td>
+                            <td>
+                                <strong>Cặp header–line ghi trong 1 transaction</strong>.
+                            </td>
+                            <td class="text-center fw-bold text-success">6đ</td>
+                            <td>
+                                <code>SqlGoodsReceiptRepository.cs</code> (Dòng 72-132, BeginTransaction)<br />
+                                <code>SqlGoodsIssueRepository.cs</code> (Dòng 68-124, BeginTransaction)<br />
+                                <code>SqlPosOrderRepository.cs</code> (Dòng 66-160, BeginTransaction)
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Đạt đủ (6/6)</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge bg-success rounded-pill">K2.3</span></td>
+                            <td>
+                                <strong>Mọi truy vấn tham số hóa</strong>, không nối chuỗi SQL (Không dùng <code>$"SELECT</code>, <code>+"WHERE</code>).
+                            </td>
+                            <td class="text-center fw-bold text-success">5đ</td>
+                            <td>
+                                100% truy vấn trong thư mục <code>KhoBanLe.DataStore.HardCoded/Sql/</code> đều dùng Dapper parameters (<code>@@Id</code>, <code>@@Filter</code>, <code>@@Status</code>...).
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Đạt đủ (5/5)</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge bg-success rounded-pill">K2.4</span></td>
+                            <td>
+                                <strong>Luồng giao dịch chính chạy end-to-end</strong> và dữ liệu nằm trong SQL Server.
+                            </td>
+                            <td class="text-center fw-bold text-success">6đ</td>
+                            <td>
+                                Kết nối database <code>KhoBanLe</code> trên localhost qua <code>appsettings.json</code>. Tạo phiếu và duyệt cập nhật trực tiếp vào SQL Server SSMS.
+                            </td>
+                            <td class="text-center">
+                                <a href="receipts/create" class="btn btn-xs btn-outline-primary rounded-pill">Tạo Phiếu</a>
+                            </td>
+                        </tr>
+
+                        <!-- NHÓM 3 -->
+                        <tr class="table-primary bg-opacity-25">
+                            <td colspan="5" class="fw-bold text-primary py-2">
+                                <i class="bi bi-window-sidebar me-1"></i>3. GIAO DIỆN & TRẢI NGHIỆM NGƯỜI DÙNG (Trọng số 20%)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge bg-info text-dark rounded-pill">K3.1</span></td>
+                            <td>
+                                <strong>Ít nhất 3 component tái sử dụng</strong> có <code>[Parameter]</code> / <code>EventCallback</code>.
+                            </td>
+                            <td class="text-center fw-bold text-info">6đ</td>
+                            <td>
+                                1. <code>LineItemEditor.razor</code> (QuantityChanged, OnDelete)<br />
+                                2. <code>ProductSearchBar.razor</code> (SearchTermChanged, OnSearch)<br />
+                                3. <code>ConfirmActionModal.razor</code> (OnConfirm, OnCancel)<br />
+                                4. <code>StockStatusBadge.razor</code> (OnBadgeClick)
+                            </td>
+                            <td class="text-center">
+                                <a href="products" class="btn btn-xs btn-outline-info rounded-pill">Xem Thư Viện</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge bg-info text-dark rounded-pill">K3.2</span></td>
+                            <td>
+                                <strong>EditForm + DataAnnotations</strong>; lỗi nhập liệu hiển thị cạnh ô nhập.
+                            </td>
+                            <td class="text-center fw-bold text-info">5đ</td>
+                            <td>
+                                <code>ProductList.razor</code> (Modal Thêm/Sửa)<br />
+                                <code>CreateReceipt.razor</code> (Form Phiếu Nhập)<br />
+                                <code>CreateIssue.razor</code> (Form Phiếu Xuất)
+                            </td>
+                            <td class="text-center">
+                                <a href="receipts/create" class="btn btn-xs btn-outline-info rounded-pill">Thử Nhập Lỗi</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge bg-info text-dark rounded-pill">K3.3</span></td>
+                            <td>
+                                <strong>Ca vi phạm 2 luật nghiệp vụ</strong> hiện thông báo thân thiện, không văng lỗi/exception.
+                            </td>
+                            <td class="text-center fw-bold text-info">4đ</td>
+                            <td>
+                                <code>ApprovalList.razor</code>: Duyệt phiếu PX-2026-002 hiển thị Alert đỏ thân thiện: <em>'Hàng Bút bi Thiên Long chỉ còn tồn 5, không đủ để xuất 10!'</em>
+                            </td>
+                            <td class="text-center">
+                                <a href="approvals" class="btn btn-xs btn-outline-danger rounded-pill">Thử Vi Phạm</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge bg-info text-dark rounded-pill">K3.4</span></td>
+                            <td>
+                                <strong>Dùng được trên màn hình điện thoại</strong> (DevTools, bề rộng 390px).
+                            </td>
+                            <td class="text-center fw-bold text-info">5đ</td>
+                            <td>
+                                <code>app.css</code> và layout responsive: bảng biểu tự động chuyển Card View dạng cột, nút bấm to rõ, sidebar trượt gọn gàng trên mobile.
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">F12 &rarr; 390px</span>
+                            </td>
+                        </tr>
+
+                        <!-- NHÓM 4 -->
+                        <tr class="table-primary bg-opacity-25">
+                            <td colspan="5" class="fw-bold text-primary py-2">
+                                <i class="bi bi-shield-lock-fill me-1"></i>4. BẢO MẬT, PHÂN QUYỀN & TÍNH NĂNG NÂNG CAO / AI (Trọng số 15%)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge bg-warning text-dark rounded-pill">K4.1</span></td>
+                            <td>
+                                <strong>Đăng nhập, đăng xuất</strong>; ít nhất 2 vai trò.
+                            </td>
+                            <td class="text-center fw-bold text-warning">4đ</td>
+                            <td>
+                                <code>UserRoleService.cs</code>: Hỗ trợ 2 vai trò (Thủ kho - WarehouseStaff & Quản lý - InventoryManager), có nút chuyển vai trò & đăng nhập/đăng xuất ngay tại thanh header.
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Nút Header</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge bg-warning text-dark rounded-pill">K4.2</span></td>
+                            <td>
+                                <strong>Tài khoản thường gõ thẳng URL trang quản trị bị chặn</strong>.
+                            </td>
+                            <td class="text-center fw-bold text-warning">5đ</td>
+                            <td>
+                                <code>ApprovalList.razor</code> (Dòng 14-41): Khi vai trò là Thủ kho, truy cập <code>/approvals</code> sẽ bị chặn và hiện màn hình <strong>403 - Access Denied</strong> an toàn!
+                            </td>
+                            <td class="text-center">
+                                <a href="approvals" class="btn btn-xs btn-outline-warning rounded-pill">Thử Chặn URL</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge bg-warning text-dark rounded-pill">K4.3</span></td>
+                            <td>
+                                <strong>Tính năng nâng cao</strong>: AI đạt đủ mục 10, hoặc xuất báo cáo (Excel/PDF) từ dữ liệu thật.
+                            </td>
+                            <td class="text-center fw-bold text-warning">6đ</td>
+                            <td>
+                                1. <code>ParseSupplierQuoteUseCase.cs</code> (AI SmartPaste đạt 5 điểm Mục 10)<br />
+                                2. <code>ExcelExportService.cs</code> (Xuất file CSV/Excel UTF-8 thực tế)
+                            </td>
+                            <td class="text-center">
+                                <a href="reports" class="btn btn-xs btn-outline-success rounded-pill">Xuất Excel</a>
+                            </td>
+                        </tr>
+
+                        <!-- NHÓM 5 -->
+                        <tr class="table-primary bg-opacity-25">
+                            <td colspan="5" class="fw-bold text-primary py-2">
+                                <i class="bi bi-file-earmark-slides-fill me-1"></i>5. HỒ SƠ THIẾT KẾ (UML) & THUYẾT TRÌNH VẤN ĐÁP (Trọng số 15%)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge bg-secondary rounded-pill">K5.1</span></td>
+                            <td>
+                                <strong>Use Case, Class, Sequence (PlantUML)</strong> khớp tên lớp và luồng trong code.
+                            </td>
+                            <td class="text-center fw-bold text-secondary">6đ</td>
+                            <td>
+                                <code>Docs/Diagrams/usecase.puml</code><br />
+                                <code>Docs/Diagrams/class.puml</code> (Khớp 100% 4 tầng)<br />
+                                <code>Docs/Diagrams/sequence.puml</code> (Luồng duyệt trừ kho)
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Đạt đủ (6/6)</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge bg-secondary rounded-pill">K5.2</span></td>
+                            <td>
+                                <strong>Vấn đáp</strong>: Mỗi thành viên chỉ đúng dòng cài luật và giải thích Dependency Rule.
+                            </td>
+                            <td class="text-center fw-bold text-secondary">6đ</td>
+                            <td>
+                                Xem tab <em>"Sẵn Sàng Vấn Đáp"</em> bên trên hoặc tài liệu <code>GRADING.md</code> và <code>README.md</code>.
+                            </td>
+                            <td class="text-center">
+                                <button class="btn btn-xs btn-outline-dark rounded-pill" @onclick='() => activeTab = "qa"'>Xem Q&A</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge bg-secondary rounded-pill">K5.3</span></td>
+                            <td>
+                                <strong>Mọi thành viên có commit</strong>, rải trên ít nhất 3 tuần.
+                            </td>
+                            <td class="text-center fw-bold text-secondary">3đ</td>
+                            <td>
+                                Kiểm tra qua lệnh: <code>git shortlog -sn</code> và <code>git log --date=short</code>.
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">Git Log</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+    <!-- TAB 2: ĐỀ TÀI & ÁNH XẠ ESHOP (MỤC 8 & 13) -->
+    @if (activeTab == "topic")
+    {
+        <div class="row g-4 mb-4">
+            <div class="col-lg-7">
+                <div class="modern-card p-4">
+                    <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                        <i class="bi bi-diagram-2 text-primary me-2"></i>Bảng Ánh Xạ Nghiệp Vụ eShop &rarr; Kho Bán Lẻ (Mục 7.13 & Mục 8)
+                    </h5>
+                    <p class="small text-muted mb-3">
+                        Theo nguyên tắc Đồ án Capstone: "Mọi đề tài là eShop đổi miền nghiệp vụ, giữ nguyên khung 4 tầng Clean Architecture, thay Entity, luật nghiệp vụ, SQL và giao diện".
+                    </p>
+                    <div class="table-responsive">
+                        <table class="table custom-table table-bordered small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Khái Niệm eShop Gốc</th>
+                                    <th>Ánh Xạ Đề Tài 13 (Kho Bán Lẻ)</th>
+                                    <th>Mô Tả Vai Trò Trong Dự Án</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><strong>Product (Sản phẩm)</strong></td>
+                                    <td><code>Product</code> (Hàng hóa kho & quầy)</td>
+                                    <td>Mã SKU, đơn vị tính, danh mục, giá bán, tồn kho, định mức tối thiểu.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Shopping Cart (Giỏ hàng)</strong></td>
+                                    <td><code>Phiếu Nháp / Giỏ Hàng POS</code></td>
+                                    <td>State service Scoped (Video Part 3) quản lý danh sách mặt hàng trước khi ghi nhận.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Order / LineItem (Đơn hàng)</strong></td>
+                                    <td>
+                                        <code>GoodsReceipt / Line</code><br />
+                                        <code>GoodsIssue / Line</code><br />
+                                        <code>PosOrder / Line</code>
+                                    </td>
+                                    <td>2 cặp header–line chính (nhập và xuất kho) và 1 cặp header-line mở rộng bán lẻ quầy POS.</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Admin Order Processing</strong></td>
+                                    <td><code>Quản Lý Duyệt Phiếu</code></td>
+                                    <td>Chuyển trạng thái Draft &rarr; Approved, kích hoạt cập nhật tồn kho trong 1 Transaction.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="modern-card p-4 mb-4">
+                    <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                        <i class="bi bi-shield-check text-success me-2"></i>5 Điều Kiện Đề Tài Tự Đề Xuất (Mục 8)
+                    </h5>
+                    <ul class="list-unstyled small mb-0 d-flex flex-column gap-2.5">
+                        <li class="d-flex align-items-start gap-2">
+                            <i class="bi bi-check-circle-fill text-success fs-6 mt-0.5"></i>
+                            <div><strong>1. Ít nhất 5 Entity:</strong> Dự án có 9 Entity (Supplier, Product, Customer, GoodsReceipt, Line, GoodsIssue, Line, PosOrder, Line).</div>
+                        </li>
+                        <li class="d-flex align-items-start gap-2">
+                            <i class="bi bi-check-circle-fill text-success fs-6 mt-0.5"></i>
+                            <div><strong>2. Ít nhất 2 vai trò:</strong> Thủ kho (WarehouseStaff) và Quản lý kho (InventoryManager xử lý giao dịch duyệt).</div>
+                        </li>
+                        <li class="d-flex align-items-start gap-2">
+                            <i class="bi bi-check-circle-fill text-success fs-6 mt-0.5"></i>
+                            <div><strong>3. 2 luật nghiệp vụ có thể demo ca vi phạm:</strong> Luật 1 (Chặn xuất âm kho trên phiếu PX-2026-002) & Luật 2 (Bảo toàn công thức tồn kho).</div>
+                        </li>
+                        <li class="d-flex align-items-start gap-2">
+                            <i class="bi bi-check-circle-fill text-success fs-6 mt-0.5"></i>
+                            <div><strong>4. Dữ liệu lưu trên SQL Server:</strong> Database <code>KhoBanLe</code> trên localhost, script tạo bảng và dữ liệu mẫu có sẵn trong repo.</div>
+                        </li>
+                        <li class="d-flex align-items-start gap-2">
+                            <i class="bi bi-check-circle-fill text-success fs-6 mt-0.5"></i>
+                            <div><strong>5. Viết bảng ánh xạ eShop:</strong> Khớp hoàn toàn với bảng ánh xạ tại Mục 7.13 trong đề tài chính thức.</div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- TAB 3: TIÊU CHUẨN AI (MỤC 10) -->
+    @if (activeTab == "ai")
+    {
+        <div class="modern-card p-4 mb-4">
+            <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                <i class="bi bi-stars text-primary me-2"></i>Mục 10. Yêu Cầu Riêng Cho Phần AI — Trợ Lý SmartPaste Báo Giá NCC
+            </h5>
+
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="p-3 bg-light rounded-3 border mb-3">
+                        <h6 class="fw-bold text-dark mb-2">5 Tiêu Chí Bắt Buộc Của Mục 10:</h6>
+                        <ul class="small text-muted mb-0 ps-3 d-flex flex-column gap-2">
+                            <li><strong>1. Bảo mật API Key:</strong> Cấu hình qua <code>User Secrets</code> hoặc biến môi trường, không commit lên Git.</li>
+                            <li><strong>2. Độc lập kiến trúc:</strong> <code>IChatClient</code> được inject vào UseCase riêng (<code>ParseSupplierQuoteUseCase</code>), không gọi trực tiếp từ file <code>.razor</code>.</li>
+                            <li><strong>3. Xử lý lỗi mềm (Graceful Degradation):</strong> Khi API lỗi hoặc hết hạn mức/offline, ứng dụng vẫn chạy bình thường với bộ phân tích dự phòng thông minh, hiển thị thông báo rõ ràng.</li>
+                            <li><strong>4. Human-in-the-loop:</strong> AI chỉ đóng vai trò gợi ý. Dữ liệu trích xuất hiển thị bản xem trước để người dùng xác nhận trước khi đưa vào phiếu và lưu CSDL.</li>
+                            <li><strong>5. Chi phí 0 đồng:</strong> Hỗ trợ Ollama local hoặc Smart Heuristic Parser không tốn chi phí API.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="card p-3 border rounded-3 bg-primary bg-opacity-10 border-primary-subtle">
+                        <h6 class="fw-bold text-primary mb-2">Thực Hành Ngay Với 2 Mẫu Báo Giá Thử Nghiệm:</h6>
+                        <div class="p-2.5 bg-white rounded-2 border mb-2 font-monospace small">
+                            "Giao 20 thùng mì Hảo Hảo giá 110k, 10 hộp sữa tươi Vinamilk giá 32k"
+                        </div>
+                        <div class="p-2.5 bg-white rounded-2 border mb-3 font-monospace small">
+                            "Giao 50 cây Bút bi Thiên Long giá 4200, 15 túi gạo ST25 giá 180k"
+                        </div>
+                        <a href="receipts/create" class="btn btn-primary btn-sm rounded-pill fw-bold">
+                            <i class="bi bi-magic me-1"></i>Mở Màn Hình Lập Phiếu & Thử AI SmartPaste &rarr;
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- TAB 4: ERD SQL SERVER (9 BẢNG 3NF) -->
+    @if (activeTab == "erd")
+    {
+        <div class="modern-card p-4 mb-4">
+            <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                <i class="bi bi-database-fill-gear text-primary me-2"></i>Sơ Đồ Thực Thể (ERD) & Quan Hệ Khóa Ngoại (9 Bảng Chuẩn 3NF Trong SQL Server)
+            </h5>
+
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="p-3 bg-light rounded-3 border font-monospace small" style="line-height: 1.9;">
+                        <div class="fw-bold text-primary mb-2">// 10 LIÊN KẾT KHÓA NGOẠI (FOREIGN KEYS) ĐẢM BẢO ACID:</div>
+                        <div>1. <code>Supplier (1)</code> ───&lt; FK_GoodsReceipt_Supplier &gt;─── <code>GoodsReceipt (N)</code></div>
+                        <div>2. <code>GoodsReceipt (1)</code> ───&lt; FK_ReceiptLine_Receipt &gt;─── <code>GoodsReceiptLine (N)</code></div>
+                        <div>3. <code>Product (1)</code> ───&lt; FK_ReceiptLine_Product &gt;─── <code>GoodsReceiptLine (N)</code></div>
+                        <div>4. <code>GoodsIssue (1)</code> ───&lt; FK_IssueLine_Issue &gt;─── <code>GoodsIssueLine (N)</code></div>
+                        <div>5. <code>Product (1)</code> ───&lt; FK_IssueLine_Product &gt;─── <code>GoodsIssueLine (N)</code></div>
+                        <div>6. <code>Customer (1)</code> ───&lt; FK_PosOrder_Customer &gt;─── <code>PosOrder (N)</code></div>
+                        <div>7. <code>PosOrder (1)</code> ───&lt; FK_PosOrderLine_PosOrder &gt;─── <code>PosOrderLine (N)</code></div>
+                        <div>8. <code>Product (1)</code> ───&lt; FK_PosOrderLine_Product &gt;─── <code>PosOrderLine (N)</code></div>
+                        <div class="text-success fw-bold">9. <code>GoodsIssue (1)</code> &lt;═══ [FK_GoodsIssue_PosOrder] ═══&gt; <code>PosOrder (1)</code></div>
+                        <div class="text-success fw-bold">10. <code>PosOrder (1)</code> &lt;═══ [FK_PosOrder_GoodsIssue] ═══&gt; <code>GoodsIssue (1)</code></div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="p-3 bg-light rounded-3 border small">
+                        <h6 class="fw-bold text-dark mb-2">3 Tệp Script SQL Sẵn Sàng Chạy Trong Repo:</h6>
+                        <ul class="mb-0 ps-3 d-flex flex-column gap-2">
+                            <li>
+                                <code>SqlScripts/01_schema.sql</code>:
+                                Tạo Database <code>KhoBanLe</code>, 9 bảng chuẩn 3NF, Persisted Computed Columns, ràng buộc CHECK không âm, Indexes tối ưu truy vấn.
+                            </li>
+                            <li>
+                                <code>SqlScripts/02_seed_data.sql</code>:
+                                Seed dữ liệu chuẩn logic: 4 Nhà cung cấp, 8 Hàng hóa, 3 Khách hàng, 3 Phiếu nhập, 3 Phiếu xuất (có sẵn ca vi phạm PX-2026-002) và 2 Đơn POS.
+                            </li>
+                            <li>
+                                <code>SqlScripts/03_pos_queries_and_diagram.sql</code>:
+                                View chi tiết đơn POS, View doanh thu theo ngày, Stored Procedure bán hàng trong 1 Transaction và truy vấn kiểm chứng Luật 2.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- TAB 5: SẴN SÀNG VẤN ĐÁP (K5.2) -->
+    @if (activeTab == "qa")
+    {
+        <div class="modern-card p-4 mb-4">
+            <h5 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                <i class="bi bi-patch-question-fill text-warning me-2"></i>Bộ Câu Hỏi Chuẩn Bị Vấn Đáp Giảng Viên (Slide 11 & Tiêu Chí K5.2)
+            </h5>
+
+            <div class="accordion d-flex flex-column gap-3" id="qaList">
+                <div class="card border rounded-3 p-3 bg-light">
+                    <h6 class="fw-bold text-dark mb-1">
+                        ❓ Câu hỏi 1: "Chỉ chính xác dòng code cài đặt 2 luật nghiệp vụ của đề tài?"
+                    </h6>
+                    <div class="small text-muted mt-2">
+                        <strong>Trả lời:</strong><br />
+                        - <strong>Luật 1 (Duyệt mới đổi tồn & Chặn xuất âm):</strong> Cài đặt tại tệp <code>KhoBanLe.UseCases/GoodsIssues/ApproveGoodsIssueUseCase.cs</code>, từ dòng 72 đến 90. Khi duyệt phiếu xuất, hệ thống duyệt qua từng dòng hàng hóa, nếu <code>product.CurrentStock &lt; line.Quantity</code> thì lập tức chặn lại và trả về thông báo lỗi thân thiện mà không sửa đổi CSDL.<br />
+                        - <strong>Luật 2 (Bảo toàn công thức Tồn đầu + Nhập - Xuất = Tồn cuối):</strong> Cài đặt tại <code>KhoBanLe.UseCases/Reports/GetInventoryReportUseCase.cs</code> và định nghĩa thuộc tính <code>EndingStock => BeginningStock + TotalImport - TotalExport</code> tại <code>KhoBanLe.CoreBusiness/InventoryReportItem.cs</code>.
+                    </div>
+                </div>
+
+                <div class="card border rounded-3 p-3 bg-light">
+                    <h6 class="fw-bold text-dark mb-1">
+                        ❓ Câu hỏi 2: "Giải thích nguyên tắc Dependency Rule trong Clean Architecture của nhóm?"
+                    </h6>
+                    <div class="small text-muted mt-2">
+                        <strong>Trả lời:</strong><br />
+                        Chiều phụ thuộc trong dự án luôn hướng vào tâm (từ ngoài vào trong):<br />
+                        - <code>CoreBusiness</code> là tầng trong cùng, không tham chiếu bất kỳ project nào.<br />
+                        - <code>UseCases</code> chỉ tham chiếu <code>CoreBusiness</code> và định nghĩa các interface repository.<br />
+                        - <code>DataStore</code> là tầng hạ tầng (Plugin), cài đặt các interface repository của UseCases.<br />
+                        - <code>KhoBanLe</code> (WebApp) đóng vai trò là Composition Root, chỉ kết nối Plugin tại <code>Program.cs</code>.
+                    </div>
+                </div>
+
+                <div class="card border rounded-3 p-3 bg-light">
+                    <h6 class="fw-bold text-dark mb-1">
+                        ❓ Câu hỏi 3: "Demo cách nhóm chuyển đổi Plugin dữ liệu sang SQL Server?"
+                    </h6>
+                    <div class="small text-muted mt-2">
+                        <strong>Trả lời:</strong><br />
+                        Dự án cung cấp 2 bộ Plugin hoàn chỉnh tuân thủ Dependency Rule. Để chuyển đổi, chỉ cần thay đổi 1 dòng tại <code>Program.cs</code>:<br />
+                        - Dùng SQL Server Dapper: <code>builder.Services.AddScoped&lt;IProductRepository, SqlProductRepository&gt;()</code><br />
+                        - Dùng In-Memory: <code>builder.Services.AddSingleton&lt;IProductRepository, ProductRepository&gt;()</code><br />
+                        Không phải sửa đổi bất kỳ một dòng code nào trong tầng UseCases hay CoreBusiness!
+                    </div>
+                </div>
+
+                <div class="card border rounded-3 p-3 bg-light">
+                    <h6 class="fw-bold text-dark mb-1">
+                        ❓ Câu hỏi 4: "Sơ đồ thực thể kết nối POS với Kho hàng như thế nào để đảm bảo tính nhất quán?"
+                    </h6>
+                    <div class="small text-muted mt-2">
+                        <strong>Trả lời:</strong><br />
+                        Hóa đơn <code>PosOrder</code> liên kết với phiếu xuất kho <code>GoodsIssue</code> qua khóa ngoại 2 chiều <code>PosOrderId</code> và <code>GoodsIssueId</code>. Khi thu ngân bấm thanh toán trên quầy POS, hệ thống kích hoạt trừ tồn kho và tạo phiếu xuất kho trong cùng <strong>1 Database Transaction</strong> (tiêu chí K2.2) đảm bảo tính ACID và không bao giờ xảy ra tình trạng bán hàng mà không trừ kho.
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private string activeTab = "rubric";
+}

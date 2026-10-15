@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\KhoBanLe.CoreBusiness\KhoBanLe.CoreBusiness.csproj" />
+    <ProjectReference Include="..\KhoBanLe.UseCases\KhoBanLe.UseCases.csproj" />
+    <ProjectReference Include="..\KhoBanLe.DataStore.HardCoded\KhoBanLe.DataStore.HardCoded.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>
