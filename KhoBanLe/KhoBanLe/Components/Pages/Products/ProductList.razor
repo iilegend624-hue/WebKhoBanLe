@@ -10,7 +10,7 @@
 @inject NavigationManager Nav
 @implements IDisposable
 
-<PageTitle>Danh Sách Tất Cả Giao Diện & Hàng Hóa - KhoBanLe</PageTitle>
+<PageTitle>Danh Mục Hàng Hóa Bán Lẻ & Tồn Kho - KhoBanLe</PageTitle>
 
 <!-- Toast Thông Báo Thêm Vào Giỏ Hàng -->
 @if (showToast)
@@ -32,12 +32,12 @@
     </div>
 }
 
-<!-- SAPO STYLE HERO BANNER -->
+<!-- RETAIL SUPERMARKET HERO BANNER -->
 <div class="sapo-hero-banner">
     <div class="container-fluid px-3 px-xl-4">
-        <h1 class="sapo-hero-title">Danh sách tất cả giao diện</h1>
+        <h1 class="sapo-hero-title">Kho Hàng Bán Lẻ & Siêu Thị Tiện Lợi</h1>
         <p class="sapo-hero-subtitle">
-            Hơn 400 mẫu giao diện web chuẩn SEO, tùy biến dễ dàng, phù hợp với mọi ngành hàng
+            Quản lý hơn 30 mặt hàng bán lẻ thiết yếu, đồng bộ tồn kho thực tế với SQL Server & bán hàng trực tiếp tại quầy POS
         </p>
     </div>
 </div>
@@ -99,32 +99,32 @@
                             <span>Tất cả mức giá</span>
                         </div>
                     </button>
-                    <button type="button" class="sapo-cat-item @(priceFilter == "under_100k" ? "active" : "")"
-                            @onclick='() => FilterByPriceRange("under_100k")'>
+                    <button type="button" class="sapo-cat-item @(priceFilter == "under_20k" ? "active" : "")"
+                            @onclick='() => FilterByPriceRange("under_20k")'>
                         <div class="d-flex align-items-center">
                             <span class="sapo-radio-bullet"></span>
-                            <span>Dưới 100.000 đ</span>
+                            <span>Dưới 20.000 đ</span>
                         </div>
                     </button>
-                    <button type="button" class="sapo-cat-item @(priceFilter == "100k_500k" ? "active" : "")"
-                            @onclick='() => FilterByPriceRange("100k_500k")'>
+                    <button type="button" class="sapo-cat-item @(priceFilter == "20k_50k" ? "active" : "")"
+                            @onclick='() => FilterByPriceRange("20k_50k")'>
                         <div class="d-flex align-items-center">
                             <span class="sapo-radio-bullet"></span>
-                            <span>100k - 500k</span>
+                            <span>20k - 50.000 đ</span>
                         </div>
                     </button>
-                    <button type="button" class="sapo-cat-item @(priceFilter == "500k_1m" ? "active" : "")"
-                            @onclick='() => FilterByPriceRange("500k_1m")'>
+                    <button type="button" class="sapo-cat-item @(priceFilter == "50k_100k" ? "active" : "")"
+                            @onclick='() => FilterByPriceRange("50k_100k")'>
                         <div class="d-flex align-items-center">
                             <span class="sapo-radio-bullet"></span>
-                            <span>500k - 1 triệu</span>
+                            <span>50k - 100.000 đ</span>
                         </div>
                     </button>
-                    <button type="button" class="sapo-cat-item @(priceFilter == "above_1m" ? "active" : "")"
-                            @onclick='() => FilterByPriceRange("above_1m")'>
+                    <button type="button" class="sapo-cat-item @(priceFilter == "above_100k" ? "active" : "")"
+                            @onclick='() => FilterByPriceRange("above_100k")'>
                         <div class="d-flex align-items-center">
                             <span class="sapo-radio-bullet"></span>
-                            <span>Trên 1 triệu</span>
+                            <span>Trên 100.000 đ</span>
                         </div>
                     </button>
                 </div>
@@ -190,7 +190,7 @@
                                               OnSearch="ApplyFilters"
                                               OnClear="ClearSearch"
                                               ShowCategoryFilter="false"
-                                              Placeholder="Tìm kiếm giao diện, mã SKU, tên hàng hóa..." />
+                                              Placeholder="Tìm kiếm mã SKU, tên hàng hóa bán lẻ..." />
                         </div>
                         <span class="small text-muted fw-semibold ps-1">
                             (@filteredProducts.Count sản phẩm)
@@ -263,9 +263,9 @@
                                 <div class="sapo-product-card">
                                     <!-- Image Preview with Badges -->
                                     <div class="sapo-card-image">
-                                        <img src="@(string.IsNullOrEmpty(p.ImageUrl) ? "favicon.png" : p.ImageUrl)" 
+                                        <img src="@(string.IsNullOrEmpty(p.ImageUrl) ? "images/default-product.svg" : p.ImageUrl)" 
                                              alt="@p.Name" 
-                                             onerror="this.src='favicon.png'" />
+                                             onerror="this.src='images/default-product.svg'" />
                                         
                                         <!-- Category Badge -->
                                         <div class="position-absolute top-0 start-0 m-2.5">
@@ -307,7 +307,7 @@
                                         <div class="sapo-card-actions">
                                             <!-- Nút XEM THỬ (Solid Green Pill Button) -->
                                             <button type="button" class="btn-sapo-preview"
-                                                    @onclick="() => OpenLivePreview(p)" title="Xem thử mẫu giao diện và sản phẩm">
+                                                    @onclick="() => OpenLivePreview(p)" title="Xem chi tiết và thông số sản phẩm">
                                                 Xem thử
                                             </button>
 
@@ -366,7 +366,7 @@
                 {
                     <div class="sapo-sidebar-box p-5 text-center text-muted mb-4">
                         <i class="bi bi-search fs-1 text-secondary d-block mb-2"></i>
-                        <h5 class="fw-bold text-dark">Không tìm thấy giao diện hoặc hàng hóa nào!</h5>
+                        <h5 class="fw-bold text-dark">Không tìm thấy hàng hóa nào!</h5>
                         <p class="small text-muted mb-3">Thử thay đổi từ khóa tìm kiếm hoặc điều chỉnh khoảng giá, danh mục.</p>
                         <button type="button" class="btn btn-primary rounded-pill px-4" @onclick="ClearSearch">
                             Xem tất cả sản phẩm
@@ -398,10 +398,12 @@
                                 {
                                     <tr>
                                         <td class="ps-3" data-label="Hình ảnh">
-                                            <img src="@(string.IsNullOrEmpty(p.ImageUrl) ? "favicon.png" : p.ImageUrl)" 
-                                                 alt="@p.Name" class="rounded-3 shadow-xs" 
-                                                 style="width: 48px; height: 48px; object-fit: cover;" 
-                                                 onerror="this.src='favicon.png'" />
+                                            <div class="rounded-3 border shadow-xs d-flex align-items-center justify-content-center p-1" style="width: 48px; height: 48px; background: #ffffff;">
+                                                <img src="@(string.IsNullOrEmpty(p.ImageUrl) ? "images/default-product.svg" : p.ImageUrl)" 
+                                                     alt="@p.Name" 
+                                                     style="max-width: 100%; max-height: 100%; object-fit: contain;" 
+                                                     onerror="this.src='images/default-product.svg'" />
+                                            </div>
                                         </td>
                                         <td data-label="Mã SKU">
                                             <span class="badge bg-light text-dark border fw-bold">@p.Sku</span>
@@ -499,9 +501,10 @@
                             <!-- Hero inside preview -->
                             <div class="row g-4 align-items-center mb-4">
                                 <div class="col-12 col-md-6">
-                                    <div class="rounded-4 overflow-hidden border shadow-sm position-relative">
-                                        <img src="@(string.IsNullOrEmpty(previewProduct.ImageUrl) ? "favicon.png" : previewProduct.ImageUrl)" 
-                                             alt="@previewProduct.Name" class="w-100 h-auto" style="max-height: 360px; object-fit: cover;" />
+                                    <div class="rounded-4 overflow-hidden border shadow-sm position-relative text-center p-3" style="background: #ffffff;">
+                                        <img src="@(string.IsNullOrEmpty(previewProduct.ImageUrl) ? "images/default-product.svg" : previewProduct.ImageUrl)" 
+                                             alt="@previewProduct.Name" class="w-100 h-auto" style="max-height: 320px; object-fit: contain;" 
+                                             onerror="this.src='images/default-product.svg'" />
                                         <div class="position-absolute top-0 start-0 m-2">
                                             <span class="badge bg-success rounded-pill px-2.5 py-1 fw-bold">
                                                 <i class="bi bi-patch-check-fill me-1"></i>Chuẩn SEO 100%
@@ -584,7 +587,7 @@
                 <div class="modal-header bg-success text-white py-3 px-4">
                     <h5 class="modal-title fw-bold">
                         <i class="bi @(isEditMode ? "bi-pencil-square" : "bi-plus-circle") me-2"></i>
-                        @(isEditMode ? $"Chỉnh Sửa Hàng Hóa: {modalProduct.Name}" : "Thêm Hàng Hóa / Giao Diện Mới")
+                        @(isEditMode ? $"Chỉnh Sửa Hàng Hóa: {modalProduct.Name}" : "Thêm Hàng Hóa Mới")
                     </h5>
                     <button type="button" class="btn-close btn-close-white" @onclick="CloseModal"></button>
                 </div>
@@ -599,7 +602,7 @@
                                 <ValidationMessage For="@(() => modalProduct.Sku)" class="text-danger small" />
                             </div>
                             <div class="col-md-8">
-                                <label class="form-label small fw-bold">Tên Hàng Hóa / Giao Diện *</label>
+                                <label class="form-label small fw-bold">Tên Hàng Hóa *</label>
                                 <InputText class="form-control" @bind-Value="modalProduct.Name" placeholder="Tên sản phẩm đầy đủ" />
                                 <ValidationMessage For="@(() => modalProduct.Name)" class="text-danger small" />
                             </div>
@@ -641,29 +644,33 @@
                                 <div class="d-flex flex-wrap gap-2 mt-2 align-items-center">
                                     <span class="small text-muted">Chọn ảnh nhanh:</span>
                                     <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill"
-                                            @onclick='() => modalProduct.ImageUrl = "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600"'>
-                                        Đồng hồ
+                                            @onclick='() => modalProduct.ImageUrl = "images/products/coca-cola.png"'>
+                                        Nước ngọt (Coca-Cola)
                                     </button>
                                     <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill"
-                                            @onclick='() => modalProduct.ImageUrl = "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=600"'>
-                                        Thể thao
+                                            @onclick='() => modalProduct.ImageUrl = "images/products/lays.jpg"'>
+                                        Bánh snack (Lay&#39;s)
                                     </button>
                                     <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill"
-                                            @onclick='() => modalProduct.ImageUrl = "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600"'>
-                                        Mỹ phẩm
+                                            @onclick='() => modalProduct.ImageUrl = "images/products/vinamilk.jpg"'>
+                                        Sữa tươi (Vinamilk)
                                     </button>
                                     <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill"
-                                            @onclick='() => modalProduct.ImageUrl = "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600"'>
-                                        Thực phẩm
+                                            @onclick='() => modalProduct.ImageUrl = "images/products/haohao.jpg"'>
+                                        Mì ăn liền (Hảo Hảo)
                                     </button>
                                     <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill"
-                                            @onclick='() => modalProduct.ImageUrl = "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=600"'>
-                                        Văn phòng
+                                            @onclick='() => modalProduct.ImageUrl = "images/products/omo.jpg"'>
+                                        Bột giặt (Omo)
+                                    </button>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill"
+                                            @onclick='() => modalProduct.ImageUrl = "images/products/chinsu.jpg"'>
+                                        Gia vị (Chinsu)
                                     </button>
                                 </div>
                             </div>
                             <div class="col-12">
-                                <label class="form-label small fw-bold">Mô Tả Sản Phẩm / Giao Diện</label>
+                                <label class="form-label small fw-bold">Mô Tả Hàng Hóa</label>
                                 <InputTextArea class="form-control" rows="2" @bind-Value="modalProduct.Description" placeholder="Mô tả chi tiết sản phẩm..." />
                             </div>
                         </div>
@@ -704,25 +711,16 @@
     private string stockFilter = "all";
     private string sortBy = "default";
 
-    // 16 Danh mục chuẩn từ ảnh chụp màn hình Sapo Store
+    // 6 Nhóm ngành hàng bán lẻ siêu thị & tiện lợi
     private readonly List<string> allCategories = new()
     {
         "Tất cả",
-        "Thời trang - Trang sức",
-        "Mỹ phẩm - Làm đẹp",
-        "Thực phẩm - Nhà hàng",
-        "Đồ gia dụng - Sinh hoạt",
-        "Nội thất - Trang trí",
-        "Sách - Văn phòng phẩm",
-        "Thủ công - Mỹ nghệ - Quà tặng",
-        "Công nghệ - Kỹ thuật số",
-        "Ô tô - Xe máy",
-        "Thiết bị điện",
-        "Thể thao - Dịch vụ",
-        "Khác",
-        "Khách sạn - Du lịch",
-        "Bất động sản - Xây dựng",
-        "Doanh nghiệp"
+        "Nước giải khát & Bia",
+        "Bánh kẹo & Đồ ăn vặt",
+        "Sữa & Chế phẩm sữa",
+        "Thực phẩm & Gia vị",
+        "Hóa mỹ phẩm & Đồ gia dụng",
+        "Văn phòng phẩm"
     };
 
     private Product? previewProduct = null;
@@ -778,11 +776,10 @@
         // Price range
         query = priceFilter switch
         {
-            "under_100k" => query.Where(p => p.Price < 100000),
-            "100k_500k" => query.Where(p => p.Price >= 100000 && p.Price <= 500000),
-            "500k_1m" => query.Where(p => p.Price > 500000 && p.Price <= 1000000),
-            "above_1m" => query.Where(p => p.Price > 1000000),
-            "under_1m" => query.Where(p => p.Price <= 1000000),
+            "under_20k" => query.Where(p => p.Price < 20000),
+            "20k_50k" => query.Where(p => p.Price >= 20000 && p.Price <= 50000),
+            "50k_100k" => query.Where(p => p.Price > 50000 && p.Price <= 100000),
+            "above_100k" => query.Where(p => p.Price > 100000),
             _ => query
         };
 
@@ -957,13 +954,13 @@
         isEditMode = false;
         modalProduct = new Product
         {
-            Sku = $"SP-{(allProducts.Count + 1):D3}",
-            Unit = "Cái",
-            Category = "Thời trang - Trang sức",
-            Price = 1800000,
-            CurrentStock = 10,
-            MinStockLevel = 5,
-            ImageUrl = "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600"
+            Sku = $"BL-{(allProducts.Count + 1):D3}",
+            Unit = "Lon",
+            Category = "Nước giải khát & Bia",
+            Price = 15000,
+            CurrentStock = 50,
+            MinStockLevel = 15,
+            ImageUrl = "https://images.unsplash.com/photo-1554866585-cd94860890b7?w=400"
         };
         showModal = true;
     }

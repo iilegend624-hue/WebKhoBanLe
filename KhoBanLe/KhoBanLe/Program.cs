@@ -76,6 +76,7 @@ namespace KhoBanLe
             builder.Services.AddTransient<KhoBanLe.UseCases.Pos.IGetPosOrdersUseCase, KhoBanLe.UseCases.Pos.GetPosOrdersUseCase>();
             builder.Services.AddTransient<KhoBanLe.UseCases.Pos.IViewPosOrderUseCase, KhoBanLe.UseCases.Pos.ViewPosOrderUseCase>();
             builder.Services.AddTransient<KhoBanLe.UseCases.Pos.ICreatePosOrderUseCase, KhoBanLe.UseCases.Pos.CreatePosOrderUseCase>();
+            builder.Services.AddTransient<KhoBanLe.UseCases.Pos.ICancelPosOrderUseCase, KhoBanLe.UseCases.Pos.CancelPosOrderUseCase>();
 
             // Goods Receipts (Phiếu Nhập)
             builder.Services.AddTransient<ICreateGoodsReceiptUseCase, CreateGoodsReceiptUseCase>();

@@ -68,4 +68,24 @@ namespace KhoBanLe.UseCases.Pos
             return await _posOrderRepository.CreatePosOrderAsync(order);
         }
     }
+
+    public interface ICancelPosOrderUseCase
+    {
+        Task<bool> ExecuteAsync(int id, string reason = "");
+    }
+
+    public class CancelPosOrderUseCase : ICancelPosOrderUseCase
+    {
+        private readonly IPosOrderRepository _posOrderRepository;
+
+        public CancelPosOrderUseCase(IPosOrderRepository posOrderRepository)
+        {
+            _posOrderRepository = posOrderRepository;
+        }
+
+        public async Task<bool> ExecuteAsync(int id, string reason = "")
+        {
+            return await _posOrderRepository.CancelPosOrderAsync(id, reason);
+        }
+    }
 }

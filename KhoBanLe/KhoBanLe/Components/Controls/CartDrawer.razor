@@ -48,11 +48,12 @@
                         <div class="cart-item-card p-2.5 rounded-3 border bg-white shadow-xs">
                             <div class="d-flex gap-2.5 align-items-center">
                                 <!-- Thumbnail -->
-                                <div class="rounded-2 overflow-hidden border flex-shrink-0" style="width: 58px; height: 58px; background: #f8fafc;">
-                                    <img src="@(string.IsNullOrEmpty(item.Product?.ImageUrl) ? "favicon.png" : item.Product.ImageUrl)" 
+                                <div class="rounded-2 overflow-hidden border flex-shrink-0 d-flex align-items-center justify-content-center p-1" style="width: 58px; height: 58px; background: #ffffff;">
+                                    <img src="@(string.IsNullOrEmpty(item.Product?.ImageUrl) ? "images/default-product.svg" : item.Product.ImageUrl)" 
                                          alt="@item.Product?.Name" 
-                                         class="w-100 h-100 object-fit-cover" 
-                                         onerror="this.src='favicon.png'" />
+                                         class="w-100 h-100" 
+                                         style="object-fit: contain;" 
+                                         onerror="this.src='images/default-product.svg'" />
                                 </div>
 
                                 <!-- Info -->

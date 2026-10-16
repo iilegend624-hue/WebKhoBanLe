@@ -92,25 +92,35 @@ namespace KhoBanLe.DataStore.HardCoded.Sql
                 order.OrderDate = DateTime.Now;
                 order.Status = "Paid";
 
-                // 1. Tự động tạo Phiếu xuất kho bán lẻ (GoodsIssue) trong cùng Transaction để trừ kho
-                string issueNumber = $"PX-POS-{DateTime.Now:yyyyMMdd-HHmmss}";
-                const string insertIssueSql = @"
-                    INSERT INTO dbo.GoodsIssue (IssueNumber, CustomerOrDepartment, IssueDate, CreatedBy, ApprovedBy, ApprovedDate, Status, Note)
-                    VALUES (@IssueNumber, @CustomerOrDepartment, @IssueDate, @CreatedBy, @ApprovedBy, @ApprovedDate, 1, @Note);
-                    SELECT CAST(SCOPE_IDENTITY() as int);";
+                int issueId = 0;
+                bool needCreateIssue = (!order.GoodsIssueId.HasValue || order.GoodsIssueId.Value == 0);
 
-                int issueId = await connection.ExecuteScalarAsync<int>(insertIssueSql, new
+                if (needCreateIssue)
                 {
-                    IssueNumber = issueNumber,
-                    CustomerOrDepartment = order.CustomerName,
-                    IssueDate = order.OrderDate,
-                    CreatedBy = order.CashierName,
-                    ApprovedBy = "Hệ thống POS",
-                    ApprovedDate = order.OrderDate,
-                    Note = $"Tự động xuất kho từ đơn bán lẻ {order.OrderNumber}"
-                }, transaction);
+                    // 1. Tự động tạo Phiếu xuất kho bán lẻ (GoodsIssue) trong cùng Transaction để trừ kho
+                    string issueNumber = $"PX-POS-{DateTime.Now:yyyyMMdd-HHmmss}";
+                    const string insertIssueSql = @"
+                        INSERT INTO dbo.GoodsIssue (IssueNumber, CustomerOrDepartment, IssueDate, CreatedBy, ApprovedBy, ApprovedDate, Status, Note)
+                        VALUES (@IssueNumber, @CustomerOrDepartment, @IssueDate, @CreatedBy, @ApprovedBy, @ApprovedDate, 1, @Note);
+                        SELECT CAST(SCOPE_IDENTITY() as int);";
 
-                order.GoodsIssueId = issueId;
+                    issueId = await connection.ExecuteScalarAsync<int>(insertIssueSql, new
+                    {
+                        IssueNumber = issueNumber,
+                        CustomerOrDepartment = order.CustomerName,
+                        IssueDate = order.OrderDate,
+                        CreatedBy = order.CashierName,
+                        ApprovedBy = "Hệ thống POS",
+                        ApprovedDate = order.OrderDate,
+                        Note = $"Tự động xuất kho từ đơn bán lẻ {order.OrderNumber}"
+                    }, transaction);
+
+                    order.GoodsIssueId = issueId;
+                }
+                else
+                {
+                    issueId = order.GoodsIssueId!.Value;
+                }
 
                 // 2. Insert PosOrder Header
                 const string insertOrderSql = @"
@@ -142,7 +152,7 @@ namespace KhoBanLe.DataStore.HardCoded.Sql
                 await connection.ExecuteAsync("UPDATE dbo.GoodsIssue SET PosOrderId = @PosOrderId WHERE Id = @IssueId;",
                     new { PosOrderId = orderId, IssueId = issueId }, transaction);
 
-                // 3. Insert PosOrderLine & GoodsIssueLine & Giảm tồn kho trong cùng Transaction
+                // 3. Insert PosOrderLine (& GoodsIssueLine & Giảm tồn kho nếu tự tạo Issue)
                 const string insertOrderLineSql = @"
                     INSERT INTO dbo.PosOrderLine (PosOrderId, ProductId, Quantity, UnitPrice)
                     VALUES (@PosOrderId, @ProductId, @Quantity, @UnitPrice);";
@@ -167,23 +177,89 @@ namespace KhoBanLe.DataStore.HardCoded.Sql
                         line.UnitPrice
                     }, transaction);
 
-                    await connection.ExecuteAsync(insertIssueLineSql, new
+                    if (needCreateIssue)
                     {
-                        GoodsIssueId = issueId,
-                        line.ProductId,
-                        line.Quantity,
-                        line.UnitPrice
-                    }, transaction);
+                        await connection.ExecuteAsync(insertIssueLineSql, new
+                        {
+                            GoodsIssueId = issueId,
+                            line.ProductId,
+                            line.Quantity,
+                            line.UnitPrice
+                        }, transaction);
 
-                    await connection.ExecuteAsync(updateStockSql, new
+                        await connection.ExecuteAsync(updateStockSql, new
+                        {
+                            line.Quantity,
+                            line.ProductId
+                        }, transaction);
+                    }
+                }
+
+                transaction.Commit();
+                return orderId;
+            }
+            catch
+            {
+                transaction.Rollback();
+                throw;
+            }
+        }
+
+        public async Task<bool> CancelPosOrderAsync(int id, string reason = "")
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            await connection.OpenAsync();
+
+            using var transaction = connection.BeginTransaction();
+            try
+            {
+                // Lấy đơn POS hiện tại
+                const string getOrderSql = "SELECT Id, GoodsIssueId, Status FROM dbo.PosOrder WHERE Id = @Id;";
+                var order = await connection.QueryFirstOrDefaultAsync<PosOrder>(getOrderSql, new { Id = id }, transaction);
+                if (order == null || order.Status == "Cancelled")
+                {
+                    return false;
+                }
+
+                // Cập nhật PosOrder Status = Cancelled
+                const string updateOrderSql = @"
+                    UPDATE dbo.PosOrder 
+                    SET Status = 'Cancelled',
+                        Note = CASE WHEN @Reason <> '' THEN ISNULL(Note, '') + ' [Hủy: ' + @Reason + ']' ELSE ISNULL(Note, '') + ' [Đã hủy]' END
+                    WHERE Id = @Id;";
+                await connection.ExecuteAsync(updateOrderSql, new { Id = id, Reason = reason }, transaction);
+
+                // Hoàn lại tồn kho cho các mặt hàng trong đơn
+                const string getLinesSql = "SELECT ProductId, Quantity FROM dbo.PosOrderLine WHERE PosOrderId = @Id;";
+                var lines = await connection.QueryAsync<(int ProductId, int Quantity)>(getLinesSql, new { Id = id }, transaction);
+
+                const string restoreStockSql = @"
+                    UPDATE dbo.Product
+                    SET CurrentStock = CurrentStock + @Quantity
+                    WHERE Id = @ProductId;";
+
+                foreach (var line in lines)
+                {
+                    await connection.ExecuteAsync(restoreStockSql, new
                     {
                         line.Quantity,
                         line.ProductId
                     }, transaction);
                 }
 
+                // Cập nhật trạng thái GoodsIssue liên kết nếu có
+                if (order.GoodsIssueId.HasValue && order.GoodsIssueId.Value > 0)
+                {
+                    const string updateIssueSql = @"
+                        UPDATE dbo.GoodsIssue
+                        SET Status = 2, -- Cancelled
+                            Note = ISNULL(Note, '') + ' [Đơn POS liên kết đã hủy]'
+                        WHERE Id = @IssueId;";
+                    await connection.ExecuteAsync(updateIssueSql, new { IssueId = order.GoodsIssueId.Value }, transaction);
+                }
+
                 transaction.Commit();
-                return orderId;
+                return true;
             }
             catch
             {

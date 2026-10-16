@@ -8,5 +8,6 @@ namespace KhoBanLe.UseCases.PluginInterfaces.DataStore
         Task<PosOrder?> GetPosOrderByIdAsync(int id);
         Task<PosOrder?> GetPosOrderByNumberAsync(string orderNumber);
         Task<int> CreatePosOrderAsync(PosOrder order);
+        Task<bool> CancelPosOrderAsync(int id, string reason = "");
     }
 }

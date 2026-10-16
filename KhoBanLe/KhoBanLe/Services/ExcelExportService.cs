@@ -67,6 +67,44 @@ namespace KhoBanLe.Services
             await DownloadFileAsync(fileName, bytes, "text/csv;charset=utf-8;");
         }
 
+        public async Task ExportSinglePosOrderToExcelAsync(PosOrder order, string? fileName = null)
+        {
+            fileName ??= $"HoaDon_{order.OrderNumber}.csv";
+            var sb = new StringBuilder();
+            sb.Append('\uFEFF');
+
+            sb.AppendLine("CỬA HÀNG BÁN LẺ & KHO TIỆN LỢI ECO");
+            sb.AppendLine("Địa chỉ: 120 Nguyễn Huệ, P. Bến Nghé, Quận 1, TP.HCM");
+            sb.AppendLine("Hotline: 1900 6868 - 0903 123 456");
+            sb.AppendLine($"HÓA ĐƠN BÁN LẺ POS:;\"{order.OrderNumber}\"");
+            sb.AppendLine($"Ngày lập:;\"{order.OrderDate:dd/MM/yyyy HH:mm:ss}\"");
+            sb.AppendLine($"Thu ngân:;\"{order.CashierName}\"");
+            sb.AppendLine($"Khách hàng:;\"{order.CustomerName}\"");
+            sb.AppendLine($"Phương thức thanh toán:;\"{order.PaymentMethod}\"");
+            sb.AppendLine($"Trạng thái:;\"{order.Status}\"");
+            sb.AppendLine();
+            sb.AppendLine("STT;Mã SKU;Tên sản phẩm;Đơn vị tính;Số lượng;Đơn giá (VNĐ);Thành tiền (VNĐ)");
+
+            int index = 1;
+            foreach (var line in order.Lines)
+            {
+                var sku = line.Product?.Sku ?? $"SKU-{line.ProductId}";
+                var name = line.Product?.Name ?? $"Mặt hàng #{line.ProductId}";
+                var unit = line.Product?.Unit ?? "Cái";
+                sb.AppendLine($"{index++};\"{sku}\";\"{name}\";\"{unit}\";{line.Quantity};{line.UnitPrice:N0};{line.LineTotal:N0}");
+            }
+
+            sb.AppendLine();
+            sb.AppendLine($";;;;Tạm tính:;{order.SubTotal:N0}");
+            sb.AppendLine($";;;;Giảm giá:;{order.DiscountAmount:N0}");
+            sb.AppendLine($";;;;TỔNG TIỀN THANH TOÁN:;{order.TotalAmount:N0}");
+            sb.AppendLine($";;;;Tiền khách đưa:;{order.ReceivedAmount:N0}");
+            sb.AppendLine($";;;;Tiền thối lại khách:;{order.ChangeAmount:N0}");
+
+            var bytes = Encoding.UTF8.GetBytes(sb.ToString());
+            await DownloadFileAsync(fileName, bytes, "text/csv;charset=utf-8;");
+        }
+
         private async Task DownloadFileAsync(string fileName, byte[] content, string contentType)
         {
             var base64 = Convert.ToBase64String(content);

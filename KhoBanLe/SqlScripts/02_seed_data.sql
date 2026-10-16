@@ -20,29 +20,38 @@ VALUES
 (N'NCC-AC', N'Công ty CP Acecook Việt Nam', N'028 3815 4064', N'info@acecookvietnam.com', N'Lô II-3, Đường số 11, KCN Tân Bình, P. Tây Thạnh, Tân Phú, TP.HCM', 1),
 (N'NCC-KO', N'Công ty TNHH NGK Coca-Cola Việt Nam', N'028 3896 1000', N'cskh@coca-cola.com.vn', N'Xa lộ Hà Nội, P. Linh Trung, TP. Thủ Đức, TP.HCM', 1);
 
--- 2. SEED DỮ LIỆU SẢN PHẨM (Product - Trùng khớp 100% ProductRepository.cs)
+-- 2. SEED DỮ LIỆU SẢN PHẨM BÁN LẺ (Product - Trùng khớp 100% ProductRepository.cs)
 INSERT INTO dbo.Product (Sku, Name, Unit, Category, Price, CurrentStock, MinStockLevel, Description, ImageUrl)
 VALUES
-(N'TL-01', N'Bút bi Thiên Long TL-027', N'Cái', N'Văn phòng phẩm', 5000, 5, 20, N'Bút bi Thiên Long mực xanh cao cấp ngòi 0.5mm êm trơn. (Dùng demo Luật 1: Tồn 5)', N'https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=300'),
-(N'HH-01', N'Mì Hảo Hảo Tôm chua cay (30 gói)', N'Thùng', N'Thực phẩm', 115000, 80, 25, N'Mì ăn liền Acecook Hảo Hảo vị Tôm chua cay truyền thống.', N'https://images.unsplash.com/photo-1612927601601-6638404737ce?w=300'),
-(N'VM-01', N'Sữa tươi tiệt trùng Vinamilk 100% 1L', N'Hộp', N'Sữa & Đồ uống', 34000, 35, 15, N'Sữa tươi tiệt trùng Vinamilk có đường 1 lít giàu canxi và vitamin.', N'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=300'),
-(N'CC-01', N'Nước ngọt Coca-Cola lon 330ml (24 lon)', N'Thùng', N'Sữa & Đồ uống', 210000, 50, 20, N'Nước giải khát có ga Coca-Cola sảng khoái.', N'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=300'),
-(N'ST25-05', N'Gạo thơm Sóc Trăng ST25 thượng hạng 5kg', N'Túi', N'Thực phẩm', 185000, 40, 10, N'Gạo ST25 gạo ngon nhất thế giới, hạt dài, dẻo thơm.', N'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=300'),
-(N'SP-01', N'Dầu ăn đậu nành Simply nguyên chất 1L', N'Chai', N'Thực phẩm', 58000, 30, 10, N'Dầu đậu nành nguyên chất 100% tốt cho tim mạch.', N'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=300'),
-(N'SL-01', N'Nước rửa chén Sunlight Chanh túi 750g', N'Túi', N'Hóa mỹ phẩm', 32000, 6, 15, N'Nước rửa chén sạch dầu mỡ (Cảnh báo sắp hết hàng: 6 < 15)', N'https://images.unsplash.com/photo-1585421514284-efb74c2b69ba?w=300'),
-(N'PP-01', N'Khăn giấy lụa cao cấp Pulppy 10 cuộn', N'Lốc', N'Đồ gia dụng - Sinh hoạt', 85000, 0, 10, N'Khăn giấy Pulppy mềm mại (Cảnh báo hết hàng: Tồn 0)', N'https://images.unsplash.com/photo-1584556812952-905ffd0c611a?w=300'),
-(N'EGO-HELIOS', N'Ego Helios', N'Gói', N'Thời trang - Trang sức', 1800000, 45, 10, N'Giao diện web bán hàng Thời trang & Đồng hồ cao cấp, phong cách sang trọng hiện đại.', N'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600'),
-(N'EGO-FITNESS', N'Ego Fitness', N'Gói', N'Thể thao - Dịch vụ', 1900000, 32, 8, N'Giao diện thể thao, phòng gym, thực phẩm thể hình năng động và bứt phá doanh số.', N'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=600'),
-(N'HER-COSMETIC', N'Her Cosmetic', N'Gói', N'Mỹ phẩm - Làm đẹp', 1840000, 50, 12, N'Giao diện mỹ phẩm, làm đẹp, spa sắc sảo và thanh lịch tối ưu tỷ lệ chuyển đổi.', N'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600'),
-(N'ORGANIC-FOOD', N'Thực Phẩm Hữu Cơ Giàu Dinh Dưỡng', N'Combo', N'Thực phẩm - Nhà hàng', 1200000, 28, 10, N'Giao diện cửa hàng thực phẩm sạch hữu cơ, rau củ quả tươi sống, chuẩn SEO.', N'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600'),
-(N'COZY-HOME', N'Nội Thất Cozy Home & Decor', N'Gói', N'Nội thất - Trang trí', 1500000, 20, 5, N'Mẫu giao diện nội thất gia đình, kiến trúc và trang trí nhà cửa cao cấp.', N'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600'),
-(N'SMART-TECH', N'SmartTech Điện Tử Số', N'Gói', N'Công nghệ - Kỹ thuật số', 2100000, 15, 5, N'Cửa hàng điện thoại, máy tính, linh kiện điện tử hiện đại và mạnh mẽ.', N'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600'),
-(N'NANO-LIGHT', N'Thiết Bị Điện Gia Đình NanoLight', N'Gói', N'Thiết bị điện', 1450000, 25, 8, N'Thiết bị chiếu sáng, điện dân dụng, giải pháp điện thông minh.', N'https://images.unsplash.com/photo-1558002038-1055907df827?w=600'),
-(N'AUTO-PRO', N'Phụ Kiện Ô Tô - Xe Máy Sport', N'Gói', N'Ô tô - Xe máy', 2500000, 18, 5, N'Giao diện gara, đồ chơi ô tô xe máy, phụ tùng xe phân khối lớn.', N'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600'),
-(N'CRAFT-GIFT', N'Thủ Công Mỹ Nghệ & Quà Tặng Tinh Xảo', N'Gói', N'Thủ công - Mỹ nghệ - Quà tặng', 680000, 30, 10, N'Đồ lưu niệm, gốm sứ Bát Tràng, tranh thêu và quà tặng thủ công truyền thống.', N'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=600'),
-(N'BLUE-SKY', N'Khách Sạn & Du Lịch BlueSky Resort', N'Gói', N'Khách sạn - Du lịch', 2200000, 12, 4, N'Đặt phòng khách sạn, tour du lịch, nghỉ dưỡng và vé máy bay trực tuyến.', N'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600'),
-(N'PRIME-LAND', N'Bất Động Sản Đất Vàng Prime Land', N'Gói', N'Bất động sản - Xây dựng', 2800000, 10, 3, N'Dự án căn hộ, biệt thự nghỉ dưỡng, sàn giao dịch bất động sản chuyên nghiệp.', N'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600'),
-(N'PRO-BIZ', N'Hồ Sơ Doanh Nghiệp ProBiz', N'Gói', N'Doanh nghiệp', 1950000, 22, 6, N'Trang giới thiệu công ty, tập đoàn đa ngành, hồ sơ năng lực uy tín.', N'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600');
+(N'TL-01', N'Bút bi Thiên Long TL-027 xanh', N'Cái', N'Văn phòng phẩm', 5000, 5, 20, N'Bút bi Thiên Long mực xanh cao cấp ngòi 0.5mm êm trơn. (Demo Luật 1: Tồn 5)', N'images/products/thienlong.jpg'),
+(N'HH-01', N'Mì Hảo Hảo Tôm chua cay (thùng 30 gói)', N'Thùng', N'Mì gói & Thực phẩm', 115000, 80, 25, N'Mì ăn liền Acecook Hảo Hảo vị Tôm chua cay truyền thống thùng 30 gói.', N'images/products/haohao.jpg'),
+(N'VM-01', N'Sữa tươi tiệt trùng Vinamilk 100% 1L', N'Hộp', N'Sữa & Chế phẩm sữa', 34000, 35, 15, N'Sữa tươi tiệt trùng Vinamilk có đường 1 lít giàu canxi và vitamin D3.', N'images/products/vinamilk.jpg'),
+(N'CC-01', N'Nước ngọt Coca-Cola lon 320ml (thùng 24 lon)', N'Thùng', N'Nước giải khát & Bia', 210000, 50, 20, N'Nước giải khát có ga Coca-Cola sảng khoái nguyên thùng 24 lon.', N'images/products/coca-cola.png'),
+(N'ST25-05', N'Gạo thơm Sóc Trăng ST25 thượng hạng 5kg', N'Túi', N'Thực phẩm & Gia vị', 185000, 40, 10, N'Gạo ST25 gạo ngon nhất thế giới, hạt dài, dẻo thơm hảo hạng.', N'images/products/st25.jpg'),
+(N'SP-01', N'Dầu ăn đậu nành Simply nguyên chất 1L', N'Chai', N'Thực phẩm & Gia vị', 58000, 30, 10, N'Dầu đậu nành nguyên chất 100% tốt cho tim mạch chai 1L.', N'images/products/simply.jpg'),
+(N'SL-01', N'Nước rửa chén Sunlight Chanh túi 750g', N'Túi', N'Hóa mỹ phẩm & Đồ gia dụng', 32000, 6, 15, N'Nước rửa chén Sunlight tinh chất chanh tươi sạch dầu mỡ (Cảnh báo: Tồn 6)', N'images/products/sunlight.jpg'),
+(N'PP-01', N'Khăn giấy lụa cao cấp Pulppy 10 cuộn', N'Lốc', N'Hóa mỹ phẩm & Đồ gia dụng', 85000, 0, 10, N'Khăn giấy lụa Pulppy mềm mại an toàn, thấm hút vượt trội (Hết hàng: Tồn 0)', N'images/products/pulppy.jpg'),
+(N'CC-LON', N'Nước ngọt Coca-Cola vị nguyên bản lon 320ml', N'Lon', N'Nước giải khát & Bia', 11000, 150, 24, N'Nước giải khát có ga Coca-Cola sảng khoái lon lẻ 320ml bán chạy tại quầy.', N'images/products/coca-cola.png'),
+(N'RB-01', N'Nước tăng lực Red Bull Thái lon 250ml', N'Lon', N'Nước giải khát & Bia', 15000, 120, 24, N'Nước tăng lực bò húc Red Bull nắp vàng Thái Lan chính hãng.', N'images/products/redbull.jpg'),
+(N'RM-650', N'Dầu gội nam Romano Classic sạch gàu 650g', N'Chai', N'Hóa mỹ phẩm & Đồ gia dụng', 175000, 45, 10, N'Dầu gội nước hoa cao cấp Romano hương Classic lịch lãm, sạch gàu.', N'images/products/romano.jpg'),
+(N'LAY-01', N'Snack khoai tây Lay''s vị tự nhiên Classic 95g', N'Gói', N'Bánh kẹo & Đồ ăn vặt', 22000, 85, 15, N'Bim bim khoai tây chiên vàng giòn rụm vị muối tự nhiên thơm ngon.', N'images/products/lays.jpg'),
+(N'CP-12', N'Bánh ChocoPie Orion hộp 12 cái (396g)', N'Hộp', N'Bánh kẹo & Đồ ăn vặt', 56000, 60, 10, N'Bánh sôcôla ChocoPie kẹp kem dẻo marshmallow thơm lừng ngọt ngào.', N'images/products/chocopie.jpg'),
+(N'LV-500', N'Nước khoáng thiên nhiên LaVie chai 500ml', N'Chai', N'Nước giải khát & Bia', 6000, 200, 48, N'Nước khoáng LaVie đóng chai tự nhiên thanh khiết cho sức khỏe.', N'images/products/lavie.jpg'),
+(N'HN-330', N'Bia Heineken Silver lon 330ml', N'Lon', N'Nước giải khát & Bia', 21000, 95, 24, N'Bia Heineken Silver nhẹ êm dễ uống, hương vị tươi mát sảng khoái.', N'images/products/heineken.jpg'),
+(N'VM-LOC', N'Sữa tươi Vinamilk có đường 180ml (lốc 4 hộp)', N'Lốc', N'Sữa & Chế phẩm sữa', 34000, 80, 20, N'Lốc 4 hộp sữa tươi tiệt trùng Vinamilk có đường giàu dinh dưỡng.', N'images/products/vinamilk.jpg'),
+(N'SC-VM', N'Sữa chua ăn Vinamilk có đường (lốc 4 hộp x 100g)', N'Lốc', N'Sữa & Chế phẩm sữa', 28000, 70, 15, N'Sữa chua lên men tự nhiên bổ sung men vi sinh tốt cho hệ tiêu hóa.', N'images/products/yogurt.jpg'),
+(N'OT-380', N'Sữa đặc có đường Ông Thọ đỏ lon 380g', N'Lon', N'Sữa & Chế phẩm sữa', 26000, 90, 20, N'Sữa đặc Ông Thọ sánh đặc ngọt béo dùng pha cà phê sữa thơm ngon.', N'images/products/ongtho.jpg'),
+(N'HH-GOI', N'Mì Hảo Hảo tôm chua cay gói 75g', N'Gói', N'Mì gói & Thực phẩm', 4500, 300, 50, N'Mì gói Hảo Hảo tôm chua cay bán lẻ từng gói, món ăn quốc dân.', N'images/products/haohao.jpg'),
+(N'NN-900', N'Nước mắm Nam Ngư Đệ Nhị chai 900ml', N'Chai', N'Thực phẩm & Gia vị', 32000, 65, 15, N'Nước mắm Nam Ngư Đệ Nhị vị ngon đậm đà, chấm hay nấu đều thơm.', N'images/products/namngu.jpg'),
+(N'KN-400', N'Hạt nêm Knorr thịt thăn xương ống 400g', N'Gói', N'Thực phẩm & Gia vị', 39000, 55, 15, N'Hạt nêm Knorr chiết xuất thịt thăn xương ống cho canh ngọt thanh đậm đà.', N'images/products/knorr.jpg'),
+(N'CS-250', N'Tương ớt Chinsu chai 250g', N'Chai', N'Thực phẩm & Gia vị', 14000, 70, 20, N'Tương ớt Chinsu thơm cay bùng nổ hương vị chấm món gì cũng ngon.', N'images/products/chinsu.jpg'),
+(N'CG-180', N'Kem đánh răng Colgate Total than hoạt tính 180g', N'Hộp', N'Hóa mỹ phẩm & Đồ gia dụng', 45000, 50, 15, N'Kem đánh răng Colgate bảo vệ răng miệng toàn diện suốt 12h.', N'images/products/colgate.jpg'),
+(N'OM-2KG', N'Bột giặt Omo Matic cửa trên túi 2kg', N'Túi', N'Hóa mỹ phẩm & Đồ gia dụng', 135000, 30, 10, N'Bột giặt Omo Matic xoáy bay vết bẩn cứng đầu, thơm lâu ngát hương.', N'images/products/omo.jpg'),
+(N'CF-18', N'Nước xả vải Comfort một lần xả túi 1.8L', N'Túi', N'Hóa mỹ phẩm & Đồ gia dụng', 118000, 40, 10, N'Nước xả vải Comfort hương ban mai bền lâu giúp quần áo mềm mại.', N'images/products/comfort.jpg'),
+(N'CC-PD', N'Kẹo dẻo Chupa Chups Panda vị trái cây 90g', N'Gói', N'Bánh kẹo & Đồ ăn vặt', 16000, 100, 20, N'Kẹo dẻo hình gấu Panda hương trái cây thơm ngon dai mềm vui nhộn.', N'images/products/chupachups.jpg'),
+(N'CS-288', N'Bánh quy Cosy Marie Kinh Đô 288g', N'Gói', N'Bánh kẹo & Đồ ăn vặt', 38000, 45, 10, N'Bánh quy sữa Cosy Marie giòn xốp béo ngậy vị sữa tươi nguyên chất.', N'images/products/cosy.jpg'),
+(N'CP-A5', N'Sổ tay Campus A5 kẻ ngang 200 trang', N'Quyển', N'Văn phòng phẩm', 25000, 60, 15, N'Sổ tay lò xo bìa cứng Campus giấy chống lóa viết êm không thấm mực.', N'images/products/campus.jpg'),
+(N'C2-01', N'Trà xanh C2 hương chanh chai 455ml', N'Chai', N'Nước giải khát & Bia', 10000, 85, 24, N'Trà xanh đóng chai C2 ủ từ lá trà Thái Nguyên vị chanh thanh khiết.', N'images/products/c2.jpg');
 
 -- 3. SEED DỮ LIỆU KHÁCH HÀNG (Customer - Dành cho POS & Khách Quen)
 INSERT INTO dbo.Customer (CustomerCode, Name, Phone, Email, Address, Points)

@@ -1,4 +1,4 @@
-using KhoBanLe.CoreBusiness;
+﻿using KhoBanLe.CoreBusiness;
 using KhoBanLe.UseCases.PluginInterfaces.DataStore;
 
 namespace KhoBanLe.DataStore.HardCoded
@@ -15,27 +15,27 @@ namespace KhoBanLe.DataStore.HardCoded
                 {
                     Id = 1,
                     Sku = "TL-01",
-                    Name = "Bút bi Thiên Long TL-027",
+                    Name = "Bút bi Thiên Long TL-027 xanh",
                     Unit = "Cái",
                     Category = "Văn phòng phẩm",
                     Price = 5000,
-                    CurrentStock = 5,      // ĐÚNG THEO SLIDE 7 ĐỂ DEMO LUẬT 1: Tồn 5, yêu cầu xuất 10 -> Chặn lỗi!
+                    CurrentStock = 5,      // Demo Luật 1: Tồn 5
                     MinStockLevel = 20,
                     Description = "Bút bi Thiên Long mực xanh cao cấp ngòi 0.5mm êm trơn.",
-                    ImageUrl = "https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=300"
+                    ImageUrl = "images/products/thienlong.jpg"
                 },
                 new Product
                 {
                     Id = 2,
                     Sku = "HH-01",
-                    Name = "Mì Hảo Hảo Tôm chua cay (30 gói)",
+                    Name = "Mì Hảo Hảo Tôm chua cay (thùng 30 gói)",
                     Unit = "Thùng",
-                    Category = "Thực phẩm",
+                    Category = "Thực phẩm & Gia vị",
                     Price = 115000,
                     CurrentStock = 80,
                     MinStockLevel = 25,
-                    Description = "Mì ăn liền Acecook Hảo Hảo vị Tôm chua cay truyền thống.",
-                    ImageUrl = "https://images.unsplash.com/photo-1612927601601-6638404737ce?w=300"
+                    Description = "Mì ăn liền Acecook Hảo Hảo vị Tôm chua cay truyền thống thùng 30 gói.",
+                    ImageUrl = "images/products/haohao.jpg"
                 },
                 new Product
                 {
@@ -43,25 +43,25 @@ namespace KhoBanLe.DataStore.HardCoded
                     Sku = "VM-01",
                     Name = "Sữa tươi tiệt trùng Vinamilk 100% 1L",
                     Unit = "Hộp",
-                    Category = "Sữa & Đồ uống",
+                    Category = "Sữa & Chế phẩm sữa",
                     Price = 34000,
                     CurrentStock = 35,
                     MinStockLevel = 15,
-                    Description = "Sữa tươi tiệt trùng Vinamilk có đường 1 lít giàu canxi và vitamin.",
-                    ImageUrl = "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=300"
+                    Description = "Sữa tươi tiệt trùng Vinamilk có đường 1 lít giàu canxi và vitamin D3.",
+                    ImageUrl = "images/products/vinamilk.jpg"
                 },
                 new Product
                 {
                     Id = 4,
                     Sku = "CC-01",
-                    Name = "Nước ngọt Coca-Cola lon 330ml (24 lon)",
+                    Name = "Nước ngọt Coca-Cola lon 320ml (thùng 24 lon)",
                     Unit = "Thùng",
-                    Category = "Sữa & Đồ uống",
+                    Category = "Nước giải khát & Bia",
                     Price = 210000,
                     CurrentStock = 50,
                     MinStockLevel = 20,
-                    Description = "Nước giải khát có ga Coca-Cola sảng khoái.",
-                    ImageUrl = "https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=300"
+                    Description = "Nước giải khát có ga Coca-Cola sảng khoái nguyên thùng 24 lon.",
+                    ImageUrl = "images/products/coca-cola.png"
                 },
                 new Product
                 {
@@ -69,12 +69,12 @@ namespace KhoBanLe.DataStore.HardCoded
                     Sku = "ST25-05",
                     Name = "Gạo thơm Sóc Trăng ST25 thượng hạng 5kg",
                     Unit = "Túi",
-                    Category = "Thực phẩm",
+                    Category = "Thực phẩm & Gia vị",
                     Price = 185000,
                     CurrentStock = 40,
                     MinStockLevel = 10,
-                    Description = "Gạo ST25 gạo ngon nhất thế giới, hạt dài, dẻo thơm.",
-                    ImageUrl = "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=300"
+                    Description = "Gạo ST25 gạo ngon nhất thế giới, hạt dài, dẻo thơm hảo hạng.",
+                    ImageUrl = "images/products/st25.jpg"
                 },
                 new Product
                 {
@@ -82,12 +82,12 @@ namespace KhoBanLe.DataStore.HardCoded
                     Sku = "SP-01",
                     Name = "Dầu ăn đậu nành Simply nguyên chất 1L",
                     Unit = "Chai",
-                    Category = "Thực phẩm",
+                    Category = "Thực phẩm & Gia vị",
                     Price = 58000,
                     CurrentStock = 30,
                     MinStockLevel = 10,
-                    Description = "Dầu đậu nành nguyên chất 100% tốt cho tim mạch.",
-                    ImageUrl = "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=300"
+                    Description = "Dầu đậu nành nguyên chất 100% tốt cho tim mạch chai 1L.",
+                    ImageUrl = "images/products/simply.jpg"
                 },
                 new Product
                 {
@@ -95,12 +95,12 @@ namespace KhoBanLe.DataStore.HardCoded
                     Sku = "SL-01",
                     Name = "Nước rửa chén Sunlight Chanh túi 750g",
                     Unit = "Túi",
-                    Category = "Hóa mỹ phẩm",
+                    Category = "Hóa mỹ phẩm & Đồ gia dụng",
                     Price = 32000,
-                    CurrentStock = 6,      // Sắp hết hàng (6 < 15) -> Badge màu Vàng
+                    CurrentStock = 6,      // Sắp hết hàng (6 < 15)
                     MinStockLevel = 15,
-                    Description = "Nước rửa chén Sunlight tinh chất chanh sạch dầu mỡ.",
-                    ImageUrl = "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300"
+                    Description = "Nước rửa chén Sunlight tinh chất chanh tươi sạch dầu mỡ.",
+                    ImageUrl = "images/products/sunlight.jpg"
                 },
                 new Product
                 {
@@ -108,181 +108,285 @@ namespace KhoBanLe.DataStore.HardCoded
                     Sku = "PP-01",
                     Name = "Khăn giấy lụa cao cấp Pulppy 10 cuộn",
                     Unit = "Lốc",
-                    Category = "Đồ gia dụng - Sinh hoạt",
+                    Category = "Hóa mỹ phẩm & Đồ gia dụng",
                     Price = 85000,
-                    CurrentStock = 0,      // Hết hàng (0) -> Badge màu Đỏ
+                    CurrentStock = 0,      // Hết hàng (0)
                     MinStockLevel = 10,
-                    Description = "Khăn giấy Pulppy mềm mại, thấm hút tốt, an toàn cho da.",
-                    ImageUrl = "https://images.unsplash.com/photo-1584556812952-905ffd0c611a?w=400"
+                    Description = "Khăn giấy lụa Pulppy mềm mại an toàn, thấm hút vượt trội.",
+                    ImageUrl = "images/products/pulppy.jpg"
                 },
-                // --- CÁC MẪU GIAO DIỆN & MẶT HÀNG CHUẨN THEO ẢNH CHỤP MÀN HÌNH SAPO ---
                 new Product
                 {
                     Id = 9,
-                    Sku = "EGO-HELIOS",
-                    Name = "Ego Helios",
-                    Unit = "Gói",
-                    Category = "Thời trang - Trang sức",
-                    Price = 1800000,
-                    OriginalPrice = 2200000,
-                    CurrentStock = 45,
-                    MinStockLevel = 10,
-                    Description = "Giao diện web bán hàng Thời trang & Đồng hồ cao cấp, phong cách sang trọng hiện đại.",
-                    ImageUrl = "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600"
+                    Sku = "CC-LON",
+                    Name = "Nước ngọt Coca-Cola vị nguyên bản lon 320ml",
+                    Unit = "Lon",
+                    Category = "Nước giải khát & Bia",
+                    Price = 11000,
+                    CurrentStock = 150,
+                    MinStockLevel = 24,
+                    Description = "Nước giải khát có ga Coca-Cola sảng khoái lon lẻ 320ml bán chạy tại quầy.",
+                    ImageUrl = "images/products/coca-cola.png"
                 },
                 new Product
                 {
                     Id = 10,
-                    Sku = "EGO-FITNESS",
-                    Name = "Ego Fitness",
-                    Unit = "Gói",
-                    Category = "Thể thao - Dịch vụ",
-                    Price = 1900000,
-                    OriginalPrice = null,
-                    CurrentStock = 32,
-                    MinStockLevel = 8,
-                    Description = "Giao diện thể thao, phòng gym, thực phẩm thể hình năng động và bứt phá doanh số.",
-                    ImageUrl = "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=600"
+                    Sku = "RB-01",
+                    Name = "Nước tăng lực Red Bull Thái lon 250ml",
+                    Unit = "Lon",
+                    Category = "Nước giải khát & Bia",
+                    Price = 15000,
+                    CurrentStock = 120,
+                    MinStockLevel = 24,
+                    Description = "Nước tăng lực bò húc Red Bull nắp vàng Thái Lan chính hãng.",
+                    ImageUrl = "images/products/redbull.jpg"
                 },
                 new Product
                 {
                     Id = 11,
-                    Sku = "HER-COSMETIC",
-                    Name = "Her Cosmetic",
-                    Unit = "Gói",
-                    Category = "Mỹ phẩm - Làm đẹp",
-                    Price = 1840000,
-                    OriginalPrice = 2300000,
-                    CurrentStock = 50,
-                    MinStockLevel = 12,
-                    Description = "Giao diện mỹ phẩm, làm đẹp, spa sắc sảo và thanh lịch tối ưu tỷ lệ chuyển đổi.",
-                    ImageUrl = "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=600"
+                    Sku = "RM-650",
+                    Name = "Dầu gội nam Romano Classic sạch gàu 650g",
+                    Unit = "Chai",
+                    Category = "Hóa mỹ phẩm & Đồ gia dụng",
+                    Price = 175000,
+                    CurrentStock = 45,
+                    MinStockLevel = 10,
+                    Description = "Dầu gội nước hoa cao cấp Romano hương Classic lịch lãm, sạch gàu.",
+                    ImageUrl = "images/products/romano.jpg"
                 },
                 new Product
                 {
                     Id = 12,
-                    Sku = "ORGANIC-FOOD",
-                    Name = "Thực Phẩm Hữu Cơ Giàu Dinh Dưỡng",
-                    Unit = "Combo",
-                    Category = "Thực phẩm - Nhà hàng",
-                    Price = 1200000,
-                    OriginalPrice = 1500000,
-                    CurrentStock = 28,
-                    MinStockLevel = 10,
-                    Description = "Giao diện cửa hàng thực phẩm sạch hữu cơ, rau củ quả tươi sống, chuẩn SEO.",
-                    ImageUrl = "https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600"
+                    Sku = "LAY-01",
+                    Name = "Snack khoai tây Lay's vị tự nhiên Classic 95g",
+                    Unit = "Gói",
+                    Category = "Bánh kẹo & Đồ ăn vặt",
+                    Price = 22000,
+                    CurrentStock = 85,
+                    MinStockLevel = 15,
+                    Description = "Bim bim khoai tây chiên vàng giòn rụm vị muối tự nhiên thơm ngon.",
+                    ImageUrl = "images/products/lays.jpg"
                 },
                 new Product
                 {
                     Id = 13,
-                    Sku = "COZY-HOME",
-                    Name = "Nội Thất Cozy Home & Decor",
-                    Unit = "Gói",
-                    Category = "Nội thất - Trang trí",
-                    Price = 1500000,
-                    OriginalPrice = 1800000,
-                    CurrentStock = 20,
-                    MinStockLevel = 5,
-                    Description = "Mẫu giao diện nội thất gia đình, kiến trúc và trang trí nhà cửa cao cấp.",
-                    ImageUrl = "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600"
+                    Sku = "CP-12",
+                    Name = "Bánh ChocoPie Orion hộp 12 cái (396g)",
+                    Unit = "Hộp",
+                    Category = "Bánh kẹo & Đồ ăn vặt",
+                    Price = 56000,
+                    CurrentStock = 60,
+                    MinStockLevel = 10,
+                    Description = "Bánh sôcôla ChocoPie kẹp kem dẻo marshmallow thơm lừng ngọt ngào.",
+                    ImageUrl = "images/products/chocopie.jpg"
                 },
                 new Product
                 {
                     Id = 14,
-                    Sku = "SMART-TECH",
-                    Name = "SmartTech Điện Tử Số",
-                    Unit = "Gói",
-                    Category = "Công nghệ - Kỹ thuật số",
-                    Price = 2100000,
-                    OriginalPrice = 2500000,
-                    CurrentStock = 15,
-                    MinStockLevel = 5,
-                    Description = "Cửa hàng điện thoại, máy tính, linh kiện điện tử hiện đại và mạnh mẽ.",
-                    ImageUrl = "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=600"
+                    Sku = "LV-500",
+                    Name = "Nước khoáng thiên nhiên LaVie chai 500ml",
+                    Unit = "Chai",
+                    Category = "Nước giải khát & Bia",
+                    Price = 6000,
+                    CurrentStock = 200,
+                    MinStockLevel = 48,
+                    Description = "Nước khoáng LaVie đóng chai tự nhiên thanh khiết cho sức khỏe.",
+                    ImageUrl = "images/products/lavie.jpg"
                 },
                 new Product
                 {
                     Id = 15,
-                    Sku = "NANO-LIGHT",
-                    Name = "Thiết Bị Điện Gia Đình NanoLight",
-                    Unit = "Gói",
-                    Category = "Thiết bị điện",
-                    Price = 1450000,
-                    OriginalPrice = 1700000,
-                    CurrentStock = 25,
-                    MinStockLevel = 8,
-                    Description = "Thiết bị chiếu sáng, điện dân dụng, giải pháp điện thông minh.",
-                    ImageUrl = "https://images.unsplash.com/photo-1558002038-1055907df827?w=600"
+                    Sku = "HN-330",
+                    Name = "Bia Heineken Silver lon 330ml",
+                    Unit = "Lon",
+                    Category = "Nước giải khát & Bia",
+                    Price = 21000,
+                    CurrentStock = 95,
+                    MinStockLevel = 24,
+                    Description = "Bia Heineken Silver nhẹ êm dễ uống, hương vị tươi mát sảng khoái.",
+                    ImageUrl = "images/products/heineken.jpg"
                 },
                 new Product
                 {
                     Id = 16,
-                    Sku = "AUTO-PRO",
-                    Name = "Phụ Kiện Ô Tô - Xe Máy Sport",
-                    Unit = "Gói",
-                    Category = "Ô tô - Xe máy",
-                    Price = 2500000,
-                    OriginalPrice = null,
-                    CurrentStock = 18,
-                    MinStockLevel = 5,
-                    Description = "Giao diện gara, đồ chơi ô tô xe máy, phụ tùng xe phân khối lớn.",
-                    ImageUrl = "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=600"
+                    Sku = "VM-LOC",
+                    Name = "Sữa tươi Vinamilk có đường 180ml (lốc 4 hộp)",
+                    Unit = "Lốc",
+                    Category = "Sữa & Chế phẩm sữa",
+                    Price = 34000,
+                    CurrentStock = 80,
+                    MinStockLevel = 20,
+                    Description = "Lốc 4 hộp sữa tươi tiệt trùng Vinamilk có đường giàu dinh dưỡng.",
+                    ImageUrl = "images/products/vinamilk.jpg"
                 },
                 new Product
                 {
                     Id = 17,
-                    Sku = "CRAFT-GIFT",
-                    Name = "Thủ Công Mỹ Nghệ & Quà Tặng Tinh Xảo",
-                    Unit = "Gói",
-                    Category = "Thủ công - Mỹ nghệ - Quà tặng",
-                    Price = 680000,
-                    OriginalPrice = 850000,
-                    CurrentStock = 30,
-                    MinStockLevel = 10,
-                    Description = "Đồ lưu niệm, gốm sứ Bát Tràng, tranh thêu và quà tặng thủ công truyền thống.",
-                    ImageUrl = "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=600"
+                    Sku = "SC-VM",
+                    Name = "Sữa chua ăn Vinamilk có đường (lốc 4 hộp x 100g)",
+                    Unit = "Lốc",
+                    Category = "Sữa & Chế phẩm sữa",
+                    Price = 28000,
+                    CurrentStock = 70,
+                    MinStockLevel = 15,
+                    Description = "Sữa chua lên men tự nhiên bổ sung men vi sinh tốt cho hệ tiêu hóa.",
+                    ImageUrl = "images/products/yogurt.jpg"
                 },
                 new Product
                 {
                     Id = 18,
-                    Sku = "BLUE-SKY",
-                    Name = "Khách Sạn & Du Lịch BlueSky Resort",
-                    Unit = "Gói",
-                    Category = "Khách sạn - Du lịch",
-                    Price = 2200000,
-                    OriginalPrice = 2700000,
-                    CurrentStock = 12,
-                    MinStockLevel = 4,
-                    Description = "Đặt phòng khách sạn, tour du lịch, nghỉ dưỡng và vé máy bay trực tuyến.",
-                    ImageUrl = "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600"
+                    Sku = "OT-380",
+                    Name = "Sữa đặc có đường Ông Thọ đỏ lon 380g",
+                    Unit = "Lon",
+                    Category = "Sữa & Chế phẩm sữa",
+                    Price = 26000,
+                    CurrentStock = 90,
+                    MinStockLevel = 20,
+                    Description = "Sữa đặc Ông Thọ sánh đặc ngọt béo dùng pha cà phê sữa thơm ngon.",
+                    ImageUrl = "images/products/ongtho.jpg"
                 },
                 new Product
                 {
                     Id = 19,
-                    Sku = "PRIME-LAND",
-                    Name = "Bất Động Sản Đất Vàng Prime Land",
+                    Sku = "HH-GOI",
+                    Name = "Mì Hảo Hảo tôm chua cay gói 75g",
                     Unit = "Gói",
-                    Category = "Bất động sản - Xây dựng",
-                    Price = 2800000,
-                    OriginalPrice = 3200000,
-                    CurrentStock = 10,
-                    MinStockLevel = 3,
-                    Description = "Dự án căn hộ, biệt thự nghỉ dưỡng, sàn giao dịch bất động sản chuyên nghiệp.",
-                    ImageUrl = "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=600"
+                    Category = "Thực phẩm & Gia vị",
+                    Price = 4500,
+                    CurrentStock = 300,
+                    MinStockLevel = 50,
+                    Description = "Mì gói Hảo Hảo tôm chua cay bán lẻ từng gói, món ăn quốc dân.",
+                    ImageUrl = "images/products/haohao.jpg"
                 },
                 new Product
                 {
                     Id = 20,
-                    Sku = "PRO-BIZ",
-                    Name = "Hồ Sơ Doanh Nghiệp ProBiz",
+                    Sku = "NN-900",
+                    Name = "Nước mắm Nam Ngư Đệ Nhị chai 900ml",
+                    Unit = "Chai",
+                    Category = "Thực phẩm & Gia vị",
+                    Price = 32000,
+                    CurrentStock = 65,
+                    MinStockLevel = 15,
+                    Description = "Nước mắm Nam Ngư Đệ Nhị vị ngon đậm đà, chấm hay nấu đều thơm.",
+                    ImageUrl = "images/products/namngu.jpg"
+                },
+                new Product
+                {
+                    Id = 21,
+                    Sku = "KN-400",
+                    Name = "Hạt nêm Knorr thịt thăn xương ống 400g",
                     Unit = "Gói",
-                    Category = "Doanh nghiệp",
-                    Price = 1950000,
-                    OriginalPrice = null,
-                    CurrentStock = 22,
-                    MinStockLevel = 6,
-                    Description = "Trang giới thiệu công ty, tập đoàn đa ngành, hồ sơ năng lực uy tín.",
-                    ImageUrl = "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=600"
+                    Category = "Thực phẩm & Gia vị",
+                    Price = 39000,
+                    CurrentStock = 55,
+                    MinStockLevel = 15,
+                    Description = "Hạt nêm Knorr chiết xuất thịt thăn xương ống cho canh ngọt thanh đậm đà.",
+                    ImageUrl = "images/products/knorr.jpg"
+                },
+                new Product
+                {
+                    Id = 22,
+                    Sku = "CS-250",
+                    Name = "Tương ớt Chinsu chai 250g",
+                    Unit = "Chai",
+                    Category = "Thực phẩm & Gia vị",
+                    Price = 14000,
+                    CurrentStock = 70,
+                    MinStockLevel = 20,
+                    Description = "Tương ớt Chinsu thơm cay bùng nổ hương vị chấm món gì cũng ngon.",
+                    ImageUrl = "images/products/chinsu.jpg"
+                },
+                new Product
+                {
+                    Id = 23,
+                    Sku = "CG-180",
+                    Name = "Kem đánh răng Colgate Total than hoạt tính 180g",
+                    Unit = "Hộp",
+                    Category = "Hóa mỹ phẩm & Đồ gia dụng",
+                    Price = 45000,
+                    CurrentStock = 50,
+                    MinStockLevel = 15,
+                    Description = "Kem đánh răng Colgate bảo vệ răng miệng toàn diện suốt 12h.",
+                    ImageUrl = "images/products/colgate.jpg"
+                },
+                new Product
+                {
+                    Id = 24,
+                    Sku = "OM-2KG",
+                    Name = "Bột giặt Omo Matic cửa trên túi 2kg",
+                    Unit = "Túi",
+                    Category = "Hóa mỹ phẩm & Đồ gia dụng",
+                    Price = 135000,
+                    CurrentStock = 30,
+                    MinStockLevel = 10,
+                    Description = "Bột giặt Omo Matic xoáy bay vết bẩn cứng đầu, thơm lâu ngát hương.",
+                    ImageUrl = "images/products/omo.jpg"
+                },
+                new Product
+                {
+                    Id = 25,
+                    Sku = "CF-18",
+                    Name = "Nước xả vải Comfort một lần xả túi 1.8L",
+                    Unit = "Túi",
+                    Category = "Hóa mỹ phẩm & Đồ gia dụng",
+                    Price = 118000,
+                    CurrentStock = 40,
+                    MinStockLevel = 10,
+                    Description = "Nước xả vải Comfort hương ban mai bền lâu giúp quần áo mềm mại.",
+                    ImageUrl = "images/products/comfort.jpg"
+                },
+                new Product
+                {
+                    Id = 26,
+                    Sku = "CC-PD",
+                    Name = "Kẹo dẻo Chupa Chups Panda vị trái cây 90g",
+                    Unit = "Gói",
+                    Category = "Bánh kẹo & Đồ ăn vặt",
+                    Price = 16000,
+                    CurrentStock = 100,
+                    MinStockLevel = 20,
+                    Description = "Kẹo dẻo hình gấu Panda hương trái cây thơm ngon dai mềm vui nhộn.",
+                    ImageUrl = "images/products/chupachups.jpg"
+                },
+                new Product
+                {
+                    Id = 27,
+                    Sku = "CS-288",
+                    Name = "Bánh quy Cosy Marie Kinh Đô 288g",
+                    Unit = "Gói",
+                    Category = "Bánh kẹo & Đồ ăn vặt",
+                    Price = 38000,
+                    CurrentStock = 45,
+                    MinStockLevel = 10,
+                    Description = "Bánh quy sữa Cosy Marie giòn xốp béo ngậy vị sữa tươi nguyên chất.",
+                    ImageUrl = "images/products/cosy.jpg"
+                },
+                new Product
+                {
+                    Id = 28,
+                    Sku = "CP-A5",
+                    Name = "Sổ tay Campus A5 kẻ ngang 200 trang",
+                    Unit = "Quyển",
+                    Category = "Văn phòng phẩm",
+                    Price = 25000,
+                    CurrentStock = 60,
+                    MinStockLevel = 15,
+                    Description = "Sổ tay lò xo bìa cứng Campus giấy chống lóa viết êm không thấm mực.",
+                    ImageUrl = "images/products/campus.jpg"
+                },
+                new Product
+                {
+                    Id = 29,
+                    Sku = "C2-01",
+                    Name = "Trà xanh C2 hương chanh chai 455ml",
+                    Unit = "Chai",
+                    Category = "Nước giải khát & Bia",
+                    Price = 10000,
+                    CurrentStock = 85,
+                    MinStockLevel = 24,
+                    Description = "Trà xanh đóng chai C2 ủ từ lá trà Thái Nguyên vị chanh thanh khiết.",
+                    ImageUrl = "images/products/c2.jpg"
                 }
             };
         }

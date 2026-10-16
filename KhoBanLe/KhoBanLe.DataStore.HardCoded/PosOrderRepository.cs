@@ -194,5 +194,29 @@ namespace KhoBanLe.DataStore.HardCoded
                 return Task.FromResult(order.Id);
             }
         }
+
+        public Task<bool> CancelPosOrderAsync(int id, string reason = "")
+        {
+            lock (_orders)
+            {
+                var order = _orders.FirstOrDefault(o => o.Id == id);
+                if (order == null || order.Status == "Cancelled") return Task.FromResult(false);
+
+                order.Status = "Cancelled";
+                order.Note = string.IsNullOrEmpty(reason) ? $"{order.Note} [Đã hủy]" : $"{order.Note} [Hủy: {reason}]";
+
+                foreach (var line in order.Lines)
+                {
+                    _productRepository.UpdateStockAsync(line.ProductId, line.Quantity);
+                }
+
+                if (order.GoodsIssueId.HasValue)
+                {
+                    _goodsIssueRepository.CancelIssueAsync(order.GoodsIssueId.Value);
+                }
+
+                return Task.FromResult(true);
+            }
+        }
     }
 }
