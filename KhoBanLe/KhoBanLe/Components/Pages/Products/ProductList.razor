@@ -263,7 +263,7 @@
                                 <div class="sapo-product-card">
                                     <!-- Image Preview with Badges -->
                                     <div class="sapo-card-image">
-                                        <img src="@(string.IsNullOrEmpty(p.ImageUrl) ? "images/default-product.svg" : p.ImageUrl)" 
+                                        <img src="@GetProductImage(p.ImageUrl)" 
                                              alt="@p.Name" 
                                              onerror="this.src='images/default-product.svg'" />
                                         
@@ -399,7 +399,7 @@
                                     <tr>
                                         <td class="ps-3" data-label="Hình ảnh">
                                             <div class="rounded-3 border shadow-xs d-flex align-items-center justify-content-center p-1" style="width: 48px; height: 48px; background: #ffffff;">
-                                                <img src="@(string.IsNullOrEmpty(p.ImageUrl) ? "images/default-product.svg" : p.ImageUrl)" 
+                                                <img src="@GetProductImage(p.ImageUrl)" 
                                                      alt="@p.Name" 
                                                      style="max-width: 100%; max-height: 100%; object-fit: contain;" 
                                                      onerror="this.src='images/default-product.svg'" />
@@ -502,7 +502,7 @@
                             <div class="row g-4 align-items-center mb-4">
                                 <div class="col-12 col-md-6">
                                     <div class="rounded-4 overflow-hidden border shadow-sm position-relative text-center p-3" style="background: #ffffff;">
-                                        <img src="@(string.IsNullOrEmpty(previewProduct.ImageUrl) ? "images/default-product.svg" : previewProduct.ImageUrl)" 
+                                        <img src="@GetProductImage(previewProduct.ImageUrl)" 
                                              alt="@previewProduct.Name" class="w-100 h-auto" style="max-height: 320px; object-fit: contain;" 
                                              onerror="this.src='images/default-product.svg'" />
                                         <div class="position-absolute top-0 start-0 m-2">
@@ -644,8 +644,36 @@
                                 <div class="d-flex flex-wrap gap-2 mt-2 align-items-center">
                                     <span class="small text-muted">Chọn ảnh nhanh:</span>
                                     <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill"
+                                            @onclick='() => modalProduct.ImageUrl = "images/products/sunlight-chanh.jpg"'>
+                                        Rửa chén Sunlight
+                                    </button>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill"
+                                            @onclick='() => modalProduct.ImageUrl = "images/products/simply-1l.jpg"'>
+                                        Dầu ăn Simply
+                                    </button>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill"
+                                            @onclick='() => modalProduct.ImageUrl = "images/products/heineken.png"'>
+                                        Bia Heineken Silver
+                                    </button>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill"
                                             @onclick='() => modalProduct.ImageUrl = "images/products/coca-cola.png"'>
                                         Nước ngọt (Coca-Cola)
+                                    </button>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill"
+                                            @onclick='() => modalProduct.ImageUrl = "images/products/swing-steak.jpg"'>
+                                        Snack Swing
+                                    </button>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill"
+                                            @onclick='() => modalProduct.ImageUrl = "images/products/ostar-kimchi.jpg"'>
+                                        Snack O'Star
+                                    </button>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill"
+                                            @onclick='() => modalProduct.ImageUrl = "images/products/toonies.jpg"'>
+                                        Snack Toonies
+                                    </button>
+                                    <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill"
+                                            @onclick='() => modalProduct.ImageUrl = "images/products/sting.jpg"'>
+                                        Nước tăng lực Sting
                                     </button>
                                     <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill"
                                             @onclick='() => modalProduct.ImageUrl = "images/products/lays.jpg"'>
@@ -746,6 +774,12 @@
     private async void OnCartUpdated()
     {
         await InvokeAsync(StateHasChanged);
+    }
+
+    private string GetProductImage(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url)) return "images/default-product.svg";
+        return $"{url}?v=20261019_v3";
     }
 
     private async Task LoadProducts()

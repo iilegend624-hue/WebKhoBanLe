@@ -22,7 +22,7 @@ namespace KhoBanLe.DataStore.HardCoded
                     CurrentStock = 5,      // Demo Luật 1: Tồn 5
                     MinStockLevel = 20,
                     Description = "Bút bi Thiên Long mực xanh cao cấp ngòi 0.5mm êm trơn.",
-                    ImageUrl = "images/products/thienlong.jpg"
+                    ImageUrl = "images/products/thienlong-tl027.jpg"
                 },
                 new Product
                 {
@@ -74,7 +74,7 @@ namespace KhoBanLe.DataStore.HardCoded
                     CurrentStock = 40,
                     MinStockLevel = 10,
                     Description = "Gạo ST25 gạo ngon nhất thế giới, hạt dài, dẻo thơm hảo hạng.",
-                    ImageUrl = "images/products/st25.jpg"
+                    ImageUrl = "images/products/st25-5kg.jpg"
                 },
                 new Product
                 {
@@ -87,7 +87,7 @@ namespace KhoBanLe.DataStore.HardCoded
                     CurrentStock = 30,
                     MinStockLevel = 10,
                     Description = "Dầu đậu nành nguyên chất 100% tốt cho tim mạch chai 1L.",
-                    ImageUrl = "images/products/simply.jpg"
+                    ImageUrl = "images/products/simply-1l.jpg"
                 },
                 new Product
                 {
@@ -100,7 +100,7 @@ namespace KhoBanLe.DataStore.HardCoded
                     CurrentStock = 6,      // Sắp hết hàng (6 < 15)
                     MinStockLevel = 15,
                     Description = "Nước rửa chén Sunlight tinh chất chanh tươi sạch dầu mỡ.",
-                    ImageUrl = "images/products/sunlight.jpg"
+                    ImageUrl = "images/products/sunlight-chanh.jpg"
                 },
                 new Product
                 {
@@ -113,7 +113,7 @@ namespace KhoBanLe.DataStore.HardCoded
                     CurrentStock = 0,      // Hết hàng (0)
                     MinStockLevel = 10,
                     Description = "Khăn giấy lụa Pulppy mềm mại an toàn, thấm hút vượt trội.",
-                    ImageUrl = "images/products/pulppy.jpg"
+                    ImageUrl = "images/products/pulppy-10cuon.jpg"
                 },
                 new Product
                 {
@@ -152,7 +152,7 @@ namespace KhoBanLe.DataStore.HardCoded
                     CurrentStock = 45,
                     MinStockLevel = 10,
                     Description = "Dầu gội nước hoa cao cấp Romano hương Classic lịch lãm, sạch gàu.",
-                    ImageUrl = "images/products/romano.jpg"
+                    ImageUrl = "images/products/romano-classic.jpg"
                 },
                 new Product
                 {
@@ -178,7 +178,7 @@ namespace KhoBanLe.DataStore.HardCoded
                     CurrentStock = 60,
                     MinStockLevel = 10,
                     Description = "Bánh sôcôla ChocoPie kẹp kem dẻo marshmallow thơm lừng ngọt ngào.",
-                    ImageUrl = "images/products/chocopie.jpg"
+                    ImageUrl = "images/products/chocopie-orion.jpg"
                 },
                 new Product
                 {
@@ -191,7 +191,7 @@ namespace KhoBanLe.DataStore.HardCoded
                     CurrentStock = 200,
                     MinStockLevel = 48,
                     Description = "Nước khoáng LaVie đóng chai tự nhiên thanh khiết cho sức khỏe.",
-                    ImageUrl = "images/products/lavie.jpg"
+                    ImageUrl = "images/products/lavie-500ml.jpg"
                 },
                 new Product
                 {
@@ -204,7 +204,7 @@ namespace KhoBanLe.DataStore.HardCoded
                     CurrentStock = 95,
                     MinStockLevel = 24,
                     Description = "Bia Heineken Silver nhẹ êm dễ uống, hương vị tươi mát sảng khoái.",
-                    ImageUrl = "images/products/heineken.jpg"
+                    ImageUrl = "images/products/heineken.png"
                 },
                 new Product
                 {
@@ -230,7 +230,7 @@ namespace KhoBanLe.DataStore.HardCoded
                     CurrentStock = 70,
                     MinStockLevel = 15,
                     Description = "Sữa chua lên men tự nhiên bổ sung men vi sinh tốt cho hệ tiêu hóa.",
-                    ImageUrl = "images/products/yogurt.jpg"
+                    ImageUrl = "images/products/vinamilk-yogurt.jpg"
                 },
                 new Product
                 {
@@ -243,7 +243,7 @@ namespace KhoBanLe.DataStore.HardCoded
                     CurrentStock = 90,
                     MinStockLevel = 20,
                     Description = "Sữa đặc Ông Thọ sánh đặc ngọt béo dùng pha cà phê sữa thơm ngon.",
-                    ImageUrl = "images/products/ongtho.jpg"
+                    ImageUrl = "images/products/ongtho-do.jpg"
                 },
                 new Product
                 {
@@ -334,7 +334,7 @@ namespace KhoBanLe.DataStore.HardCoded
                     CurrentStock = 40,
                     MinStockLevel = 10,
                     Description = "Nước xả vải Comfort hương ban mai bền lâu giúp quần áo mềm mại.",
-                    ImageUrl = "images/products/comfort.jpg"
+                    ImageUrl = "images/products/comfort-18l.jpg"
                 },
                 new Product
                 {
@@ -347,7 +347,7 @@ namespace KhoBanLe.DataStore.HardCoded
                     CurrentStock = 100,
                     MinStockLevel = 20,
                     Description = "Kẹo dẻo hình gấu Panda hương trái cây thơm ngon dai mềm vui nhộn.",
-                    ImageUrl = "images/products/chupachups.jpg"
+                    ImageUrl = "images/products/chupachups-panda.jpg"
                 },
                 new Product
                 {
@@ -360,7 +360,7 @@ namespace KhoBanLe.DataStore.HardCoded
                     CurrentStock = 45,
                     MinStockLevel = 10,
                     Description = "Bánh quy sữa Cosy Marie giòn xốp béo ngậy vị sữa tươi nguyên chất.",
-                    ImageUrl = "images/products/cosy.jpg"
+                    ImageUrl = "images/products/cosy-marie.jpg"
                 },
                 new Product
                 {
@@ -373,7 +373,7 @@ namespace KhoBanLe.DataStore.HardCoded
                     CurrentStock = 60,
                     MinStockLevel = 15,
                     Description = "Sổ tay lò xo bìa cứng Campus giấy chống lóa viết êm không thấm mực.",
-                    ImageUrl = "images/products/campus.jpg"
+                    ImageUrl = "images/products/campus-a5.jpg"
                 },
                 new Product
                 {
@@ -386,7 +386,163 @@ namespace KhoBanLe.DataStore.HardCoded
                     CurrentStock = 85,
                     MinStockLevel = 24,
                     Description = "Trà xanh đóng chai C2 ủ từ lá trà Thái Nguyên vị chanh thanh khiết.",
-                    ImageUrl = "images/products/c2.jpg"
+                    ImageUrl = "images/products/c2-lemon.jpg"
+                },
+                new Product
+                {
+                    Id = 30,
+                    Sku = "SW-NY",
+                    Name = "Snack khoai tây Swing vị Bít tết New York 63g",
+                    Unit = "Gói",
+                    Category = "Bánh kẹo & Đồ ăn vặt",
+                    Price = 12500,
+                    CurrentStock = 65,
+                    MinStockLevel = 15,
+                    Description = "Snack khoai tây lát gợn sóng Swing vị Bít tết New York đậm đà giòn rụm.",
+                    ImageUrl = "images/products/swing-steak.jpg"
+                },
+                new Product
+                {
+                    Id = 31,
+                    Sku = "SW-GA",
+                    Name = "Snack khoai tây Swing vị Cánh gà nướng mật ong 63g",
+                    Unit = "Gói",
+                    Category = "Bánh kẹo & Đồ ăn vặt",
+                    Price = 12500,
+                    CurrentStock = 50,
+                    MinStockLevel = 15,
+                    Description = "Snack khoai tây Swing cánh gà nướng thơm lừng vị mật ong hấp dẫn.",
+                    ImageUrl = "images/products/swing-chicken.jpg"
+                },
+                new Product
+                {
+                    Id = 32,
+                    Sku = "OST-TN",
+                    Name = "Snack khoai tây O'Star vị tự nhiên muối biển 63g",
+                    Unit = "Gói",
+                    Category = "Bánh kẹo & Đồ ăn vặt",
+                    Price = 12000,
+                    CurrentStock = 80,
+                    MinStockLevel = 20,
+                    Description = "Snack khoai tây O'Star vị muối biển tự nhiên giòn tan thơm bùi đặc trưng.",
+                    ImageUrl = "images/products/ostar-salt.jpg"
+                },
+                new Product
+                {
+                    Id = 33,
+                    Sku = "OST-KC",
+                    Name = "Snack khoai tây O'Star vị Kim chi Hàn Quốc 63g",
+                    Unit = "Gói",
+                    Category = "Bánh kẹo & Đồ ăn vặt",
+                    Price = 12000,
+                    CurrentStock = 75,
+                    MinStockLevel = 20,
+                    Description = "Snack khoai tây lát O'Star vị Kim chi cay nhẹ chua ngọt đậm đà chuẩn vị Hàn.",
+                    ImageUrl = "images/products/ostar-kimchi.jpg"
+                },
+                new Product
+                {
+                    Id = 34,
+                    Sku = "OST-TB",
+                    Name = "Snack khoai tây O'Star vị Tảo biển 63g",
+                    Unit = "Gói",
+                    Category = "Bánh kẹo & Đồ ăn vặt",
+                    Price = 12000,
+                    CurrentStock = 60,
+                    MinStockLevel = 15,
+                    Description = "Snack khoai tây O'Star rắc tảo biển thơm lừng giòn tan vui miệng.",
+                    ImageUrl = "images/products/ostar-seaweed.jpg"
+                },
+                new Product
+                {
+                    Id = 35,
+                    Sku = "TOO-PM",
+                    Name = "Snack que Toonies vị Phô mai bùng nổ 65g",
+                    Unit = "Gói",
+                    Category = "Bánh kẹo & Đồ ăn vặt",
+                    Price = 7000,
+                    CurrentStock = 90,
+                    MinStockLevel = 20,
+                    Description = "Snack que Toonies giòn rụm ngập tràn sốt phô mai béo ngậy món ăn vặt tuổi thơ.",
+                    ImageUrl = "images/products/toonies.jpg"
+                },
+                new Product
+                {
+                    Id = 36,
+                    Sku = "CC-MUC",
+                    Name = "Snack mực lăn sa tế Chop Chop 50g",
+                    Unit = "Gói",
+                    Category = "Bánh kẹo & Đồ ăn vặt",
+                    Price = 7000,
+                    CurrentStock = 85,
+                    MinStockLevel = 20,
+                    Description = "Snack mực nướng sa tế Chop Chop giòn cay kích thích vị giác cực kỳ lôi cuốn.",
+                    ImageUrl = "images/products/chopchop.jpg"
+                },
+                new Product
+                {
+                    Id = 37,
+                    Sku = "TY-X",
+                    Name = "Snack que TaYo! X vị Tảo ngọt 60g",
+                    Unit = "Gói",
+                    Category = "Bánh kẹo & Đồ ăn vặt",
+                    Price = 8000,
+                    CurrentStock = 70,
+                    MinStockLevel = 15,
+                    Description = "Snack que rỗng TaYo! X vị tảo ngọt giòn xốp hương vị mới lạ hấp dẫn.",
+                    ImageUrl = "images/products/tayo-x.jpg"
+                },
+                new Product
+                {
+                    Id = 38,
+                    Sku = "TY-TBK",
+                    Name = "Snack bánh gạo TaYo! vị cay Tokbokki 60g",
+                    Unit = "Gói",
+                    Category = "Bánh kẹo & Đồ ăn vặt",
+                    Price = 8000,
+                    CurrentStock = 65,
+                    MinStockLevel = 15,
+                    Description = "Bánh gạo lắc vị Tokbokki Hàn Quốc cay ngọt giòn tan đậm đà.",
+                    ImageUrl = "images/products/tayo-tokbokki.jpg"
+                },
+                new Product
+                {
+                    Id = 39,
+                    Sku = "CORN-01",
+                    Name = "Snack bắp nướng bơ Corn Chip 56g",
+                    Unit = "Gói",
+                    Category = "Bánh kẹo & Đồ ăn vặt",
+                    Price = 7500,
+                    CurrentStock = 70,
+                    MinStockLevel = 15,
+                    Description = "Snack bắp nướng bơ sữa thơm ngậy giòn tan hương vị bắp ngọt tự nhiên.",
+                    ImageUrl = "images/products/cornchip.jpg"
+                },
+                new Product
+                {
+                    Id = 40,
+                    Sku = "STING-01",
+                    Name = "Nước tăng lực Sting hương dâu tây lon 320ml",
+                    Unit = "Lon",
+                    Category = "Nước giải khát & Bia",
+                    Price = 11000,
+                    CurrentStock = 120,
+                    MinStockLevel = 24,
+                    Description = "Nước tăng lực Sting dâu đỏ lon cao sảng khoái bổ sung năng lượng tức thì.",
+                    ImageUrl = "images/products/sting.jpg"
+                },
+                new Product
+                {
+                    Id = 41,
+                    Sku = "OM-BO",
+                    Name = "Mì khoai tây Omachi xốt bò hầm gói 82g",
+                    Unit = "Gói",
+                    Category = "Thực phẩm & Gia vị",
+                    Price = 9000,
+                    CurrentStock = 150,
+                    MinStockLevel = 30,
+                    Description = "Mì khoai tây Omachi sợi mì vàng dai mướt kết hợp xốt bò hầm thơm ngon không lo bị nóng.",
+                    ImageUrl = "images/products/omachi.jpg"
                 }
             };
         }

@@ -1,0 +1,45 @@
+USE [KhoBanLe];
+GO
+
+UPDATE dbo.Product SET ImageUrl = N'images/products/thienlong-tl027.jpg' WHERE Sku = N'TL-01';
+UPDATE dbo.Product SET ImageUrl = N'images/products/haohao.jpg' WHERE Sku = N'HH-01';
+UPDATE dbo.Product SET ImageUrl = N'images/products/vinamilk.jpg' WHERE Sku = N'VM-01';
+UPDATE dbo.Product SET ImageUrl = N'images/products/coca-cola.png' WHERE Sku = N'CC-01';
+UPDATE dbo.Product SET ImageUrl = N'images/products/st25-5kg.jpg' WHERE Sku = N'ST25-05';
+UPDATE dbo.Product SET ImageUrl = N'images/products/simply-1l.jpg' WHERE Sku = N'SP-01';
+UPDATE dbo.Product SET ImageUrl = N'images/products/sunlight-chanh.jpg' WHERE Sku = N'SL-01';
+UPDATE dbo.Product SET ImageUrl = N'images/products/pulppy-10cuon.jpg' WHERE Sku = N'PP-01';
+UPDATE dbo.Product SET ImageUrl = N'images/products/coca-cola.png' WHERE Sku = N'CC-LON';
+UPDATE dbo.Product SET ImageUrl = N'images/products/redbull.jpg' WHERE Sku = N'RB-01';
+UPDATE dbo.Product SET ImageUrl = N'images/products/romano-classic.jpg' WHERE Sku = N'RM-650';
+UPDATE dbo.Product SET ImageUrl = N'images/products/lays.jpg' WHERE Sku = N'LAY-01';
+UPDATE dbo.Product SET ImageUrl = N'images/products/chocopie-orion.jpg' WHERE Sku = N'CP-12';
+UPDATE dbo.Product SET ImageUrl = N'images/products/lavie-500ml.jpg' WHERE Sku = N'LV-500';
+UPDATE dbo.Product SET ImageUrl = N'images/products/heineken.png' WHERE Sku = N'HN-330';
+UPDATE dbo.Product SET ImageUrl = N'images/products/vinamilk.jpg' WHERE Sku = N'VM-LOC';
+UPDATE dbo.Product SET ImageUrl = N'images/products/vinamilk-yogurt.jpg' WHERE Sku = N'SC-VM';
+UPDATE dbo.Product SET ImageUrl = N'images/products/ongtho-do.jpg' WHERE Sku = N'OT-380';
+UPDATE dbo.Product SET ImageUrl = N'images/products/haohao.jpg' WHERE Sku = N'HH-GOI';
+UPDATE dbo.Product SET ImageUrl = N'images/products/namngu.jpg' WHERE Sku = N'NN-900';
+UPDATE dbo.Product SET ImageUrl = N'images/products/knorr.jpg' WHERE Sku = N'KN-400';
+UPDATE dbo.Product SET ImageUrl = N'images/products/chinsu.jpg' WHERE Sku = N'CS-250';
+UPDATE dbo.Product SET ImageUrl = N'images/products/colgate.jpg' WHERE Sku = N'CG-180';
+UPDATE dbo.Product SET ImageUrl = N'images/products/omo.jpg' WHERE Sku = N'OM-2KG';
+UPDATE dbo.Product SET ImageUrl = N'images/products/comfort-18l.jpg' WHERE Sku = N'CF-18';
+UPDATE dbo.Product SET ImageUrl = N'images/products/chupachups-panda.jpg' WHERE Sku = N'CC-PD';
+UPDATE dbo.Product SET ImageUrl = N'images/products/cosy-marie.jpg' WHERE Sku = N'CS-288';
+UPDATE dbo.Product SET ImageUrl = N'images/products/campus-a5.jpg' WHERE Sku = N'CP-A5';
+UPDATE dbo.Product SET ImageUrl = N'images/products/c2-lemon.jpg' WHERE Sku = N'C2-01';
+UPDATE dbo.Product SET ImageUrl = N'images/products/swing-steak.jpg' WHERE Sku = N'SW-NY';
+UPDATE dbo.Product SET ImageUrl = N'images/products/swing-chicken.jpg' WHERE Sku = N'SW-GA';
+UPDATE dbo.Product SET ImageUrl = N'images/products/ostar-salt.jpg' WHERE Sku = N'OST-TN';
+UPDATE dbo.Product SET ImageUrl = N'images/products/ostar-kimchi.jpg' WHERE Sku = N'OST-KC';
+UPDATE dbo.Product SET ImageUrl = N'images/products/ostar-seaweed.jpg' WHERE Sku = N'OST-TB';
+UPDATE dbo.Product SET ImageUrl = N'images/products/toonies.jpg' WHERE Sku = N'TOO-PM';
+UPDATE dbo.Product SET ImageUrl = N'images/products/chopchop.jpg' WHERE Sku = N'CC-MUC';
+UPDATE dbo.Product SET ImageUrl = N'images/products/tayo-x.jpg' WHERE Sku = N'TY-X';
+UPDATE dbo.Product SET ImageUrl = N'images/products/tayo-tokbokki.jpg' WHERE Sku = N'TY-TBK';
+UPDATE dbo.Product SET ImageUrl = N'images/products/cornchip.jpg' WHERE Sku = N'CORN-01';
+UPDATE dbo.Product SET ImageUrl = N'images/products/sting.jpg' WHERE Sku = N'STING-01';
+UPDATE dbo.Product SET ImageUrl = N'images/products/omachi.jpg' WHERE Sku = N'OM-BO';
+GO
