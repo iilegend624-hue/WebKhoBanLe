@@ -886,33 +886,74 @@ body {
 }
 
 /* =========================================================================
-   PRINT MEDIA QUERY: In hóa đơn POS chuẩn nhiệt 80mm chuyên nghiệp
+   PRINT MEDIA QUERY: In hóa đơn POS chuẩn nhiệt 80mm & A4 sắc nét
    ========================================================================= */
+.print-only-invoice {
+    display: none;
+}
+
 @media print {
-    body {
+    @page {
+        size: 80mm auto;
+        margin: 4mm 2mm;
+    }
+
+    html, body {
         background: #ffffff !important;
         color: #000000 !important;
-    }
-    body * {
-        visibility: hidden;
-    }
-    .print-only-area, .print-only-area * {
-        visibility: visible;
-    }
-    .print-only-area {
-        position: absolute;
-        left: 0;
-        top: 0;
+        margin: 0 !important;
+        padding: 0 !important;
         width: 100% !important;
-        max-width: 80mm !important;
-        margin: 0 auto !important;
-        padding: 4mm !important;
-        border: none !important;
-        box-shadow: none !important;
-        background: #ffffff !important;
-        color: #000000 !important;
+        height: auto !important;
+        font-size: 12px !important;
     }
-    header, nav, footer, .btn, .no-print, .sapo-top-header, .toast-notice, .modal-backdrop, .modal-header, .modal-footer {
+
+    /* Ẩn hoàn toàn toàn bộ thành phần giao diện màn hình để không bị trang trắng */
+    .pos-screen-view,
+    .no-print,
+    header,
+    nav,
+    footer,
+    .sapo-top-header,
+    .sapo-hero-banner,
+    .sapo-sidebar-box,
+    .sapo-sort-bar-container,
+    .modal-backdrop,
+    .modal,
+    .toast-notice,
+    #blazor-error-ui,
+    .cart-drawer-container,
+    .btn,
+    button,
+    .btn-group {
         display: none !important;
     }
+
+    /* Hiển thị duy nhất hóa đơn bán lẻ POS */
+    .print-only-invoice {
+        display: block !important;
+        position: relative !important;
+        width: 100% !important;
+        max-width: 78mm !important;
+        margin: 0 auto !important;
+        padding: 2mm !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-family: 'Courier New', Courier, monospace, 'Segoe UI', Tahoma, sans-serif !important;
+        box-shadow: none !important;
+        border: none !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    .print-only-invoice * {
+        color: #000000 !important;
+        background: transparent !important;
+    }
+
+    .print-only-invoice table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+    }
 }
+

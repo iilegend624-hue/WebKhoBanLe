@@ -1,4 +1,4 @@
-﻿using KhoBanLe.CoreBusiness;
+using KhoBanLe.CoreBusiness;
 using KhoBanLe.UseCases.PluginInterfaces.DataStore;
 
 namespace KhoBanLe.DataStore.HardCoded
@@ -543,6 +543,426 @@ namespace KhoBanLe.DataStore.HardCoded
                     MinStockLevel = 30,
                     Description = "Mì khoai tây Omachi sợi mì vàng dai mướt kết hợp xốt bò hầm thơm ngon không lo bị nóng.",
                     ImageUrl = "images/products/omachi.jpg"
+                },
+                new Product
+                {
+                    Id = 42,
+                    Sku = "AQ-500",
+                    Name = "Nước tinh khiết Aquafina chai 500ml",
+                    Unit = "Chai",
+                    Category = "Nước giải khát & Bia",
+                    Price = 6000,
+                    OriginalPrice = 7000,
+                    CurrentStock = 180,
+                    MinStockLevel = 24,
+                    Description = "Nước uống tinh khiết Aquafina công nghệ lọc Hydro-7 thanh khiết sảng khoái.",
+                    ImageUrl = "images/products/aquafina-500ml.jpg"
+                },
+                new Product
+                {
+                    Id = 43,
+                    Sku = "NB1-330",
+                    Name = "Nước tăng lực Number 1 chai thủy tinh 330ml",
+                    Unit = "Chai",
+                    Category = "Nước giải khát & Bia",
+                    Price = 10000,
+                    OriginalPrice = 12000,
+                    CurrentStock = 120,
+                    MinStockLevel = 24,
+                    Description = "Nước tăng lực Number 1 chai thủy tinh nắp khoén bật vị ngon truyền thống bừng tỉnh năng lượng.",
+                    ImageUrl = "images/products/number1-330ml.jpg"
+                },
+                new Product
+                {
+                    Id = 44,
+                    Sku = "KD-455",
+                    Name = "Trà xanh Không Độ vị chanh chai 455ml",
+                    Unit = "Chai",
+                    Category = "Nước giải khát & Bia",
+                    Price = 10000,
+                    OriginalPrice = 11000,
+                    CurrentStock = 95,
+                    MinStockLevel = 24,
+                    Description = "Trà xanh Không Độ chiết xuất lá trà Thái Nguyên dồi dào EGCG giải nhiệt cuộc sống.",
+                    ImageUrl = "images/products/khongdo-455ml.jpg"
+                },
+                new Product
+                {
+                    Id = 45,
+                    Sku = "PEP-320",
+                    Name = "Nước ngọt Pepsi vị nguyên bản lon 320ml",
+                    Unit = "Lon",
+                    Category = "Nước giải khát & Bia",
+                    Price = 11000,
+                    OriginalPrice = 12000,
+                    CurrentStock = 140,
+                    MinStockLevel = 24,
+                    Description = "Nước giải khát có ga Pepsi sảng khoái bùng nổ vị cola mát lạnh cực đã.",
+                    ImageUrl = "images/products/pepsi-320ml.jpg"
+                },
+                new Product
+                {
+                    Id = 46,
+                    Sku = "7UP-320",
+                    Name = "Nước ngọt 7Up vị chanh lon 320ml",
+                    Unit = "Lon",
+                    Category = "Nước giải khát & Bia",
+                    Price = 11000,
+                    OriginalPrice = 12000,
+                    CurrentStock = 110,
+                    MinStockLevel = 24,
+                    Description = "Nước giải khát có ga 7Up hương chanh tươi thanh mát tiêu hóa tốt sảng khoái ngày hè.",
+                    ImageUrl = "images/products/7up-320ml.jpg"
+                },
+                new Product
+                {
+                    Id = 47,
+                    Sku = "SG-330",
+                    Name = "Bia Sài Gòn Special rồng vàng lon 330ml",
+                    Unit = "Lon",
+                    Category = "Nước giải khát & Bia",
+                    Price = 16000,
+                    OriginalPrice = 18000,
+                    CurrentStock = 90,
+                    MinStockLevel = 24,
+                    Description = "Bia Sài Gòn Special 100% lúa mạch hảo hạng hương vị đậm đà khó quên.",
+                    ImageUrl = "images/products/saigon-special.jpg"
+                },
+                new Product
+                {
+                    Id = 48,
+                    Sku = "TP-327",
+                    Name = "Nước cam ép Minute Maid Teppy tép cam 327ml",
+                    Unit = "Chai",
+                    Category = "Nước giải khát & Bia",
+                    Price = 12000,
+                    OriginalPrice = 13500,
+                    CurrentStock = 80,
+                    MinStockLevel = 20,
+                    Description = "Nước cam ép Teppy dồi dào tép cam mọng nước thơm ngon giàu Vitamin C.",
+                    ImageUrl = "images/products/teppy-orange.jpg"
+                },
+                new Product
+                {
+                    Id = 49,
+                    Sku = "MUOI-1KG",
+                    Name = "Muối tinh sấy iot Bạc Liêu cao cấp gói 1kg",
+                    Unit = "Gói",
+                    Category = "Thực phẩm & Gia vị",
+                    Price = 6000,
+                    OriginalPrice = 7000,
+                    CurrentStock = 150,
+                    MinStockLevel = 30,
+                    Description = "Muối ăn tinh sấy hạt mịn bổ sung vi chất I-ốt phòng ngừa bướu cổ gói 1kg tiện lợi.",
+                    ImageUrl = "images/products/muoi-iot-1kg.jpg"
+                },
+                new Product
+                {
+                    Id = 50,
+                    Sku = "DG-1KG",
+                    Name = "Đường cát trắng Biên Hòa Pure tinh luyện 1kg",
+                    Unit = "Gói",
+                    Category = "Thực phẩm & Gia vị",
+                    Price = 28000,
+                    OriginalPrice = 30000,
+                    CurrentStock = 90,
+                    MinStockLevel = 20,
+                    Description = "Đường tinh luyện Biên Hòa Pure từ 100% mía đường tự nhiên ngọt thanh tinh khiết.",
+                    ImageUrl = "images/products/duong-bienhoa-1kg.jpg"
+                },
+                new Product
+                {
+                    Id = 51,
+                    Sku = "AJI-454",
+                    Name = "Bột ngọt Ajinomoto hạt lớn gói 454g",
+                    Unit = "Gói",
+                    Category = "Thực phẩm & Gia vị",
+                    Price = 34000,
+                    OriginalPrice = 36000,
+                    CurrentStock = 75,
+                    MinStockLevel = 15,
+                    Description = "Mì chính Ajinomoto tinh khiết lên men tự nhiên từ mật mía và tinh bột sắn thơm ngon món ăn.",
+                    ImageUrl = "images/products/ajinomoto-454g.jpg"
+                },
+                new Product
+                {
+                    Id = 52,
+                    Sku = "TTT-500",
+                    Name = "Nước tương Tam Thái Tử Nhất Ca sánh đậm 500ml",
+                    Unit = "Chai",
+                    Category = "Thực phẩm & Gia vị",
+                    Price = 16000,
+                    OriginalPrice = 18000,
+                    CurrentStock = 85,
+                    MinStockLevel = 20,
+                    Description = "Nước tương Tam Thái Tử Nhất Ca đậu nành tự nhiên không 3-MCPD chấm hay xào đều ngon.",
+                    ImageUrl = "images/products/tamthaitu-500ml.jpg"
+                },
+                new Product
+                {
+                    Id = 53,
+                    Sku = "TC-155",
+                    Name = "Cá nục sốt cà Three Lady Cooks Ba Cô Gái 155g",
+                    Unit = "Hộp",
+                    Category = "Thực phẩm & Gia vị",
+                    Price = 17000,
+                    OriginalPrice = 19000,
+                    CurrentStock = 95,
+                    MinStockLevel = 20,
+                    Description = "Cá nục sốt cà chua Ba Cô Gái thịt cá chắc ngọt sốt đậm đà ăn liền tiện lợi.",
+                    ImageUrl = "images/products/bacogai-155g.jpg"
+                },
+                new Product
+                {
+                    Id = 54,
+                    Sku = "XX-VS",
+                    Name = "Xúc xích tiệt trùng Vissan heo gói 5 cây 175g",
+                    Unit = "Gói",
+                    Category = "Thực phẩm & Gia vị",
+                    Price = 22000,
+                    OriginalPrice = 24000,
+                    CurrentStock = 80,
+                    MinStockLevel = 20,
+                    Description = "Xúc xích dinh dưỡng heo Vissan thơm bùi giàu đạm ăn liền hoặc ăn kèm mì tôm.",
+                    ImageUrl = "images/products/xucxich-vissan.jpg"
+                },
+                new Product
+                {
+                    Id = 55,
+                    Sku = "KM-90",
+                    Name = "Mì tôm Kokomi Đại 90 tôm chua cay gói 90g",
+                    Unit = "Gói",
+                    Category = "Thực phẩm & Gia vị",
+                    Price = 4000,
+                    OriginalPrice = 4500,
+                    CurrentStock = 250,
+                    MinStockLevel = 50,
+                    Description = "Mì Kokomi Đại 90 sợi mì dai giòn thơm bùi xốt tôm chua cay đậm đà ăn no đã miệng.",
+                    ImageUrl = "images/products/kokomi-90g.jpg"
+                },
+                new Product
+                {
+                    Id = 56,
+                    Sku = "DN-82",
+                    Name = "Mì Đệ Nhất thịt bằm rau củ gói 82g",
+                    Unit = "Gói",
+                    Category = "Thực phẩm & Gia vị",
+                    Price = 7500,
+                    OriginalPrice = 8500,
+                    CurrentStock = 130,
+                    MinStockLevel = 30,
+                    Description = "Mì ăn liền Đệ Nhất Acecook nước súp ngọt thanh thịt bằm bổ sung tinh nghệ thơm ngon.",
+                    ImageUrl = "images/products/denhat-82g.jpg"
+                },
+                new Product
+                {
+                    Id = 57,
+                    Sku = "BM-KD",
+                    Name = "Bánh mì tươi Kinh Đô bơ sữa thơm mềm 50g",
+                    Unit = "Gói",
+                    Category = "Bánh kẹo & Đồ ăn vặt",
+                    Price = 8000,
+                    OriginalPrice = 9000,
+                    CurrentStock = 60,
+                    MinStockLevel = 15,
+                    Description = "Bánh mì hoa cúc bơ sữa Kinh Đô ruột mềm thơm ngọt béo bữa sáng tiện lợi.",
+                    ImageUrl = "images/products/banhmi-kinhdo.jpg"
+                },
+                new Product
+                {
+                    Id = 58,
+                    Sku = "OO-150",
+                    Name = "Bánh gạo One One vị ngọt dịu truyền thống 150g",
+                    Unit = "Gói",
+                    Category = "Bánh kẹo & Đồ ăn vặt",
+                    Price = 26000,
+                    OriginalPrice = 28000,
+                    CurrentStock = 70,
+                    MinStockLevel = 15,
+                    Description = "Bánh gạo giòn tan One One làm từ 100% hạt gạo thơm Việt Nam vị ngọt dịu thanh tao.",
+                    ImageUrl = "images/products/oneone-150g.jpg"
+                },
+                new Product
+                {
+                    Id = 59,
+                    Sku = "NB-168",
+                    Name = "Bánh xốp Nabati kem phô mai béo ngậy hộp 168g",
+                    Unit = "Hộp",
+                    Category = "Bánh kẹo & Đồ ăn vặt",
+                    Price = 22000,
+                    OriginalPrice = 25000,
+                    CurrentStock = 85,
+                    MinStockLevel = 20,
+                    Description = "Bánh quế xốp Richeese Nabati ngập tràn lớp kem phô mai thơm béo đậm đà hấp dẫn.",
+                    ImageUrl = "images/products/nabati-phomai.jpg"
+                },
+                new Product
+                {
+                    Id = 60,
+                    Sku = "OR-133",
+                    Name = "Bánh quy kẹp kem vani Oreo sôcôla gói 133g",
+                    Unit = "Gói",
+                    Category = "Bánh kẹo & Đồ ăn vặt",
+                    Price = 18000,
+                    OriginalPrice = 20000,
+                    CurrentStock = 90,
+                    MinStockLevel = 20,
+                    Description = "Bánh quy sôcôla kẹp kem vani Oreo thơm lừng chấm sữa ăn cực ngon miệng.",
+                    ImageUrl = "images/products/oreo-133g.jpg"
+                },
+                new Product
+                {
+                    Id = 61,
+                    Sku = "CA-58",
+                    Name = "Kẹo cao su Cool Air hương bạc hà khuynh diệp hũ 58.4g",
+                    Unit = "Hũ",
+                    Category = "Bánh kẹo & Đồ ăn vặt",
+                    Price = 28000,
+                    OriginalPrice = 30000,
+                    CurrentStock = 65,
+                    MinStockLevel = 15,
+                    Description = "Kẹo cao su không đường Cool Air sảng khoái the mát tức thì cho hơi thở thơm tho.",
+                    ImageUrl = "images/products/coolair-58g.jpg"
+                },
+                new Product
+                {
+                    Id = 62,
+                    Sku = "AL-120",
+                    Name = "Kẹo viên Alpenliebe hương dâu kem ngọt ngào gói 120g",
+                    Unit = "Gói",
+                    Category = "Bánh kẹo & Đồ ăn vặt",
+                    Price = 14000,
+                    OriginalPrice = 16000,
+                    CurrentStock = 95,
+                    MinStockLevel = 20,
+                    Description = "Kẹo ngậm Alpenliebe hương dâu sữa ngọt ngào béo ngậy món ăn vặt được mọi lứa tuổi yêu thích.",
+                    ImageUrl = "images/products/alpenliebe-dau.jpg"
+                },
+                new Product
+                {
+                    Id = 63,
+                    Sku = "ML-180",
+                    Name = "Sữa lúa mạch Nestlé Milo Activ-Go 180ml (lốc 4 hộp)",
+                    Unit = "Lốc",
+                    Category = "Sữa & Chế phẩm sữa",
+                    Price = 32000,
+                    OriginalPrice = 35000,
+                    CurrentStock = 85,
+                    MinStockLevel = 20,
+                    Description = "Sữa lúa mạch Milo giàu dinh dưỡng vitamin khoáng chất tiếp thêm năng lượng bền bỉ.",
+                    ImageUrl = "images/products/milo-180ml.jpg"
+                },
+                new Product
+                {
+                    Id = 64,
+                    Sku = "TH-180",
+                    Name = "Sữa tươi TH true MILK ít đường 180ml (lốc 4 hộp)",
+                    Unit = "Lốc",
+                    Category = "Sữa & Chế phẩm sữa",
+                    Price = 36000,
+                    OriginalPrice = 38000,
+                    CurrentStock = 75,
+                    MinStockLevel = 20,
+                    Description = "Sữa tươi tiệt trùng TH true MILK nguyên chất từ trang trại sạch chuẩn quốc tế.",
+                    ImageUrl = "images/products/th-truemilk-180ml.jpg"
+                },
+                new Product
+                {
+                    Id = 65,
+                    Sku = "PB-65",
+                    Name = "Sữa chua uống men sống Probi Vinamilk (lốc 5 chai x 65ml)",
+                    Unit = "Lốc",
+                    Category = "Sữa & Chế phẩm sữa",
+                    Price = 26000,
+                    OriginalPrice = 28000,
+                    CurrentStock = 70,
+                    MinStockLevel = 15,
+                    Description = "Sữa chua uống Probi chứa 65 tỷ lợi khuẩn tăng cường đề kháng hỗ trợ tiêu hóa khỏe mạnh.",
+                    ImageUrl = "images/products/probi-65ml.jpg"
+                },
+                new Product
+                {
+                    Id = 66,
+                    Sku = "LB-90",
+                    Name = "Xà bông cục Lifebuoy bảo vệ vượt trội 90g",
+                    Unit = "Cục",
+                    Category = "Hóa mỹ phẩm & Đồ gia dụng",
+                    Price = 16000,
+                    OriginalPrice = 18000,
+                    CurrentStock = 100,
+                    MinStockLevel = 25,
+                    Description = "Xà phòng bánh Lifebuoy ion bạc bảo vệ khỏi 99.9% vi khuẩn gây bệnh an toàn cả nhà.",
+                    ImageUrl = "images/products/lifebuoy-soap.jpg"
+                },
+                new Product
+                {
+                    Id = 67,
+                    Sku = "VIM-880",
+                    Name = "Nước tẩy bồn cầu Vim diệt khuẩn đậm đặc xanh 880ml",
+                    Unit = "Chai",
+                    Category = "Hóa mỹ phẩm & Đồ gia dụng",
+                    Price = 38000,
+                    OriginalPrice = 42000,
+                    CurrentStock = 50,
+                    MinStockLevel = 12,
+                    Description = "Nước tẩy bồn cầu Vim công thức diệt sạch mầm bệnh tẩy sạch mảng bám ố vàng nhanh chóng.",
+                    ImageUrl = "images/products/vim-880ml.jpg"
+                },
+                new Product
+                {
+                    Id = 68,
+                    Sku = "SL-LS",
+                    Name = "Nước lau sàn Sunlight tinh dầu hoa quế chai 1kg",
+                    Unit = "Chai",
+                    Category = "Hóa mỹ phẩm & Đồ gia dụng",
+                    Price = 34000,
+                    OriginalPrice = 38000,
+                    CurrentStock = 45,
+                    MinStockLevel = 12,
+                    Description = "Nước lau sàn Sunlight hoạt chất tẩy sạch sáng bóng lưu hương quế tự nhiên xua đuổi côn trùng.",
+                    ImageUrl = "images/products/sunlight-lausan.jpg"
+                },
+                new Product
+                {
+                    Id = 69,
+                    Sku = "LB-450",
+                    Name = "Nước rửa tay Lifebuoy bảo vệ vượt trội túi 450ml",
+                    Unit = "Túi",
+                    Category = "Hóa mỹ phẩm & Đồ gia dụng",
+                    Price = 65000,
+                    OriginalPrice = 70000,
+                    CurrentStock = 40,
+                    MinStockLevel = 10,
+                    Description = "Nước rửa tay diệt khuẩn Lifebuoy túi tiết kiệm bảo vệ bàn tay mềm mại sạch khuẩn trong 10 giây.",
+                    ImageUrl = "images/products/lifebuoy-handwash.jpg"
+                },
+                new Product
+                {
+                    Id = 70,
+                    Sku = "EM-10",
+                    Name = "Khăn giấy vệ sinh E'mos Classic 2 lớp lốc 10 cuộn",
+                    Unit = "Lốc",
+                    Category = "Hóa mỹ phẩm & Đồ gia dụng",
+                    Price = 72000,
+                    OriginalPrice = 78000,
+                    CurrentStock = 35,
+                    MinStockLevel = 10,
+                    Description = "Giấy vệ sinh cuộn E'mos Classic 100% bột giấy tự nhiên mềm mịn dai và thấm hút tốt.",
+                    ImageUrl = "images/products/emos-10cuon.jpg"
+                },
+                new Product
+                {
+                    Id = 71,
+                    Sku = "CG-BC",
+                    Name = "Bàn chải đánh răng Colgate Slim Soft than hoạt tính",
+                    Unit = "Cái",
+                    Category = "Hóa mỹ phẩm & Đồ gia dụng",
+                    Price = 22000,
+                    OriginalPrice = 25000,
+                    CurrentStock = 80,
+                    MinStockLevel = 20,
+                    Description = "Bàn chải Colgate lông chải siêu mềm mảnh phủ than hoạt tính len sâu kẽ răng làm sạch hiệu quả.",
+                    ImageUrl = "images/products/colgate-banchai.jpg"
                 }
             };
         }

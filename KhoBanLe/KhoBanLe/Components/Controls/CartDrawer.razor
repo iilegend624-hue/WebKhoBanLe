@@ -100,9 +100,22 @@
                     <div>
                         <select class="form-select form-select-sm" @bind="paymentMethod">
                             <option value="Tiền mặt">💵 Tiền mặt</option>
-                            <option value="Chuyển khoản QR">📱 Chuyển khoản VietQR</option>
+                            <option value="Chuyển khoản QR">📱 Quét mã VietQR (Vietcombank)</option>
                             <option value="Quẹt thẻ POS">💳 Quẹt thẻ POS</option>
                         </select>
+                        @if (paymentMethod == "Chuyển khoản QR")
+                        {
+                            <div class="mt-2 p-2 bg-white rounded-3 border small text-start shadow-xs">
+                                <div class="d-flex align-items-center gap-2">
+                                    <img src="images/vcb_qr_white_card.png" alt="QR Vietcombank" style="width: 52px; height: 52px; object-fit: contain;" class="rounded border p-0.5" />
+                                    <div style="font-size: 0.78rem;">
+                                        <div class="fw-bold text-success">Vietcombank &bull; NGUYEN TRUNG QUYET</div>
+                                        <div>STK: <strong class="text-dark"><code>1041587637</code></strong></div>
+                                        <div class="text-muted" style="font-size: 0.72rem;">Cú pháp: <code>Thanh toan POS</code></div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
                     </div>
                 </div>
             }
@@ -137,12 +150,12 @@
                         @if (isProcessing)
                         {
                             <span class="spinner-border spinner-border-sm"></span>
-                            <span>Đang thanh toán...</span>
+                            <span>Đang thanh toán & trừ tồn kho...</span>
                         }
                         else
                         {
                             <i class="bi bi-lightning-charge-fill"></i>
-                            <span>Thanh Toán & Trừ Tồn Kho Ngay</span>
+                            <span>THANH TOÁN & TRỪ TỒN KHO NGAY</span>
                         }
                     </button>
 
@@ -198,7 +211,7 @@
 
         if (result.Success)
         {
-            alertMsg = $"Thanh toán thành công phiếu {result.IssueNumber}! Tổng tiền: {result.TotalAmount:N0} đ";
+            alertMsg = $"Thanh toán thành công đơn {result.PosOrderNumber}! Đã trừ hàng còn tồn trong kho (Phiếu xuất #{result.IssueNumber}).";
             isSuccess = true;
         }
         else
