@@ -93,5 +93,25 @@ namespace KhoBanLe.DataStore.HardCoded
             }
             return Task.CompletedTask;
         }
+
+        public Task<bool> HasGoodsReceiptsAsync(int id)
+        {
+            // IDs 1-4 have receipts in seed data
+            bool hasReceipts = id <= 4;
+            return Task.FromResult(hasReceipts);
+        }
+
+        public Task DeleteSupplierAsync(int id)
+        {
+            lock (_suppliers)
+            {
+                var s = _suppliers.FirstOrDefault(x => x.Id == id);
+                if (s != null)
+                {
+                    _suppliers.Remove(s);
+                }
+            }
+            return Task.CompletedTask;
+        }
     }
 }

@@ -5,397 +5,451 @@
 @inject IViewGoodsReceiptUseCase ViewReceipts
 @inject IViewGoodsIssueUseCase ViewIssues
 @inject UserRoleService RoleService
+@inject NavigationManager Nav
 
-<PageTitle>Tổng Quan Quản Lý Kho Bán Lẻ & POS - KhoBanLe</PageTitle>
+<PageTitle>Tổng Quan Quản Lý Kho Bán Lẻ - KhoBanLe</PageTitle>
 
-<div class="container-fluid px-3 px-xl-4 py-3">
+<div class="container-fluid px-0">
     <!-- 1. EXECUTIVE WELCOME & QUICK ACTION BAR -->
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 pb-3 border-bottom">
         <div>
             <div class="d-flex align-items-center gap-2 mb-1">
                 <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-2.5 py-1 rounded-pill fw-semibold">
-                    <i class="bi bi-shield-check me-1"></i>Hệ Thống Trực Tuyến &bull; Dữ Liệu Đồng Bộ 100%
+                    <i class="bi bi-shield-check me-1"></i>Hệ Thống Trực Tuyến &bull; SQL Server Dapper Live
                 </span>
                 <span class="badge bg-light text-secondary border px-2 py-1 rounded-pill small">
-                    Clean Architecture 4 Tầng .NET 8
+                    Clean Architecture 4 Tầng &bull; Capstone ECO2415
                 </span>
             </div>
             <h2 class="fw-bold text-dark mb-1" style="letter-spacing: -0.02em;">
-                Tổng Quan Quản Lý Kho & Bán Hàng Tại Quầy (POS)
+                Tổng Quan Quản Lý Kho Bán Lẻ (Retail Inventory)
             </h2>
             <p class="text-muted small mb-0">
-                Theo dõi xuất – nhập – tồn kho thời gian thực, vận hành quầy thu ngân và kiểm soát luồng giao dịch an toàn.
+                Theo dõi xuất – nhập – tồn kho thời gian thực, quản lý ngưỡng tồn an toàn và kiểm soát luồng giao dịch chứng từ.
             </p>
         </div>
 
         <!-- Quick Fast Actions -->
         <div class="d-flex flex-wrap align-items-center gap-2">
-            <a href="cart" class="btn btn-warning text-dark rounded-pill fw-bold px-3.5 py-2 shadow-xs d-flex align-items-center gap-1.5">
-                <i class="bi bi-shop fs-6"></i>
-                <span>Mở Quầy POS</span>
+            <a href="receipts/create" class="btn btn-success rounded-pill fw-semibold px-3 py-2 shadow-xs d-flex align-items-center gap-1.5" title="Lập phiếu nhập kho">
+                <i class="bi bi-plus-circle me-1"></i>Lập Phiếu Nhập
             </a>
-            <a href="products" class="btn btn-primary rounded-pill fw-bold px-3.5 py-2 shadow-xs d-flex align-items-center gap-1.5">
-                <i class="bi bi-boxes fs-6"></i>
-                <span>Danh Mục Hàng</span>
+            <a href="issues/create" class="btn btn-danger rounded-pill fw-semibold px-3 py-2 shadow-xs d-flex align-items-center gap-1.5" title="Lập phiếu xuất kho">
+                <i class="bi bi-dash-circle me-1"></i>Lập Phiếu Xuất
             </a>
-            <a href="receipts/create" class="btn btn-outline-success rounded-pill fw-semibold px-3 py-2 d-flex align-items-center gap-1.5">
-                <i class="bi bi-plus-circle me-1"></i>Phiếu Nhập
-            </a>
-            <a href="issues/create" class="btn btn-outline-danger rounded-pill fw-semibold px-3 py-2 d-flex align-items-center gap-1.5">
-                <i class="bi bi-dash-circle me-1"></i>Phiếu Xuất
+            <a href="cart" class="btn btn-warning text-dark rounded-pill fw-bold px-3 py-2 shadow-xs d-flex align-items-center gap-1.5" title="Mở quầy POS">
+                <i class="bi bi-shop me-1"></i>Quầy POS
             </a>
             <a href="reports" class="btn btn-light border rounded-pill fw-semibold px-3 py-2 text-dark d-flex align-items-center gap-1.5" title="Báo cáo NXT & Xuất Excel">
-                <i class="bi bi-file-earmark-excel text-success me-1"></i>Báo Cáo
-            </a>
-            <a href="guide" class="btn btn-light border rounded-pill fw-semibold px-3 py-2 text-secondary" title="Xem phiếu chấm đồ án">
-                <i class="bi bi-mortarboard text-warning me-1"></i>Phiếu Chấm
+                <i class="bi bi-file-earmark-excel text-success me-1"></i>Báo Cáo NXT
             </a>
         </div>
     </div>
 
-    <!-- 2. 4 EXECUTIVE KPI STAT CARDS -->
-    <div class="row g-3 mb-4">
-        <!-- Card 1: Tổng SKU -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="stat-card h-100">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="text-muted fw-semibold small text-uppercase" style="letter-spacing: 0.04em;">Tổng Mặt Hàng (SKU)</span>
-                    <div class="stat-icon bg-success bg-opacity-10 text-success">
-                        <i class="bi bi-boxes"></i>
+    @if (isLoading)
+    {
+        <div class="modern-card p-5 text-center my-4">
+            <div class="spinner-border text-success mb-3" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Đang tải...</span>
+            </div>
+            <h5 class="fw-bold text-dark">Đang đồng bộ dữ liệu thời gian thực từ SQL Server...</h5>
+            <p class="text-muted small mb-0">Vui lòng chờ trong giây lát.</p>
+        </div>
+    }
+    else if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger rounded-3 shadow-xs mb-4" role="alert">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-exclamation-triangle-fill fs-4 text-danger"></i>
+                <div>
+                    <h6 class="fw-bold mb-0">Lỗi truy vấn dữ liệu từ SQL Server</h6>
+                    <div>@errorMessage</div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- 2. 6 EXECUTIVE KPI STAT CARDS (CLICKABLE WITH SPECIFIC FILTERS) -->
+        <div class="row g-3 mb-4">
+            <!-- Card 1: Tổng SKU -->
+            <div class="col-12 col-sm-6 col-xl-2">
+                <a href="products" class="stat-card h-100 d-block text-decoration-none transition-all hover-shadow">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted fw-semibold small text-uppercase" style="letter-spacing: 0.04em;">Số Mặt Hàng</span>
+                        <div class="stat-icon bg-success bg-opacity-10 text-success">
+                            <i class="bi bi-boxes"></i>
+                        </div>
+                    </div>
+                    <div class="h3 fw-bold mb-1 text-dark">@totalProducts <span class="fs-6 fw-normal text-muted">SKU</span></div>
+                    <div class="d-flex align-items-center gap-1 small text-success fw-medium">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <span>@activeCategories nhóm hàng</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Card 2: Tổng đơn vị tồn thực tế -->
+            <div class="col-12 col-sm-6 col-xl-2">
+                <a href="products" class="stat-card h-100 d-block text-decoration-none transition-all hover-shadow">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted fw-semibold small text-uppercase" style="letter-spacing: 0.04em;">Tổng Đơn Vị Tồn</span>
+                        <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                            <i class="bi bi-layers-fill"></i>
+                        </div>
+                    </div>
+                    <div class="h3 fw-bold mb-1 text-dark">@totalInventoryUnits.ToString("N0")</div>
+                    <div class="d-flex align-items-center gap-1 small text-muted">
+                        <i class="bi bi-info-circle"></i>
+                        <span>Tổng số cái / gói / lon</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Card 3: Cảnh báo tồn thấp -->
+            <div class="col-12 col-sm-6 col-xl-2">
+                <a href="products?stock=low_stock" class="stat-card h-100 d-block text-decoration-none transition-all hover-shadow @(lowStockCount > 0 ? "border-warning" : "")">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted fw-semibold small text-uppercase" style="letter-spacing: 0.04em;">Tồn Dưới Min</span>
+                        <div class="stat-icon bg-warning bg-opacity-15 text-warning-emphasis">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                        </div>
+                    </div>
+                    <div class="h3 fw-bold mb-1 @(lowStockCount > 0 ? "text-warning" : "text-dark")">
+                        @lowStockCount <span class="fs-6 fw-normal text-muted">mặt hàng</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-1 small @(lowStockCount > 0 ? "text-warning fw-semibold" : "text-success")">
+                        <i class="bi @(lowStockCount > 0 ? "bi-bell-fill" : "bi-shield-check")"></i>
+                        <span>@(lowStockCount > 0 ? "Cần nhập thêm" : "Đạt định mức an toàn")</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Card 4: Mặt hàng hết hàng -->
+            <div class="col-12 col-sm-6 col-xl-2">
+                <a href="products?stock=out_of_stock" class="stat-card h-100 d-block text-decoration-none transition-all hover-shadow @(outOfStockCount > 0 ? "border-danger" : "")">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted fw-semibold small text-uppercase" style="letter-spacing: 0.04em;">Hết Hàng (Tồn = 0)</span>
+                        <div class="stat-icon bg-danger bg-opacity-10 text-danger">
+                            <i class="bi bi-x-octagon-fill"></i>
+                        </div>
+                    </div>
+                    <div class="h3 fw-bold mb-1 @(outOfStockCount > 0 ? "text-danger" : "text-dark")">
+                        @outOfStockCount <span class="fs-6 fw-normal text-muted">mặt hàng</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-1 small @(outOfStockCount > 0 ? "text-danger fw-semibold" : "text-success")">
+                        <i class="bi bi-shield-exclamation"></i>
+                        <span>@(outOfStockCount > 0 ? "Hết sạch tồn kho" : "Không có hàng hết")</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Card 5: Chứng từ chờ duyệt -->
+            <div class="col-12 col-sm-6 col-xl-2">
+                <a href="approvals" class="stat-card h-100 d-block text-decoration-none transition-all hover-shadow @(pendingCount > 0 ? "border-primary" : "")">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted fw-semibold small text-uppercase" style="letter-spacing: 0.04em;">Phiếu Chờ Duyệt</span>
+                        <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                    </div>
+                    <div class="h3 fw-bold mb-1 text-primary">@pendingCount <span class="fs-6 fw-normal text-muted">phiếu</span></div>
+                    <div class="d-flex align-items-center gap-1 small text-primary fw-medium">
+                        <i class="bi bi-shield-lock-fill"></i>
+                        <span>@pendingReceiptsCount nhập &bull; @pendingIssuesCount xuất</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Card 6: Tổng giá trị tồn kho -->
+            <div class="col-12 col-sm-6 col-xl-2">
+                <a href="reports" class="stat-card h-100 d-block text-decoration-none transition-all hover-shadow">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-muted fw-semibold small text-uppercase" style="letter-spacing: 0.04em;">Giá Trị Tồn Kho</span>
+                        <div class="stat-icon bg-success bg-opacity-10 text-success">
+                            <i class="bi bi-cash-stack"></i>
+                        </div>
+                    </div>
+                    <div class="h3 fw-bold mb-1 text-dark" style="font-size: 1.25rem;">@(totalStockValue.ToString("N0")) đ</div>
+                    <div class="d-flex align-items-center gap-1 small text-muted">
+                        <i class="bi bi-tag-fill text-success"></i>
+                        <span>Giá niêm yết bán lẻ</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- 3. THROUGHPUT & TRANSACTION METRICS BANNER (KHU VỰC HOẠT ĐỘNG KHO) -->
+        <div class="modern-card p-3.5 mb-4">
+            <div class="row g-3 align-items-center">
+                <div class="col-12 col-md-6 border-end-md">
+                    <div class="d-flex align-items-center justify-content-between pe-md-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-circle bg-success bg-opacity-10 text-success p-3 d-flex align-items-center justify-content-center" style="width: 52px; height: 52px;">
+                                <i class="bi bi-box-arrow-in-down fs-4"></i>
+                            </div>
+                            <div>
+                                <div class="small text-muted fw-bold text-uppercase">Hoạt Động Nhập Kho</div>
+                                <div class="h4 fw-bold text-dark mb-0">
+                                    @totalReceiptsCount <span class="fs-6 fw-normal text-muted">phiếu</span> 
+                                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill ms-2 font-monospace fs-7">
+                                        +@totalImportUnits.ToString("N0") sản phẩm
+                                    </span>
+                                </div>
+                                <small class="text-muted">Đã duyệt: @totalApprovedReceiptsCount &bull; Chờ duyệt: @pendingReceiptsCount</small>
+                            </div>
+                        </div>
+                        <a href="receipts" class="btn btn-sm btn-outline-success rounded-pill fw-semibold px-3 d-none d-sm-inline-flex align-items-center gap-1">
+                            Xem chi tiết &rarr;
+                        </a>
                     </div>
                 </div>
-                <div class="h2 fw-bold mb-1 text-dark">@totalProducts</div>
-                <div class="d-flex align-items-center gap-1.5 small text-success fw-medium">
-                    <i class="bi bi-check-circle-fill"></i>
-                    <span>@activeCategories nhóm ngành hàng chuẩn SEO</span>
+
+                <div class="col-12 col-md-6 ps-md-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-circle bg-danger bg-opacity-10 text-danger p-3 d-flex align-items-center justify-content-center" style="width: 52px; height: 52px;">
+                                <i class="bi bi-box-arrow-up fs-4"></i>
+                            </div>
+                            <div>
+                                <div class="small text-muted fw-bold text-uppercase">Hoạt Động Xuất Kho</div>
+                                <div class="h4 fw-bold text-dark mb-0">
+                                    @totalIssuesCount <span class="fs-6 fw-normal text-muted">phiếu</span>
+                                    <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill ms-2 font-monospace fs-7">
+                                        -@totalExportUnits.ToString("N0") sản phẩm
+                                    </span>
+                                </div>
+                                <small class="text-muted">Đã duyệt: @totalApprovedIssuesCount &bull; Chờ duyệt: @pendingIssuesCount</small>
+                            </div>
+                        </div>
+                        <a href="issues" class="btn btn-sm btn-outline-danger rounded-pill fw-semibold px-3 d-none d-sm-inline-flex align-items-center gap-1">
+                            Xem chi tiết &rarr;
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Card 2: Tổng giá trị tồn -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="stat-card h-100">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="text-muted fw-semibold small text-uppercase" style="letter-spacing: 0.04em;">Tổng Giá Trị Tồn Kho</span>
-                    <div class="stat-icon bg-success bg-opacity-10 text-success">
-                        <i class="bi bi-cash-stack"></i>
+        <!-- 4. 2 LUẬT NGHIỆP VỤ BẢO VỆ CỐT LÕI (CLEAN ARCHITECTURE COMPLIANCE) -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <div class="modern-card p-3.5 h-100 border-start border-4 border-danger shadow-xs">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-shield-fill-check fs-4 text-danger"></i>
+                            <h6 class="mb-0 fw-bold text-danger">LUẬT 1: DUYỆT MỚI ĐỔI TỒN & CHẶN XUẤT ÂM</h6>
+                        </div>
+                        <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-2.5 py-1">K1.3 &bull; K2.2</span>
+                    </div>
+                    <p class="small text-muted mb-2.5">
+                        Tồn kho <strong>CHỈ</strong> được trừ khi Quản lý duyệt phiếu trong 1 Transaction nguyên tử duy nhất.
+                        Nếu tổng lượng xuất theo từng sản phẩm vượt tồn kho hiện có, hệ thống lập tức <strong>CHẶN LỖI THÂN THIỆN</strong>.
+                    </p>
+                    <div class="p-2.5 rounded-3 bg-light border small d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="fw-semibold text-dark">Kịch bản kiểm thử:</span>
+                            <span class="text-muted ms-1">Phiếu xuất demo PX-2026-002 xuất 10 Bút bi (Tồn 3)</span>
+                        </div>
+                        <a href="approvals" class="btn btn-xs btn-outline-danger rounded-pill fw-bold px-2.5 py-1">
+                            Thử duyệt &rarr;
+                        </a>
                     </div>
                 </div>
-                <div class="h2 fw-bold mb-1 text-dark">@(totalStockValue.ToString("N0")) đ</div>
-                <div class="d-flex align-items-center gap-1.5 small text-muted">
-                    <i class="bi bi-info-circle"></i>
-                    <span>Tính theo đơn giá niêm yết bán lẻ</span>
+            </div>
+
+            <div class="col-md-6">
+                <div class="modern-card p-3.5 h-100 border-start border-4 border-success shadow-xs">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-calculator-fill fs-4 text-success"></i>
+                            <h6 class="mb-0 fw-bold text-success">LUẬT 2: BẢO TOÀN CÔNG THỨC NHẬP - XUẤT - TỒN</h6>
+                        </div>
+                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2.5 py-1">K1.3 &bull; K2.3</span>
+                    </div>
+                    <p class="small text-muted mb-2.5">
+                        Công thức bất biến: <strong>Tồn đầu kỳ + Tổng nhập (Approved) - Tổng xuất (Approved) = Tồn cuối kỳ</strong>.
+                        Tất cả phiếu đã duyệt được bảo vệ không thể tự ý sửa đổi gây sai lệch lịch sử giao dịch.
+                    </p>
+                    <div class="p-2.5 rounded-3 bg-light border small d-flex align-items-center justify-content-between">
+                        <div>
+                            <span class="fw-semibold text-dark">Đối soát chứng từ:</span>
+                            <span class="text-success ms-1"><i class="bi bi-check-circle-fill me-1"></i>Khớp sổ cái 100%</span>
+                        </div>
+                        <a href="reports" class="btn btn-xs btn-outline-success rounded-pill fw-bold px-2.5 py-1">
+                            Xem báo cáo NXT &rarr;
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Card 3: Cảnh báo tồn -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="stat-card h-100">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="text-muted fw-semibold small text-uppercase" style="letter-spacing: 0.04em;">Cảnh Báo Tồn Kho</span>
-                    <div class="stat-icon bg-warning bg-opacity-10 text-warning-emphasis">
-                        <i class="bi bi-exclamation-triangle-fill"></i>
+        <!-- 5. REAL-TIME DATA TABLES -->
+        <div class="row g-4">
+            <!-- Table 1: Cảnh báo hàng sắp hết & Hết hàng -->
+            <div class="col-lg-6">
+                <div class="modern-card p-3.5 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                        <div>
+                            <h6 class="fw-bold mb-0 text-dark">
+                                <i class="bi bi-exclamation-triangle-fill text-warning me-1.5"></i>Mặt Hàng Chạm Ngưỡng Tồn Tối Thiểu
+                            </h6>
+                            <small class="text-muted">Cần ưu tiên lập phiếu nhập từ nhà cung cấp</small>
+                        </div>
+                        <a href="products?stock=low" class="btn btn-sm btn-light border rounded-pill px-2.5 py-1 text-primary fw-semibold small">
+                            Xem tất cả &rarr;
+                        </a>
                     </div>
-                </div>
-                <div class="h2 fw-bold mb-1 @(lowStockProducts.Count > 0 ? "text-danger" : "text-dark")">
-                    @lowStockProducts.Count mặt hàng
-                </div>
-                <div class="d-flex align-items-center gap-1.5 small @(lowStockProducts.Count > 0 ? "text-danger fw-semibold" : "text-success")">
-                    <i class="bi @(lowStockProducts.Count > 0 ? "bi-bell-fill" : "bi-shield-check")"></i>
-                    <span>@(lowStockProducts.Count > 0 ? "Cần lập phiếu nhập bổ sung" : "Đầy đủ định mức tồn kho an toàn")</span>
-                </div>
-            </div>
-        </div>
 
-        <!-- Card 4: Chứng từ chờ duyệt -->
-        <div class="col-12 col-sm-6 col-xl-3">
-            <div class="stat-card h-100">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="text-muted fw-semibold small text-uppercase" style="letter-spacing: 0.04em;">Chứng Từ Chờ Duyệt (Draft)</span>
-                    <div class="stat-icon bg-primary bg-opacity-10 text-primary">
-                        <i class="bi bi-clock-history"></i>
-                    </div>
-                </div>
-                <div class="h2 fw-bold mb-1 text-dark">@pendingCount phiếu</div>
-                <div class="d-flex align-items-center gap-1.5 small text-primary fw-medium">
-                    <i class="bi bi-shield-lock-fill"></i>
-                    <a href="approvals" class="text-primary fw-bold text-decoration-none">Quản lý duyệt phiếu &rarr;</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 3. 4 CHỨC NĂNG VẬN HÀNH TRỌNG TÂM (ENTERPRISE APP CARDS) -->
-    <div class="row g-3 mb-4">
-        <!-- Chức năng 1: Giao diện & Hàng hóa -->
-        <div class="col-12 col-md-6 col-xl-3">
-            <a href="products" class="modern-card p-3 d-block text-decoration-none text-dark h-100 transition-all border-hover-success">
-                <div class="d-flex align-items-center gap-3 mb-2">
-                    <div class="rounded-3 bg-success bg-opacity-10 text-success p-2.5 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
-                        <i class="bi bi-grid-3x3-gap-fill fs-5"></i>
-                    </div>
-                    <div>
-                        <div class="fw-bold fs-6 mb-0 text-dark">Hàng Hóa & Tồn Kho</div>
-                        <small class="text-muted">Siêu thị & Cửa hàng tiện lợi</small>
-                    </div>
-                </div>
-                <p class="small text-muted mb-0">
-                    Khám phá 30+ mặt hàng tiêu dùng bán lẻ thiết yếu, quản lý bảng giá niêm yết và theo dõi tồn kho.
-                </p>
-            </a>
-        </div>
-
-        <!-- Chức năng 2: POS Thu ngân -->
-        <div class="col-12 col-md-6 col-xl-3">
-            <a href="cart" class="modern-card p-3 d-block text-decoration-none text-dark h-100 transition-all border-hover-warning">
-                <div class="d-flex align-items-center gap-3 mb-2">
-                    <div class="rounded-3 bg-warning bg-opacity-15 text-warning-emphasis p-2.5 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
-                        <i class="bi bi-shop fs-5"></i>
-                    </div>
-                    <div>
-                        <div class="fw-bold fs-6 mb-0 text-dark">Bán Hàng POS Quầy</div>
-                        <small class="text-warning-emphasis fw-semibold">Thu Ngân Trực Tiếp</small>
-                    </div>
-                </div>
-                <p class="small text-muted mb-0">
-                    Màn hình thanh toán siêu tốc, chọn giỏ hàng, in hóa đơn và tự động trừ tồn kho theo thời gian thực.
-                </p>
-            </a>
-        </div>
-
-        <!-- Chức năng 3: Phiếu nhập -->
-        <div class="col-12 col-md-6 col-xl-3">
-            <a href="receipts" class="modern-card p-3 d-block text-decoration-none text-dark h-100 transition-all border-hover-success">
-                <div class="d-flex align-items-center gap-3 mb-2">
-                    <div class="rounded-3 bg-success bg-opacity-10 text-success p-2.5 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
-                        <i class="bi bi-box-arrow-in-down fs-5"></i>
-                    </div>
-                    <div>
-                        <div class="fw-bold fs-6 mb-0 text-dark">Quản Lý Nhập Kho</div>
-                        <small class="text-success fw-semibold">AI SmartPaste</small>
-                    </div>
-                </div>
-                <p class="small text-muted mb-0">
-                    Lập phiếu nhập kho từ nhà cung cấp, kiểm tra giá mua và đối soát chứng từ nhập hàng chi tiết.
-                </p>
-            </a>
-        </div>
-
-        <!-- Chức năng 4: Phiếu xuất -->
-        <div class="col-12 col-md-6 col-xl-3">
-            <a href="issues" class="modern-card p-3 d-block text-decoration-none text-dark h-100 transition-all border-hover-danger">
-                <div class="d-flex align-items-center gap-3 mb-2">
-                    <div class="rounded-3 bg-danger bg-opacity-10 text-danger p-2.5 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
-                        <i class="bi bi-box-arrow-up fs-5"></i>
-                    </div>
-                    <div>
-                        <div class="fw-bold fs-6 mb-0 text-dark">Quản Lý Xuất Kho</div>
-                        <small class="text-danger fw-semibold">Chặn Xuất Âm (Luật 1)</small>
-                    </div>
-                </div>
-                <p class="small text-muted mb-0">
-                    Theo dõi chứng từ xuất bán lẻ, xuất chi nhánh với cơ chế bảo vệ Transaction chống thất thoát.
-                </p>
-            </a>
-        </div>
-    </div>
-
-    <!-- 4. 2 LUẬT NGHIỆP VỤ BẢO VỆ CỐT LÕI (CLEAN ARCHITECTURE COMPLIANCE) -->
-    <div class="row g-3 mb-4">
-        <div class="col-md-6">
-            <div class="modern-card p-3.5 h-100 border-start border-4 border-danger shadow-xs">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-shield-fill-check fs-4 text-danger"></i>
-                        <h6 class="mb-0 fw-bold text-danger">LUẬT 1: DUYỆT MỚI ĐỔI TỒN & CHẶN XUẤT ÂM</h6>
-                    </div>
-                    <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-2.5 py-1">K1.3 &bull; K2.2</span>
-                </div>
-                <p class="small text-muted mb-2.5">
-                    Số lượng tồn kho <strong>CHỈ</strong> được trừ khi Quản lý duyệt phiếu trong 1 Transaction duy nhất.
-                    Nếu số lượng xuất &gt; Tồn hiện có, hệ thống lập tức <strong>CHẶN LỖI THÂN THIỆN</strong>, đảm bảo tồn kho không bao giờ bị âm.
-                </p>
-                <div class="p-2.5 rounded-3 bg-light border small d-flex align-items-center justify-content-between">
-                    <div>
-                        <span class="fw-semibold text-dark">Kịch bản thử nghiệm:</span>
-                        <span class="text-muted ms-1">Phiếu PX-2026-002 xuất 10 Bút bi (Tồn 3)</span>
-                    </div>
-                    <a href="approvals" class="btn btn-xs btn-outline-danger rounded-pill fw-bold px-2.5 py-1">
-                        Thử duyệt &rarr;
-                    </a>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="modern-card p-3.5 h-100 border-start border-4 border-success shadow-xs">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="bi bi-calculator-fill fs-4 text-success"></i>
-                        <h6 class="mb-0 fw-bold text-success">LUẬT 2: BẢO TOÀN CÔNG THỨC NHẬP - XUẤT - TỒN</h6>
-                    </div>
-                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2.5 py-1">K1.3 &bull; K2.3</span>
-                </div>
-                <p class="small text-muted mb-2.5">
-                    Công thức bất biến: <strong>Tồn đầu kỳ + Tổng nhập (Approved) - Tổng xuất (Approved) = Tồn cuối kỳ</strong>.
-                    Hệ thống cung cấp tính năng đối soát chéo độc lập giữa dữ liệu chứng từ và bảng tồn kho thực tế.
-                </p>
-                <div class="p-2.5 rounded-3 bg-light border small d-flex align-items-center justify-content-between">
-                    <div>
-                        <span class="fw-semibold text-dark">Kiểm chứng đối soát:</span>
-                        <span class="text-success ms-1"><i class="bi bi-check-circle-fill me-1"></i>Sổ cái khớp 100%</span>
-                    </div>
-                    <a href="reports" class="btn btn-xs btn-outline-success rounded-pill fw-bold px-2.5 py-1">
-                        Xem báo cáo NXT &rarr;
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 5. BẢNG DỮ LIỆU HOẠT ĐỘNG THỜI GIAN THỰC -->
-    <div class="row g-4">
-        <!-- Bảng 1: Cảnh báo hàng sắp hết -->
-        <div class="col-lg-6">
-            <div class="modern-card p-3 h-100">
-                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
-                    <div>
-                        <h6 class="fw-bold mb-0 text-dark">
-                            <i class="bi bi-exclamation-circle-fill text-warning me-1.5"></i>Mặt Hàng Chạm Ngưỡng Tồn Tối Thiểu
-                        </h6>
-                        <small class="text-muted">Cần ưu tiên lập phiếu nhập từ nhà cung cấp</small>
-                    </div>
-                    <a href="products" class="btn btn-sm btn-light border rounded-pill px-2.5 py-1 text-primary fw-semibold small">
-                        Xem tất cả &rarr;
-                    </a>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="table custom-table align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th>MÃ SKU</th>
-                                <th>TÊN HÀNG HÓA</th>
-                                <th class="text-center">TỒN / MIN</th>
-                                <th class="text-end">TRẠNG THÁI</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (lowStockProducts.Any())
-                            {
-                                @foreach (var p in lowStockProducts)
+                    <div class="table-responsive">
+                        <table class="table custom-table align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>MÃ SKU</th>
+                                    <th>TÊN HÀNG HÓA</th>
+                                    <th class="text-center">TỒN / MIN</th>
+                                    <th class="text-end">TRẠNG THÁI</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (lowStockProducts.Any())
+                                {
+                                    @foreach (var p in lowStockProducts.Take(6))
+                                    {
+                                        <tr>
+                                            <td data-label="Mã SKU">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <div class="rounded border p-0.5 bg-white shadow-xs d-flex align-items-center justify-content-center" style="width: 36px; height: 36px; min-width: 36px;">
+                                                        <img src="@GetProductImage(p.ImageUrl)" alt="@p.Name" style="max-width: 100%; max-height: 100%; object-fit: contain;" onerror="this.src='images/default-product.svg'" />
+                                                    </div>
+                                                    <span class="badge bg-light text-dark border fw-bold">@p.Sku</span>
+                                                </div>
+                                            </td>
+                                            <td data-label="Tên hàng hóa">
+                                                <div class="fw-semibold text-dark text-truncate" style="max-width: 220px;" title="@p.Name">@p.Name</div>
+                                                <small class="text-muted">ĐVT: @p.Unit &bull; Giá: @((p.Price).ToString("N0")) đ</small>
+                                            </td>
+                                            <td data-label="Tồn / Min" class="text-center fw-bold">
+                                                <span class="@(p.CurrentStock == 0 ? "text-danger" : "text-warning")">
+                                                    @p.CurrentStock
+                                                </span>
+                                                <span class="text-muted small fw-normal"> / @p.MinStockLevel</span>
+                                            </td>
+                                            <td data-label="Trạng thái" class="text-end">
+                                                <StockStatusBadge CurrentStock="@p.CurrentStock" MinStock="@p.MinStockLevel" />
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
                                 {
                                     <tr>
-                                        <td data-label="Mã SKU"><span class="badge bg-light text-dark border fw-bold">@p.Sku</span></td>
-                                        <td data-label="Tên hàng hóa">
-                                            <div class="fw-semibold text-dark">@p.Name</div>
-                                            <small class="text-muted">ĐVT: @p.Unit &bull; Giá: @((p.Price).ToString("N0")) đ</small>
+                                        <td colspan="4" class="text-center text-muted py-4">Tất cả hàng hóa đều đạt định mức tồn an toàn!</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table 2: Chứng từ mới nhất -->
+            <div class="col-lg-6">
+                <div class="modern-card p-3.5 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                        <div>
+                            <h6 class="fw-bold mb-0 text-dark">
+                                <i class="bi bi-journal-text text-primary me-1.5"></i>Chứng Từ Kho Mới Nhất
+                            </h6>
+                            <small class="text-muted">Lịch sử lập và phê duyệt phiếu gần đây</small>
+                        </div>
+                        <a href="approvals" class="btn btn-sm btn-light border rounded-pill px-2.5 py-1 text-primary fw-semibold small">
+                            Duyệt phiếu &rarr;
+                        </a>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table custom-table align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th>MÃ PHIẾU</th>
+                                    <th>LOẠI</th>
+                                    <th>ĐỐI TÁC / NƠI NHẬN</th>
+                                    <th class="text-end">TỔNG TIỀN</th>
+                                    <th class="text-end">TRẠNG THÁI</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var r in recentReceipts)
+                                {
+                                    <tr>
+                                        <td data-label="Mã phiếu">
+                                            <a href="receipts" class="fw-bold text-success text-decoration-none">@r.ReceiptNumber</a>
                                         </td>
-                                        <td data-label="Tồn / Min" class="text-center fw-bold">
-                                            <span class="@(p.CurrentStock == 0 ? "text-danger" : "text-warning")">
-                                                @p.CurrentStock
-                                            </span>
-                                            <span class="text-muted small fw-normal"> / @p.MinStockLevel</span>
+                                        <td data-label="Loại">
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle">Nhập</span>
+                                        </td>
+                                        <td data-label="Đối tác">
+                                            <div class="text-truncate" style="max-width: 150px;">@(r.Supplier?.Name ?? "Nhà cung cấp")</div>
+                                        </td>
+                                        <td data-label="Tổng tiền" class="text-end fw-semibold text-success">
+                                            @((r.TotalAmount).ToString("N0")) đ
                                         </td>
                                         <td data-label="Trạng thái" class="text-end">
-                                            <StockStatusBadge CurrentStock="@p.CurrentStock" MinStock="@p.MinStockLevel" />
+                                            <ReceiptStatusBadge Status="@r.Status" />
                                         </td>
                                     </tr>
                                 }
-                            }
-                            else
-                            {
-                                <tr>
-                                    <td colspan="4" class="text-center text-muted py-4">Tất cả hàng hóa đều đạt định mức an toàn!</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bảng 2: Chứng từ mới nhất -->
-        <div class="col-lg-6">
-            <div class="modern-card p-3 h-100">
-                <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
-                    <div>
-                        <h6 class="fw-bold mb-0 text-dark">
-                            <i class="bi bi-journal-text text-primary me-1.5"></i>Chứng Từ Kho Mới Nhất
-                        </h6>
-                        <small class="text-muted">Lịch sử lập và phê duyệt phiếu gần đây</small>
+                                @foreach (var i in recentIssues)
+                                {
+                                    <tr>
+                                        <td data-label="Mã phiếu">
+                                            <a href="issues" class="fw-bold text-danger text-decoration-none">@i.IssueNumber</a>
+                                        </td>
+                                        <td data-label="Loại">
+                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Xuất</span>
+                                        </td>
+                                        <td data-label="Đối tác">
+                                            <div class="text-truncate" style="max-width: 150px;">@i.CustomerOrDepartment</div>
+                                        </td>
+                                        <td data-label="Tổng tiền" class="text-end fw-semibold text-danger">
+                                            @((i.TotalAmount).ToString("N0")) đ
+                                        </td>
+                                        <td data-label="Trạng thái" class="text-end">
+                                            <ReceiptStatusBadge Status="@i.Status" />
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
                     </div>
-                    <a href="approvals" class="btn btn-sm btn-light border rounded-pill px-2.5 py-1 text-primary fw-semibold small">
-                        Duyệt phiếu &rarr;
-                    </a>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="table custom-table align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th>MÃ PHIẾU</th>
-                                <th>LOẠI</th>
-                                <th>ĐỐI TÁC</th>
-                                <th class="text-end">TỔNG TIỀN</th>
-                                <th class="text-end">TRẠNG THÁI</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var r in recentReceipts)
-                            {
-                                <tr>
-                                    <td data-label="Mã phiếu">
-                                        <span class="fw-bold text-success">@r.ReceiptNumber</span>
-                                    </td>
-                                    <td data-label="Loại">
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle">Nhập</span>
-                                    </td>
-                                    <td data-label="Đối tác">
-                                        <div class="text-truncate" style="max-width: 140px;">@(r.Supplier?.Name ?? "Nhà cung cấp")</div>
-                                    </td>
-                                    <td data-label="Tổng tiền" class="text-end fw-semibold">
-                                        @((r.TotalAmount).ToString("N0")) đ
-                                    </td>
-                                    <td data-label="Trạng thái" class="text-end">
-                                        <ReceiptStatusBadge Status="@r.Status" />
-                                    </td>
-                                </tr>
-                            }
-                            @foreach (var i in recentIssues)
-                            {
-                                <tr>
-                                    <td data-label="Mã phiếu">
-                                        <span class="fw-bold text-danger">@i.IssueNumber</span>
-                                    </td>
-                                    <td data-label="Loại">
-                                        <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Xuất</span>
-                                    </td>
-                                    <td data-label="Đối tác">
-                                        <div class="text-truncate" style="max-width: 140px;">@i.CustomerOrDepartment</div>
-                                    </td>
-                                    <td data-label="Tổng tiền" class="text-end fw-semibold">
-                                        @((i.TotalAmount).ToString("N0")) đ
-                                    </td>
-                                    <td data-label="Trạng thái" class="text-end">
-                                        <ReceiptStatusBadge Status="@i.Status" />
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </div>
-    </div>
+    }
 </div>
 
 @code {
+    private bool isLoading = true;
+    private string errorMessage = string.Empty;
+
     private int totalProducts = 0;
+    private int totalInventoryUnits = 0;
     private int activeCategories = 0;
     private double totalStockValue = 0;
+    private int lowStockCount = 0;
+    private int outOfStockCount = 0;
+
     private int pendingCount = 0;
+    private int pendingReceiptsCount = 0;
+    private int pendingIssuesCount = 0;
+
+    private int totalReceiptsCount = 0;
+    private int totalApprovedReceiptsCount = 0;
+    private int totalImportUnits = 0;
+
+    private int totalIssuesCount = 0;
+    private int totalApprovedIssuesCount = 0;
+    private int totalExportUnits = 0;
 
     private List<Product> lowStockProducts = new();
     private List<GoodsReceipt> recentReceipts = new();
@@ -403,19 +457,54 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var products = (await SearchProducts.ExecuteAsync()).ToList();
-        totalProducts = products.Count;
-        activeCategories = products.Select(p => p.Category).Distinct().Count();
-        totalStockValue = products.Sum(p => p.CurrentStock * p.Price);
-        lowStockProducts = products.Where(p => p.CurrentStock <= p.MinStockLevel).ToList();
+        await LoadDashboardData();
+    }
 
-        var receipts = (await ViewReceipts.ExecuteListAsync()).ToList();
-        var issues = (await ViewIssues.ExecuteListAsync()).ToList();
+    private async Task LoadDashboardData()
+    {
+        isLoading = true;
+        errorMessage = string.Empty;
+        try
+        {
+            var products = (await SearchProducts.ExecuteAsync()).ToList();
+            totalProducts = products.Count;
+            totalInventoryUnits = products.Sum(p => p.CurrentStock);
+            activeCategories = products.Select(p => p.Category).Distinct().Count();
+            totalStockValue = products.Sum(p => (double)p.CurrentStock * p.Price);
+            lowStockCount = products.Count(p => p.CurrentStock > 0 && p.CurrentStock <= p.MinStockLevel);
+            outOfStockCount = products.Count(p => p.CurrentStock <= 0);
+            lowStockProducts = products.Where(p => p.CurrentStock <= p.MinStockLevel).OrderBy(p => p.CurrentStock).ToList();
 
-        pendingCount = receipts.Count(r => r.Status == ReceiptStatus.Draft) +
-                       issues.Count(i => i.Status == ReceiptStatus.Draft);
+            var receipts = (await ViewReceipts.ExecuteListAsync()).ToList();
+            totalReceiptsCount = receipts.Count;
+            pendingReceiptsCount = receipts.Count(r => r.Status == ReceiptStatus.Draft);
+            totalApprovedReceiptsCount = receipts.Count(r => r.Status == ReceiptStatus.Approved);
+            totalImportUnits = receipts.Where(r => r.Status == ReceiptStatus.Approved).SelectMany(r => r.Lines).Sum(l => l.Quantity);
 
-        recentReceipts = receipts.Take(3).ToList();
-        recentIssues = issues.Take(3).ToList();
+            var issues = (await ViewIssues.ExecuteListAsync()).ToList();
+            totalIssuesCount = issues.Count;
+            pendingIssuesCount = issues.Count(i => i.Status == ReceiptStatus.Draft);
+            totalApprovedIssuesCount = issues.Count(i => i.Status == ReceiptStatus.Approved);
+            totalExportUnits = issues.Where(i => i.Status == ReceiptStatus.Approved).SelectMany(i => i.Lines).Sum(l => l.Quantity);
+
+            pendingCount = pendingReceiptsCount + pendingIssuesCount;
+
+            recentReceipts = receipts.OrderByDescending(r => r.Id).Take(3).ToList();
+            recentIssues = issues.OrderByDescending(i => i.Id).Take(3).ToList();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private string GetProductImage(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url)) return "images/default-product.svg";
+        return url;
     }
 }

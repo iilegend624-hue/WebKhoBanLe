@@ -1,0 +1,517 @@
+@page "/suppliers"
+@rendermode InteractiveServer
+@namespace KhoBanLe.Components.Pages.Suppliers
+@using System.ComponentModel.DataAnnotations
+@using KhoBanLe.CoreBusiness
+@using KhoBanLe.UseCases.Suppliers
+@inject IGetSuppliersUseCase GetSuppliers
+@inject IAddSupplierUseCase AddSupplier
+@inject IEditSupplierUseCase EditSupplier
+@inject IDeleteSupplierUseCase DeleteSupplier
+@inject UserRoleService RoleService
+
+<PageTitle>Quản Lý Nhà Cung Cấp - KhoBanLe</PageTitle>
+
+<div class="container-fluid px-0">
+    <!-- Header Area -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">
+                <i class="bi bi-truck text-success me-2"></i>Quản Lý Nhà Cung Cấp
+            </h3>
+            <p class="text-muted small mb-0">
+                Danh bạ đối tác cung ứng hàng hóa, hợp đồng và lịch sử liên kết phiếu nhập kho
+            </p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            @if (RoleService.IsManager)
+            {
+                <button type="button" class="btn btn-success rounded-pill fw-semibold shadow-xs" @onclick="OpenAddModal">
+                    <i class="bi bi-plus-lg me-1"></i>Thêm Nhà Cung Cấp
+                </button>
+            }
+            else
+            {
+                <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill small" title="Chỉ Quản lý mới có quyền thêm nhà cung cấp">
+                    <i class="bi bi-lock me-1"></i>Thủ kho: Quyền chỉ xem
+                </span>
+            }
+        </div>
+    </div>
+
+    <!-- Feedback Alerts -->
+    @if (!string.IsNullOrEmpty(alertMessage))
+    {
+        <div class="alert @(isSuccessAlert ? "alert-success border-success" : "alert-danger border-danger") alert-dismissible fade show rounded-3 shadow-xs mb-4" role="alert">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi @(isSuccessAlert ? "bi-check-circle-fill text-success fs-5" : "bi-exclamation-triangle-fill text-danger fs-5")"></i>
+                <div class="fw-medium">@alertMessage</div>
+            </div>
+            <button type="button" class="btn-close" @onclick="() => alertMessage = string.Empty"></button>
+        </div>
+    }
+
+    <!-- Stat KPI Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-4">
+            <div class="stat-card">
+                <span class="text-muted small fw-semibold text-uppercase">Tổng Đối Tác</span>
+                <div class="h3 fw-bold text-dark mb-0 mt-1">@allSuppliers.Count</div>
+                <small class="text-muted">Nhà cung cấp trong hệ thống</small>
+            </div>
+        </div>
+        <div class="col-12 col-sm-4">
+            <div class="stat-card">
+                <span class="text-muted small fw-semibold text-success text-uppercase">Đang Hợp Tác</span>
+                <div class="h3 fw-bold text-success mb-0 mt-1">@allSuppliers.Count(s => s.IsActive)</div>
+                <small class="text-muted">Sẵn sàng lập phiếu nhập</small>
+            </div>
+        </div>
+        <div class="col-12 col-sm-4">
+            <div class="stat-card">
+                <span class="text-muted small fw-semibold text-secondary text-uppercase">Tạm Ngưng</span>
+                <div class="h3 fw-bold text-secondary mb-0 mt-1">@allSuppliers.Count(s => !s.IsActive)</div>
+                <small class="text-muted">Đang tạm dừng nhập hàng</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter & Search Toolbar -->
+    <div class="modern-card p-3 mb-4">
+        <div class="row g-3 align-items-center justify-content-between">
+            <div class="col-12 col-md-6 col-lg-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 text-muted">
+                        <i class="bi bi-search"></i>
+                    </span>
+                    <input type="text" class="form-control border-start-0 ps-0" 
+                           placeholder="Tìm kiếm theo mã, tên, SĐT hoặc địa chỉ..." 
+                           @bind="searchTerm" @bind:event="oninput" />
+                    @if (!string.IsNullOrWhiteSpace(searchTerm))
+                    {
+                        <button class="btn btn-outline-secondary border-start-0" type="button" @onclick="() => searchTerm = string.Empty">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    }
+                </div>
+            </div>
+
+            <div class="col-12 col-md-6 col-lg-5 text-md-end">
+                <div class="d-inline-flex align-items-center gap-1.5 bg-light p-1 rounded-pill border">
+                    <button class="btn btn-xs py-1 px-3 rounded-pill fw-semibold @(statusFilter == null ? "btn-dark text-white" : "btn-light text-secondary")"
+                            @onclick="() => statusFilter = null">
+                        Tất cả (@allSuppliers.Count)
+                    </button>
+                    <button class="btn btn-xs py-1 px-3 rounded-pill fw-semibold @(statusFilter == true ? "btn-success text-white" : "btn-light text-secondary")"
+                            @onclick="() => statusFilter = true">
+                        Đang hợp tác (@allSuppliers.Count(s => s.IsActive))
+                    </button>
+                    <button class="btn btn-xs py-1 px-3 rounded-pill fw-semibold @(statusFilter == false ? "btn-secondary text-white" : "btn-light text-secondary")"
+                            @onclick="() => statusFilter = false">
+                        Tạm ngưng (@allSuppliers.Count(s => !s.IsActive))
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supplier Data Table -->
+    <div class="modern-card p-0 overflow-hidden mb-4">
+        <div class="table-responsive">
+            <table class="table custom-table mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th class="ps-4">MÃ NCC</th>
+                        <th>TÊN NHÀ CUNG CẤP</th>
+                        <th>ĐIỆN THOẠI</th>
+                        <th>EMAIL</th>
+                        <th>ĐỊA CHỈ</th>
+                        <th class="text-center">TRẠNG THÁI</th>
+                        <th class="text-end pe-4">THAO TÁC</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (filteredSuppliers.Any())
+                    {
+                        @foreach (var s in filteredSuppliers)
+                        {
+                            <tr>
+                                <td class="ps-4" data-label="Mã NCC">
+                                    <span class="badge bg-light text-primary border fw-bold px-2 py-1">@s.SupplierCode</span>
+                                </td>
+                                <td data-label="Tên nhà cung cấp">
+                                    <div class="fw-bold text-dark">@s.Name</div>
+                                </td>
+                                <td data-label="Điện thoại">
+                                    <div class="small fw-medium text-dark">
+                                        <i class="bi bi-telephone text-muted me-1"></i>@s.Phone
+                                    </div>
+                                </td>
+                                <td data-label="Email">
+                                    @if (!string.IsNullOrEmpty(s.Email))
+                                    {
+                                        <span class="small text-muted">
+                                            <i class="bi bi-envelope text-muted me-1"></i>@s.Email
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="small text-muted fst-italic">Chưa có email</span>
+                                    }
+                                </td>
+                                <td data-label="Địa chỉ">
+                                    <span class="small text-muted text-truncate d-block" style="max-width: 250px;" title="@s.Address">
+                                        @s.Address
+                                    </span>
+                                </td>
+                                <td data-label="Trạng thái" class="text-center">
+                                    @if (s.IsActive)
+                                    {
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1 fw-semibold">
+                                            <i class="bi bi-check-circle-fill me-1"></i>Đang hợp tác
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-2.5 py-1 fw-semibold">
+                                            <i class="bi bi-pause-circle-fill me-1"></i>Tạm ngưng
+                                        </span>
+                                    }
+                                </td>
+                                <td data-label="Thao tác" class="text-end pe-4">
+                                    <div class="d-inline-flex gap-1.5">
+                                        <button class="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-1"
+                                                @onclick="() => OpenViewModal(s)" title="Xem thông tin chi tiết">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        @if (RoleService.IsManager)
+                                        {
+                                            <button class="btn btn-sm btn-light border rounded-pill px-2.5 py-1 text-primary"
+                                                    @onclick="() => OpenEditModal(s)" title="Chỉnh sửa thông tin">
+                                                <i class="bi bi-pencil"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-light border rounded-pill px-2.5 py-1 text-danger"
+                                                    @onclick="() => OpenDeleteConfirm(s)" title="Xóa nhà cung cấp">
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="bi bi-truck fs-1 d-block mb-2 text-secondary opacity-50"></i>
+                                    <div class="fw-semibold">Không tìm thấy nhà cung cấp nào phù hợp.</div>
+                                    <small>Thử thay đổi từ khóa tìm kiếm hoặc bấm thêm nhà cung cấp mới.</small>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ADD / EDIT MODAL WITH EditForm + DataAnnotations -->
+@if (showFormModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); z-index: 1050;">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content rounded-4 border-0 shadow-xl overflow-hidden">
+                <div class="modal-header bg-light px-4 py-3 border-bottom">
+                    <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                        <i class="bi @(isEditing ? "bi-pencil-square text-primary" : "bi-plus-circle text-success")"></i>
+                        <span>@(isEditing ? "Chỉnh Sửa Thông Tin Nhà Cung Cấp" : "Thêm Nhà Cung Cấp Mới")</span>
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="CloseFormModal"></button>
+                </div>
+
+                <EditForm Model="supplierModel" OnValidSubmit="SaveSupplier">
+                    <DataAnnotationsValidator />
+
+                    <div class="modal-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Mã nhà cung cấp *</label>
+                                <InputText class="form-control" @bind-Value="supplierModel.SupplierCode" placeholder="VD: NCC-VINAMILK" />
+                                <ValidationMessage For="@(() => supplierModel.SupplierCode)" class="text-danger small mt-1" />
+                            </div>
+
+                            <div class="col-md-8">
+                                <label class="form-label small fw-bold">Tên nhà cung cấp *</label>
+                                <InputText class="form-control" @bind-Value="supplierModel.Name" placeholder="VD: Công ty Cổ phần Sữa Việt Nam" />
+                                <ValidationMessage For="@(() => supplierModel.Name)" class="text-danger small mt-1" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Số điện thoại *</label>
+                                <InputText class="form-control" @bind-Value="supplierModel.Phone" placeholder="VD: 028 5415 5555" />
+                                <ValidationMessage For="@(() => supplierModel.Phone)" class="text-danger small mt-1" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Email liên hệ</label>
+                                <InputText class="form-control" @bind-Value="supplierModel.Email" placeholder="VD: sales@vinamilk.com.vn" />
+                                <ValidationMessage For="@(() => supplierModel.Email)" class="text-danger small mt-1" />
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label small fw-bold">Địa chỉ trụ sở / kho xuất hàng *</label>
+                                <InputText class="form-control" @bind-Value="supplierModel.Address" placeholder="Số nhà, đường, quận/huyện, tỉnh/thành phố..." />
+                                <ValidationMessage For="@(() => supplierModel.Address)" class="text-danger small mt-1" />
+                            </div>
+
+                            <div class="col-12">
+                                <div class="form-check form-switch pt-2">
+                                    <InputCheckbox class="form-check-input" id="isActiveSwitch" @bind-Value="supplierModel.IsActive" />
+                                    <label class="form-check-label fw-semibold small text-dark" for="isActiveSwitch">
+                                        Kích hoạt trạng thái hợp tác (cho phép chọn khi lập phiếu nhập)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer bg-light px-4 py-3 border-top d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-outline-secondary rounded-pill px-3" @onclick="CloseFormModal">
+                            Hủy bỏ
+                        </button>
+                        <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold shadow-xs">
+                            <i class="bi bi-check-lg me-1"></i>Lưu Nhà Cung Cấp
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- VIEW DETAIL MODAL -->
+@if (showViewModal && viewingSupplier != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); z-index: 1050;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow-xl overflow-hidden">
+                <div class="modal-header bg-light px-4 py-3 border-bottom">
+                    <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2">
+                        <i class="bi bi-info-circle text-primary"></i>
+                        <span>Chi Tiết Nhà Cung Cấp</span>
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="() => showViewModal = false"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="d-flex align-items-center gap-3 mb-3 pb-3 border-bottom">
+                        <div class="rounded-3 bg-success bg-opacity-10 text-success p-3 d-flex align-items-center justify-content-center" style="width: 54px; height: 54px;">
+                            <i class="bi bi-truck fs-3"></i>
+                        </div>
+                        <div>
+                            <span class="badge bg-light text-primary border fw-bold mb-1">@viewingSupplier.SupplierCode</span>
+                            <h5 class="fw-bold text-dark mb-0">@viewingSupplier.Name</h5>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-column gap-2.5 small">
+                        <div class="d-flex justify-content-between py-1 border-bottom">
+                            <span class="text-muted">Số điện thoại:</span>
+                            <span class="fw-bold text-dark">@viewingSupplier.Phone</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-1 border-bottom">
+                            <span class="text-muted">Email liên hệ:</span>
+                            <span class="fw-medium text-dark">@(string.IsNullOrEmpty(viewingSupplier.Email) ? "Chưa cung cấp" : viewingSupplier.Email)</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-1 border-bottom">
+                            <span class="text-muted">Địa chỉ:</span>
+                            <span class="fw-medium text-dark text-end" style="max-width: 60%;">@viewingSupplier.Address</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-1">
+                            <span class="text-muted">Trạng thái:</span>
+                            @if (viewingSupplier.IsActive)
+                            {
+                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-0.5">
+                                    Đang hợp tác
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-2.5 py-0.5">
+                                    Tạm ngưng
+                                </span>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light px-4 py-2.5 border-top">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill px-3" @onclick="() => showViewModal = false">Đóng</button>
+                    @if (RoleService.IsManager)
+                    {
+                        <button type="button" class="btn btn-primary rounded-pill px-3" @onclick="() => { showViewModal = false; OpenEditModal(viewingSupplier); }">
+                            <i class="bi bi-pencil me-1"></i>Sửa Thông Tin
+                        </button>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- DELETE CONFIRMATION MODAL -->
+<ConfirmActionModal @bind-IsVisible="showDeleteModal"
+                    Title="Xóa Nhà Cung Cấp"
+                    Message="@($"Bạn có chắc chắn muốn xóa nhà cung cấp \"{deletingSupplier?.Name}\"?")"
+                    DetailMessage="Lưu ý: Nếu nhà cung cấp đã có chứng từ phiếu nhập trong CSDL, hệ thống sẽ tự động chặn thao tác để bảo vệ tính toàn vẹn lịch sử."
+                    ConfirmText="Xác nhận xóa"
+                    CancelText="Hủy bỏ"
+                    ConfirmButtonClass="btn-danger"
+                    OnConfirm="HandleDeleteSupplier"
+                    OnCancel="() => showDeleteModal = false" />
+
+@code {
+    private List<Supplier> allSuppliers = new();
+    private string searchTerm = string.Empty;
+    private bool? statusFilter = null;
+
+    private string alertMessage = string.Empty;
+    private bool isSuccessAlert = true;
+
+    private bool showFormModal = false;
+    private bool isEditing = false;
+    private Supplier supplierModel = new();
+
+    private bool showViewModal = false;
+    private Supplier? viewingSupplier;
+
+    private bool showDeleteModal = false;
+    private Supplier? deletingSupplier;
+
+    private IEnumerable<Supplier> filteredSuppliers
+    {
+        get
+        {
+            var result = allSuppliers.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                string term = searchTerm.Trim().ToLower();
+                result = result.Where(s =>
+                    s.SupplierCode.ToLower().Contains(term) ||
+                    s.Name.ToLower().Contains(term) ||
+                    s.Phone.ToLower().Contains(term) ||
+                    s.Address.ToLower().Contains(term) ||
+                    (!string.IsNullOrEmpty(s.Email) && s.Email.ToLower().Contains(term)));
+            }
+
+            if (statusFilter.HasValue)
+            {
+                result = result.Where(s => s.IsActive == statusFilter.Value);
+            }
+
+            return result;
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadSuppliers();
+    }
+
+    private async Task LoadSuppliers()
+    {
+        allSuppliers = (await GetSuppliers.ExecuteAsync()).ToList();
+    }
+
+    private void OpenAddModal()
+    {
+        isEditing = false;
+        supplierModel = new Supplier
+        {
+            SupplierCode = $"NCC-{DateTime.Now:yyMMddHHmm}",
+            IsActive = true
+        };
+        showFormModal = true;
+    }
+
+    private void OpenEditModal(Supplier s)
+    {
+        isEditing = true;
+        supplierModel = new Supplier
+        {
+            Id = s.Id,
+            SupplierCode = s.SupplierCode,
+            Name = s.Name,
+            Phone = s.Phone,
+            Email = s.Email,
+            Address = s.Address,
+            IsActive = s.IsActive
+        };
+        showFormModal = true;
+    }
+
+    private void OpenViewModal(Supplier s)
+    {
+        viewingSupplier = s;
+        showViewModal = true;
+    }
+
+    private void CloseFormModal()
+    {
+        showFormModal = false;
+    }
+
+    private async Task SaveSupplier()
+    {
+        try
+        {
+            if (isEditing)
+            {
+                await EditSupplier.ExecuteAsync(supplierModel);
+                alertMessage = $"Đã cập nhật thành công thông tin nhà cung cấp {supplierModel.Name}!";
+            }
+            else
+            {
+                await AddSupplier.ExecuteAsync(supplierModel);
+                alertMessage = $"Đã thêm thành công nhà cung cấp mới {supplierModel.Name}!";
+            }
+
+            isSuccessAlert = true;
+            showFormModal = false;
+            await LoadSuppliers();
+        }
+        catch (Exception ex)
+        {
+            alertMessage = $"Lỗi khi lưu nhà cung cấp: {ex.Message}";
+            isSuccessAlert = false;
+        }
+    }
+
+    private void OpenDeleteConfirm(Supplier s)
+    {
+        deletingSupplier = s;
+        showDeleteModal = true;
+    }
+
+    private async Task HandleDeleteSupplier()
+    {
+        if (deletingSupplier == null) return;
+
+        var result = await DeleteSupplier.ExecuteAsync(deletingSupplier.Id);
+        if (result.Success)
+        {
+            alertMessage = $"Đã xóa thành công nhà cung cấp {deletingSupplier.Name}!";
+            isSuccessAlert = true;
+            await LoadSuppliers();
+        }
+        else
+        {
+            alertMessage = result.ErrorMessage ?? "Không thể xóa nhà cung cấp.";
+            isSuccessAlert = false;
+        }
+
+        showDeleteModal = false;
+    }
+}

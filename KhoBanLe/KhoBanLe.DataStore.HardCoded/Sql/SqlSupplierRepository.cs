@@ -81,5 +81,20 @@ namespace KhoBanLe.DataStore.HardCoded.Sql
                 supplier.Id
             });
         }
+
+        public async Task<bool> HasGoodsReceiptsAsync(int id)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            const string sql = "SELECT COUNT(*) FROM dbo.GoodsReceipt WHERE SupplierId = @SupplierId;";
+            int count = await connection.ExecuteScalarAsync<int>(sql, new { SupplierId = id });
+            return count > 0;
+        }
+
+        public async Task DeleteSupplierAsync(int id)
+        {
+            using var connection = _connectionFactory.CreateConnection();
+            const string sql = "DELETE FROM dbo.Supplier WHERE Id = @Id;";
+            await connection.ExecuteAsync(sql, new { Id = id });
+        }
     }
 }

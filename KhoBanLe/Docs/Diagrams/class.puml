@@ -173,6 +173,15 @@ package "2. KhoBanLe.UseCases" #f1f5f9 {
         +ApproveIssueTransactionAsync(issueId, approvedBy)
     }
 
+    interface ISupplierRepository {
+        +GetSuppliersAsync()
+        +GetSupplierByIdAsync(id)
+        +AddSupplierAsync(supplier)
+        +UpdateSupplierAsync(supplier)
+        +HasGoodsReceiptsAsync(id)
+        +DeleteSupplierAsync(id)
+    }
+
     interface IInventoryReportRepository {
         +GetInventoryReportAsync(fromDate, toDate)
     }
@@ -223,12 +232,17 @@ package "3. KhoBanLe.DataStore.HardCoded (Plugins)" #e2e8f0 {
         +ApproveIssueTransactionAsync() <<1 Transaction>>
     }
 
+    class SqlSupplierRepository implements ISupplierRepository {
+        -ISqlConnectionFactory _factory
+    }
+
     class SqlInventoryReportRepository implements IInventoryReportRepository {
         -ISqlConnectionFactory _factory
         +GetInventoryReportAsync() <<Parameterized SQL>>
     }
 
     class ProductRepository implements IProductRepository
+    class SupplierRepository implements ISupplierRepository
     class GoodsReceiptRepository implements IGoodsReceiptRepository
     class GoodsIssueRepository implements IGoodsIssueRepository
     class InventoryReportRepository implements IInventoryReportRepository
@@ -260,6 +274,7 @@ package "4. KhoBanLe (WebApp)" #f8fafc {
     class CreateReceipt_razor <<EditForm + AI>>
     class CreateIssue_razor <<EditForm + Demo Luật 1>>
     class InventoryReport_razor <<Báo cáo + Excel>>
+    class SupplierList_razor <<EditForm + CRUD>>
 
     Program ..> SqlProductRepository : Register DI
     Program ..> SqlGoodsReceiptRepository : Register DI

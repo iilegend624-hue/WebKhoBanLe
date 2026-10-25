@@ -1,17 +1,95 @@
-.page {
-    position: relative;
+/* =========================================================================
+   PREMIUM ADMIN DASHBOARD LAYOUT & RESPONSIVE SIDEBAR
+   ========================================================================= */
+
+.admin-wrapper {
     display: flex;
-    flex-direction: column;
     min-height: 100vh;
-    background-color: var(--bg-page);
+    background-color: var(--bg-page, #f8fafc);
+    position: relative;
+    width: 100%;
 }
 
-main {
+/* 1. SIDEBAR CONTAINER */
+.admin-sidebar {
+    width: 260px;
+    background-color: #0f172a;
+    color: #94a3b8;
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 1045;
+    transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Desktop Collapsed Sidebar */
+.admin-wrapper.sidebar-collapsed .admin-sidebar {
+    width: 78px;
+}
+
+/* 2. MAIN CONTENT WRAPPER */
+.admin-main {
     flex: 1;
     display: flex;
     flex-direction: column;
+    min-width: 0;
+    margin-left: 260px;
+    min-height: 100vh;
+    transition: margin-left 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.admin-wrapper.sidebar-collapsed .admin-main {
+    margin-left: 78px;
+}
+
+/* 3. TOPBAR */
+.admin-topbar {
+    background: #ffffff;
+    border-bottom: 1px solid #edf2f7;
+    position: sticky;
+    top: 0;
+    z-index: 1040;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* 4. CONTENT AREA */
+.admin-content {
+    flex: 1;
+    min-height: calc(100vh - 120px);
+}
+
+/* 5. MOBILE & TABLET RESPONSIVE (< 1200px) */
+@media (max-width: 1199.98px) {
+    .admin-sidebar {
+        transform: translateX(-100%);
+        width: 270px !important;
+    }
+
+    .admin-sidebar.mobile-open {
+        transform: translateX(0);
+    }
+
+    .admin-main {
+        margin-left: 0 !important;
+    }
+
+    .mobile-sidebar-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(15, 23, 42, 0.65);
+        backdrop-filter: blur(4px);
+        z-index: 1042;
+    }
+}
+
+/* BLAZOR ERROR UI */
 #blazor-error-ui {
     background: #fef2f2;
     color: #991b1b;

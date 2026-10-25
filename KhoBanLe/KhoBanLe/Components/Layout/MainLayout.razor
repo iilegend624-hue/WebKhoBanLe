@@ -5,173 +5,123 @@
 @inject NavigationManager Nav
 @implements IDisposable
 
-<div class="page">
-    <!-- SAPO STYLE TOP HEADER NAVIGATION -->
-    <header class="sapo-top-header">
-        <div class="container-fluid px-3 px-xl-4 py-2.5">
-            <div class="d-flex align-items-center justify-content-between gap-3">
-                <!-- Brand Logo -->
-                <div class="d-flex align-items-center gap-3">
-                    <!-- Mobile Hamburger Button -->
-                    <button type="button" class="btn btn-sm btn-light border d-lg-none rounded-3 p-2" 
-                            @onclick="() => showMobileMenu = !showMobileMenu" title="Menu điều hướng">
-                        <i class="bi bi-list fs-5"></i>
-                    </button>
+<div class="admin-wrapper @(isSidebarCollapsed ? "sidebar-collapsed" : "")">
+    <!-- 1. LEFT ADMIN SIDEBAR -->
+    <aside class="admin-sidebar @(isMobileMenuOpen ? "mobile-open" : "")">
+        <NavMenu IsCollapsed="@isSidebarCollapsed" OnCloseMobile="() => isMobileMenuOpen = false" />
+    </aside>
 
-                    <a href="" class="sapo-brand-logo">
-                        <div class="brand-icon-box">
-                            <i class="bi bi-box-seam-fill"></i>
-                        </div>
-                        <div>
-                            <div class="brand-text">KHOBANLE</div>
-                            <div class="brand-subtext">Kho Bán Lẻ & POS Thông Minh</div>
-                        </div>
-                    </a>
-                </div>
+    <!-- Mobile Sidebar Backdrop Overlay -->
+    @if (isMobileMenuOpen)
+    {
+        <div class="mobile-sidebar-backdrop d-xl-none" @onclick="() => isMobileMenuOpen = false"></div>
+    }
 
-                <!-- Desktop Horizontal Navigation Links (Sapo Clean Pill Style - Zero Bullets) -->
-                <nav class="d-none d-xl-flex align-items-center gap-1 m-0 p-0">
-                    <NavLink class="nav-header-pill" href="" Match="NavLinkMatch.All">
-                        <i class="bi bi-grid-1x2 me-1.5 text-success"></i>
-                        <span>Tổng Quan</span>
-                    </NavLink>
-                    <NavLink class="nav-header-pill" href="products">
-                        <i class="bi bi-boxes me-1.5 text-primary"></i>
-                        <span>Hàng Hóa & Tồn Kho</span>
-                    </NavLink>
-                    <NavLink class="nav-header-pill" href="cart">
-                        <i class="bi bi-shop me-1.5 text-warning"></i>
-                        <span>Bán Hàng POS</span>
-                    </NavLink>
-                    <NavLink class="nav-header-pill" href="receipts">
-                        <i class="bi bi-box-arrow-in-down me-1.5 text-success"></i>
-                        <span>Phiếu Nhập</span>
-                    </NavLink>
-                    <NavLink class="nav-header-pill" href="issues">
-                        <i class="bi bi-box-arrow-up me-1.5 text-danger"></i>
-                        <span>Phiếu Xuất</span>
-                    </NavLink>
-                    <NavLink class="nav-header-pill" href="approvals">
-                        <i class="bi bi-shield-check me-1.5 text-warning"></i>
-                        <span>Duyệt Phiếu</span>
-                    </NavLink>
-                    <NavLink class="nav-header-pill" href="reports">
-                        <i class="bi bi-bar-chart-line me-1.5 text-info"></i>
-                        <span>Báo Cáo NXT</span>
-                    </NavLink>
-                    <NavLink class="nav-header-pill" href="guide">
-                        <i class="bi bi-mortarboard me-1.5 text-secondary"></i>
-                        <span>Hướng Dẫn</span>
-                    </NavLink>
-                </nav>
-
-                <!-- Right Toolbar Actions -->
-                <div class="d-flex align-items-center gap-2.5">
-                    <!-- Role Switcher Pill -->
-                    <div class="d-flex align-items-center gap-1.5 bg-light p-1 rounded-pill border">
-                        <button class="btn btn-xs py-1 px-2.5 rounded-pill fw-bold @(RoleService.CurrentRole == SystemRole.WarehouseStaff ? "btn-primary text-white" : "btn-light text-secondary")"
-                                @onclick="() => RoleService.SetRole(SystemRole.WarehouseStaff)" style="font-size: 0.78rem;">
-                            Thủ kho
+    <!-- 2. MAIN APPLICATION CONTENT WRAPPER -->
+    <div class="admin-main">
+        <!-- TOP APP HEADER -->
+        <header class="admin-topbar">
+            <div class="container-fluid px-3 px-xl-4 py-2.5">
+                <div class="d-flex align-items-center justify-content-between gap-3">
+                    <!-- Left: Hamburger Toggle & Breadcrumb Title -->
+                    <div class="d-flex align-items-center gap-2.5">
+                        <!-- Desktop Sidebar Collapse Toggle -->
+                        <button type="button" class="btn btn-sm btn-light border rounded-3 p-2 d-none d-xl-inline-flex" 
+                                @onclick="ToggleSidebarCollapse" title="Thu gọn / Mở rộng Sidebar">
+                            <i class="bi @(isSidebarCollapsed ? "bi-layout-sidebar" : "bi-layout-sidebar-inset") fs-5 text-secondary"></i>
                         </button>
-                        <button class="btn btn-xs py-1 px-2.5 rounded-pill fw-bold @(RoleService.CurrentRole == SystemRole.InventoryManager ? "btn-warning text-dark" : "btn-light text-secondary")"
-                                @onclick="() => RoleService.SetRole(SystemRole.InventoryManager)" style="font-size: 0.78rem;">
-                            Quản lý
+
+                        <!-- Mobile Hamburger Button -->
+                        <button type="button" class="btn btn-sm btn-light border rounded-3 p-2 d-xl-none" 
+                                @onclick="() => isMobileMenuOpen = !isMobileMenuOpen" title="Mở menu điều hướng">
+                            <i class="bi bi-list fs-5 text-dark"></i>
                         </button>
+
+                        <!-- System Title / Sub-header -->
+                        <div class="d-none d-sm-block">
+                            <div class="fw-bold text-dark fs-6 lh-sm">Hệ Thống Kho Bán Lẻ</div>
+                            <small class="text-muted" style="font-size: 0.75rem;">Nhập – Xuất – Tồn & Bán Hàng Tại Quầy (POS)</small>
+                        </div>
                     </div>
 
-                    <!-- Quick Cart Button -->
-                    <button type="button" class="btn btn-sm btn-outline-success rounded-pill fw-bold position-relative px-3 shadow-xs d-flex align-items-center gap-1.5"
-                            @onclick="CartService.ToggleDrawer" title="Xem giỏ hàng & Bán lẻ POS">
-                        <i class="bi bi-cart3 fs-6"></i>
-                        <span class="d-none d-sm-inline">Giỏ hàng</span>
-                        @if (CartService.TotalItems > 0)
-                        {
-                            <span class="badge rounded-pill bg-danger text-white ms-1">
-                                @CartService.TotalItems
-                            </span>
-                        }
-                    </button>
-
-                    <!-- Fast Create Actions -->
-                    <div class="d-none d-md-flex align-items-center gap-1.5">
-                        <a href="receipts/create" class="btn btn-sm btn-light border rounded-pill px-2.5 py-1 text-success fw-semibold" title="Tạo phiếu nhập mới">
-                            <i class="bi bi-plus-lg me-1"></i>Nhập
-                        </a>
-                        <a href="issues/create" class="btn btn-sm btn-light border rounded-pill px-2.5 py-1 text-danger fw-semibold" title="Tạo phiếu xuất mới">
-                            <i class="bi bi-dash-lg me-1"></i>Xuất
-                        </a>
-                    </div>
-
-                    <!-- User Profile Avatar Badge -->
-                    <div class="d-flex align-items-center gap-2 border-start ps-2.5">
-                        <div class="rounded-circle bg-success bg-opacity-15 text-success d-flex align-items-center justify-content-center fw-bold" 
-                             style="width: 36px; height: 36px; font-size: 0.85rem; border: 1.5px solid #a7f3d0;">
-                            @(RoleService.CurrentRole == SystemRole.WarehouseStaff ? "TK" : "QL")
+                    <!-- Right Toolbar: Actions, Role Switcher, Cart & Profile -->
+                    <div class="d-flex align-items-center gap-2">
+                        <!-- Quick Transaction Buttons -->
+                        <div class="d-none d-md-flex align-items-center gap-1.5">
+                            <a href="receipts/create" class="btn btn-sm btn-outline-success rounded-pill px-3 py-1 fw-semibold d-flex align-items-center gap-1" title="Tạo phiếu nhập mới">
+                                <i class="bi bi-plus-lg"></i>
+                                <span>Nhập kho</span>
+                            </a>
+                            <a href="issues/create" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1 fw-semibold d-flex align-items-center gap-1" title="Tạo phiếu xuất mới">
+                                <i class="bi bi-dash-lg"></i>
+                                <span>Xuất kho</span>
+                            </a>
                         </div>
-                        <div class="d-none d-xl-block text-start lh-sm">
-                            <div class="fw-bold text-dark small">@RoleService.CurrentUserName</div>
-                            <small class="text-success fw-medium" style="font-size: 0.72rem;">@RoleService.RoleDisplayName</small>
+
+                        <!-- Role Switcher Pill -->
+                        <div class="d-flex align-items-center gap-1 bg-light p-1 rounded-pill border">
+                            <button type="button" 
+                                    class="btn btn-xs py-1 px-2.5 rounded-pill fw-bold @(RoleService.CurrentRole == SystemRole.WarehouseStaff ? "btn-primary text-white" : "btn-light text-secondary")"
+                                    @onclick="() => RoleService.SetRole(SystemRole.WarehouseStaff)" style="font-size: 0.78rem;">
+                                Thủ kho
+                            </button>
+                            <button type="button" 
+                                    class="btn btn-xs py-1 px-2.5 rounded-pill fw-bold @(RoleService.CurrentRole == SystemRole.InventoryManager ? "btn-warning text-dark" : "btn-light text-secondary")"
+                                    @onclick="() => RoleService.SetRole(SystemRole.InventoryManager)" style="font-size: 0.78rem;">
+                                Quản lý
+                            </button>
+                        </div>
+
+                        <!-- Quick Cart Button -->
+                        <button type="button" class="btn btn-sm btn-outline-success rounded-pill fw-bold position-relative px-3 py-1.5 shadow-xs d-flex align-items-center gap-1.5"
+                                @onclick="CartService.ToggleDrawer" title="Xem giỏ hàng & Bán lẻ POS">
+                            <i class="bi bi-cart3 fs-6"></i>
+                            <span class="d-none d-lg-inline">Giỏ POS</span>
+                            @if (CartService.TotalItems > 0)
+                            {
+                                <span class="badge rounded-pill bg-danger text-white ms-1">
+                                    @CartService.TotalItems
+                                </span>
+                            }
+                        </button>
+
+                        <!-- User Profile Avatar Badge -->
+                        <div class="d-flex align-items-center gap-2 border-start ps-2.5 ms-1">
+                            <div class="rounded-circle @(RoleService.CurrentRole == SystemRole.WarehouseStaff ? "bg-primary bg-opacity-15 text-primary border-primary" : "bg-warning bg-opacity-20 text-warning-emphasis border-warning") d-flex align-items-center justify-content-center fw-bold" 
+                                 style="width: 36px; height: 36px; font-size: 0.85rem; border: 1.5px solid;">
+                                @(RoleService.CurrentRole == SystemRole.WarehouseStaff ? "TK" : "QL")
+                            </div>
+                            <div class="d-none d-lg-block text-start lh-sm">
+                                <div class="fw-bold text-dark small">@RoleService.CurrentUserName</div>
+                                <small class="text-success fw-medium" style="font-size: 0.72rem;">@RoleService.RoleDisplayName</small>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </header>
 
-        <!-- Mobile Navigation Menu (Visible when hamburger clicked) -->
-        @if (showMobileMenu)
-        {
-            <div class="d-lg-none bg-white border-top px-3 py-2 shadow-sm">
-                <div class="d-flex flex-column gap-1">
-                    <NavLink class="sapo-nav-link" href="" Match="NavLinkMatch.All" @onclick="() => showMobileMenu = false">
-                        <i class="bi bi-house-door me-2"></i>Tổng Quan
-                    </NavLink>
-                    <NavLink class="sapo-nav-link" href="products" @onclick="() => showMobileMenu = false">
-                        <i class="bi bi-boxes me-2"></i>Hàng Hóa & Tồn Kho
-                    </NavLink>
-                    <NavLink class="sapo-nav-link" href="cart" @onclick="() => showMobileMenu = false">
-                        <i class="bi bi-shop me-2 text-warning"></i>Bán Hàng POS
-                    </NavLink>
-                    <NavLink class="sapo-nav-link" href="receipts" @onclick="() => showMobileMenu = false">
-                        <i class="bi bi-box-arrow-in-down me-2 text-success"></i>Sổ Phiếu Nhập
-                    </NavLink>
-                    <NavLink class="sapo-nav-link" href="issues" @onclick="() => showMobileMenu = false">
-                        <i class="bi bi-box-arrow-up me-2 text-danger"></i>Sổ Phiếu Xuất
-                    </NavLink>
-                    <NavLink class="sapo-nav-link" href="approvals" @onclick="() => showMobileMenu = false">
-                        <i class="bi bi-shield-check me-2 text-warning"></i>Duyệt Phiếu
-                    </NavLink>
-                    <NavLink class="sapo-nav-link" href="reports" @onclick="() => showMobileMenu = false">
-                        <i class="bi bi-bar-chart-line me-2 text-info"></i>Báo Cáo NXT
-                    </NavLink>
-                    <NavLink class="sapo-nav-link" href="guide" @onclick="() => showMobileMenu = false">
-                        <i class="bi bi-mortarboard me-2"></i>Hướng Dẫn
-                    </NavLink>
-                </div>
-            </div>
-        }
-    </header>
-
-    <!-- MAIN APPLICATION CONTENT -->
-    <main class="flex-grow-1">
-        <article class="content pb-5">
+        <!-- PAGE CONTENT BODY -->
+        <main class="admin-content flex-grow-1 p-3 p-xl-4">
             @Body
-        </article>
-    </main>
+        </main>
 
-    <!-- CLEAN MODERN FOOTER -->
-    <footer class="bg-white border-top py-3 text-center text-muted small mt-auto">
-        <div class="container-fluid px-4 d-flex flex-wrap align-items-center justify-content-between gap-2">
-            <div class="d-flex align-items-center gap-2">
-                <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-2 py-1 rounded-pill fw-semibold">
-                    <i class="bi bi-check-circle-fill me-1"></i>Sapo Style Clean UI
-                </span>
-                <span>© 2026 Hệ Thống Kho Bán Lẻ & Bán Hàng Tại Quầy POS | Clean Architecture 4 Tầng</span>
+        <!-- CLEAN MODERN FOOTER -->
+        <footer class="bg-white border-top py-3 text-center text-muted small mt-auto">
+            <div class="container-fluid px-4 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle px-2.5 py-1 rounded-pill fw-semibold">
+                        <i class="bi bi-check-circle-fill me-1"></i>Kho Bán Lẻ & POS Thông Minh
+                    </span>
+                    <span>© 2026 Đồ Án Capstone ECO2415 — Đề tài 13: Kho Bán Lẻ (Nhập – Xuất – Tồn)</span>
+                </div>
+                <div class="text-muted d-flex align-items-center gap-3">
+                    <span>Clean Architecture 4 Tầng &bull; SQL Server Dapper</span>
+                    <a href="guide" class="text-decoration-none text-primary fw-semibold">Phiếu Chấm Đồ Án &rarr;</a>
+                </div>
             </div>
-            <div class="text-muted">
-                <span>Liên kết SQL Server SSMS Dapper & Export Excel UTF-8</span>
-            </div>
-        </div>
-    </footer>
+        </footer>
+    </div>
 </div>
 
 <!-- Global Quick Cart Drawer -->
@@ -184,12 +134,18 @@
 </div>
 
 @code {
-    private bool showMobileMenu = false;
+    private bool isSidebarCollapsed = false;
+    private bool isMobileMenuOpen = false;
 
     protected override void OnInitialized()
     {
         CartService.OnChange += OnStateUpdated;
         RoleService.OnRoleChanged += OnStateUpdated;
+    }
+
+    private void ToggleSidebarCollapse()
+    {
+        isSidebarCollapsed = !isSidebarCollapsed;
     }
 
     private async void OnStateUpdated()

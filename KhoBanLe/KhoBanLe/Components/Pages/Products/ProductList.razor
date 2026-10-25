@@ -7,7 +7,9 @@
 @inject IDeleteProductUseCase DeleteProduct
 @inject ShoppingCartService CartService
 @inject ExcelExportService ExcelService
+@inject UserRoleService RoleService
 @inject NavigationManager Nav
+@inject IJSRuntime JS
 @implements IDisposable
 
 <PageTitle>Danh Mục Hàng Hóa Bán Lẻ & Tồn Kho - KhoBanLe</PageTitle>
@@ -32,13 +34,59 @@
     </div>
 }
 
-<!-- RETAIL SUPERMARKET HERO BANNER -->
-<div class="sapo-hero-banner">
+<!-- EXECUTIVE RETAIL INVENTORY DASHBOARD HEADER (MỤC TIÊU GIAO DIỆN HIỆN ĐẠI) -->
+<div class="retail-dashboard-header">
     <div class="container-fluid px-3 px-xl-4">
-        <h1 class="sapo-hero-title">Kho Hàng Bán Lẻ & Siêu Thị Tiện Lợi</h1>
-        <p class="sapo-hero-subtitle">
-            Quản lý hơn 70 mặt hàng bán lẻ thiết yếu, đồng bộ tồn kho thực tế với SQL Server & bán hàng trực tiếp tại quầy POS
-        </p>
+        <div class="row align-items-center g-3">
+            <div class="col-12 col-xl-5">
+                <div class="d-flex align-items-center gap-2 mb-1.5">
+                    <span class="badge bg-success text-white fw-bold px-2.5 py-1 rounded-pill shadow-xs">
+                        <i class="bi bi-shop me-1"></i>ECO2415 CAPSTONE ĐỀ TÀI 13
+                    </span>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle fw-bold px-2.5 py-1 rounded-pill">
+                        <i class="bi bi-database-check me-1"></i>SQL Server Dapper
+                    </span>
+                </div>
+                <h2 class="fw-bold text-dark mb-1 tracking-tight">
+                    <i class="bi bi-boxes text-success me-2"></i>Kho Hàng Bán Lẻ & Siêu Thị Tiện Lợi
+                </h2>
+                <p class="text-muted small mb-0">
+                    Quản lý hơn 110+ mặt hàng thiết yếu thuộc 10 ngành hàng &bull; Đồng bộ tồn kho tức thì &bull; Bán hàng tại quầy POS &bull; In tem mã QR
+                </p>
+            </div>
+            <div class="col-12 col-xl-7">
+                <div class="row g-2">
+                    <div class="col-6 col-sm-3">
+                        <div class="kpi-mini-card p-2.5 rounded-3 bg-white border shadow-xs text-center h-100">
+                            <div class="text-muted small fw-semibold">Tổng Hàng Hóa</div>
+                            <div class="h4 fw-bold text-dark mb-0">@allProducts.Count</div>
+                            <small class="text-success fw-semibold" style="font-size: 0.72rem;">@allCategories.Count(c => c != "Tất cả") ngành hàng</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="kpi-mini-card p-2.5 rounded-3 bg-white border border-success-subtle shadow-xs text-center h-100">
+                            <div class="text-muted small fw-semibold">Tồn An Toàn</div>
+                            <div class="h4 fw-bold text-success mb-0">@(allProducts.Count(p => p.CurrentStock > p.MinStockLevel))</div>
+                            <small class="text-muted" style="font-size: 0.72rem;">Đầy đủ hàng bán</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="kpi-mini-card p-2.5 rounded-3 bg-white border border-warning-subtle shadow-xs text-center h-100">
+                            <div class="text-muted small fw-semibold">Sắp Hết Hàng</div>
+                            <div class="h4 fw-bold text-warning-emphasis mb-0">@(allProducts.Count(p => p.CurrentStock > 0 && p.CurrentStock <= p.MinStockLevel))</div>
+                            <small class="text-warning-emphasis" style="font-size: 0.72rem;">Cần nhập thêm</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-sm-3">
+                        <div class="kpi-mini-card p-2.5 rounded-3 bg-white border border-danger-subtle shadow-xs text-center h-100">
+                            <div class="text-muted small fw-semibold">Hết Hàng</div>
+                            <div class="h4 fw-bold text-danger mb-0">@(allProducts.Count(p => p.CurrentStock <= 0))</div>
+                            <small class="text-danger" style="font-size: 0.72rem;">Tồn kho = 0</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -75,6 +123,7 @@
                                 @onclick="() => FilterByCategory(cat)">
                             <div class="d-flex align-items-center">
                                 <span class="sapo-radio-bullet"></span>
+                                <i class="bi @GetCategoryIcon(cat) me-1.5 opacity-75"></i>
                                 <span>@cat</span>
                             </div>
                             <span class="badge @(isSelected ? "bg-success text-white" : "bg-light text-muted border") rounded-pill" style="font-size: 0.72rem;">
@@ -246,6 +295,49 @@
                             <i class="bi bi-plus-lg me-1"></i>Thêm Mới
                         </button>
                     </div>
+
+                    <!-- GỢI Ý TÌM NHANH (QUICK KEYWORD CHIPS) -->
+                    <div class="d-flex flex-wrap align-items-center gap-1.5 w-100 mt-2.5 pt-2 border-top">
+                        <small class="text-muted fw-bold me-1"><i class="bi bi-lightning-charge-fill text-warning me-1"></i>Gợi ý nhanh:</small>
+                        <button type="button" class="btn btn-xs rounded-pill @(searchTerm == "h" ? "btn-success text-white shadow-xs fw-bold" : "btn-light text-secondary border")"
+                                @onclick='() => SetQuickSearch("h")' title="Tìm mọi mặt hàng có chứa chữ 'h'">
+                            Chữ "h"
+                        </button>
+                        <button type="button" class="btn btn-xs rounded-pill @(searchTerm == "haohao" || searchTerm == "hảo hảo" ? "btn-success text-white shadow-xs fw-bold" : "btn-light text-secondary border")"
+                                @onclick='() => SetQuickSearch("haohao")'>
+                            🍜 Mì Hảo Hảo
+                        </button>
+                        <button type="button" class="btn btn-xs rounded-pill @(searchTerm == "coca" ? "btn-success text-white shadow-xs fw-bold" : "btn-light text-secondary border")"
+                                @onclick='() => SetQuickSearch("coca")'>
+                            🥤 Coca-Cola
+                        </button>
+                        <button type="button" class="btn btn-xs rounded-pill @(searchTerm == "vinamilk" ? "btn-success text-white shadow-xs fw-bold" : "btn-light text-secondary border")"
+                                @onclick='() => SetQuickSearch("vinamilk")'>
+                            🥛 Sữa Vinamilk
+                        </button>
+                        <button type="button" class="btn btn-xs rounded-pill @(searchTerm == "omo" ? "btn-success text-white shadow-xs fw-bold" : "btn-light text-secondary border")"
+                                @onclick='() => SetQuickSearch("omo")'>
+                            🧼 Bột giặt OMO
+                        </button>
+                        <button type="button" class="btn btn-xs rounded-pill @(searchTerm == "thienlong" || searchTerm == "thiên long" ? "btn-success text-white shadow-xs fw-bold" : "btn-light text-secondary border")"
+                                @onclick='() => SetQuickSearch("thienlong")'>
+                            ✏️ Bút Thiên Long
+                        </button>
+                        <button type="button" class="btn btn-xs rounded-pill @(searchTerm == "simply" ? "btn-success text-white shadow-xs fw-bold" : "btn-light text-secondary border")"
+                                @onclick='() => SetQuickSearch("simply")'>
+                            🍳 Dầu Simply
+                        </button>
+                        <button type="button" class="btn btn-xs rounded-pill @(searchTerm == "g7" ? "btn-success text-white shadow-xs fw-bold" : "btn-light text-secondary border")"
+                                @onclick='() => SetQuickSearch("g7")'>
+                            ☕ Cà phê G7
+                        </button>
+                        @if (!string.IsNullOrWhiteSpace(searchTerm))
+                        {
+                            <button type="button" class="btn btn-xs btn-outline-danger rounded-pill ms-auto fw-semibold" @onclick="ClearSearch">
+                                <i class="bi bi-x-circle me-1"></i>Xóa tìm kiếm
+                            </button>
+                        }
+                    </div>
                 </div>
             </div>
 
@@ -344,6 +436,11 @@
                                                         </button>
                                                     </li>
                                                     <li>
+                                                        <button class="dropdown-item py-1.5 small text-dark" @onclick="() => OpenQrModal(p)">
+                                                            <i class="bi bi-qr-code-scan me-2 text-success"></i>Mã QR & Tem nhãn
+                                                        </button>
+                                                    </li>
+                                                    <li>
                                                         <button class="dropdown-item py-1.5 small text-primary" @onclick="() => OpenEditModal(p)">
                                                             <i class="bi bi-pencil me-2 text-warning"></i>Sửa thông tin
                                                         </button>
@@ -364,12 +461,31 @@
                 }
                 else
                 {
-                    <div class="sapo-sidebar-box p-5 text-center text-muted mb-4">
-                        <i class="bi bi-search fs-1 text-secondary d-block mb-2"></i>
-                        <h5 class="fw-bold text-dark">Không tìm thấy hàng hóa nào!</h5>
-                        <p class="small text-muted mb-3">Thử thay đổi từ khóa tìm kiếm hoặc điều chỉnh khoảng giá, danh mục.</p>
-                        <button type="button" class="btn btn-primary rounded-pill px-4" @onclick="ClearSearch">
-                            Xem tất cả sản phẩm
+                    <div class="sapo-sidebar-box p-5 text-center text-muted mb-4 border border-dashed rounded-4 bg-light bg-opacity-50">
+                        <div class="rounded-circle bg-success bg-opacity-10 text-success d-inline-flex align-items-center justify-content-center mb-3 shadow-xs" style="width: 64px; height: 64px;">
+                            <i class="bi bi-search fs-2"></i>
+                        </div>
+                        <h5 class="fw-bold text-dark mb-1">Không tìm thấy hàng hóa nào phù hợp!</h5>
+                        <p class="small text-muted mb-3 max-w-md mx-auto">
+                            Không có sản phẩm nào khớp với từ khóa "<strong>@searchTerm</strong>" trong bộ lọc hiện tại.
+                        </p>
+                        <div class="d-flex flex-wrap justify-content-center gap-2 mb-3">
+                            <span class="small text-muted align-self-center">Thử bấm tìm:</span>
+                            <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill" @onclick='() => SetQuickSearch("h")'>
+                                Chữ cái "h"
+                            </button>
+                            <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill" @onclick='() => SetQuickSearch("haohao")'>
+                                Mì Hảo Hảo
+                            </button>
+                            <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill" @onclick='() => SetQuickSearch("coca")'>
+                                Coca-Cola
+                            </button>
+                            <button type="button" class="btn btn-xs btn-outline-secondary rounded-pill" @onclick='() => SetQuickSearch("vinamilk")'>
+                                Vinamilk
+                            </button>
+                        </div>
+                        <button type="button" class="btn btn-success rounded-pill px-4 fw-bold shadow-xs" @onclick="ClearSearch">
+                            <i class="bi bi-arrow-counterclockwise me-1.5"></i>Xem tất cả 111 sản phẩm
                         </button>
                     </div>
                 }
@@ -436,6 +552,10 @@
                                                 <button class="btn btn-xs btn-outline-success rounded-pill px-2.5 py-1 fw-bold" 
                                                         @onclick="() => HandleAddToCart(p)" disabled="@(p.CurrentStock <= 0)">
                                                     + Giỏ
+                                                </button>
+                                                <button class="btn btn-xs btn-outline-dark rounded-pill px-2 py-1 fw-bold" 
+                                                        @onclick="() => OpenQrModal(p)" title="Xem mã QR & Tem nhãn SKU">
+                                                    <i class="bi bi-qr-code"></i> QR
                                                 </button>
                                                 <button class="btn btn-xs btn-light border rounded-pill px-2" 
                                                         @onclick="() => OpenEditModal(p)" title="Sửa">
@@ -727,6 +847,87 @@
     OnConfirm="ConfirmDelete"
     OnCancel="@(() => productToDelete = null)" />
 
+<!-- =========================================================================
+     MODAL 3: XEM MÃ QR LỚN & TEM NHÃN GIÁ HÀNG HÓA SIÊU THỊ
+     ========================================================================= -->
+@if (showQrModal && qrProduct != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 1080;">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header bg-dark text-white py-3 px-4 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-qr-code-scan text-success fs-5"></i>
+                        <h6 class="modal-title fw-bold mb-0">Mã QR & Tem Nhãn Hàng Hóa</h6>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" @onclick="CloseQrModal"></button>
+                </div>
+                
+                <div class="modal-body p-4 bg-light text-center">
+                    <!-- TEM NHÃN SIÊU THỊ BÁN LẺ (RETAIL PRICE & BARCODE LABEL) -->
+                    <div class="bg-white p-3.5 rounded-3 border shadow-xs text-start mx-auto" style="max-width: 360px;">
+                        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                            <span class="badge bg-success-subtle text-success fw-bold text-uppercase" style="font-size: 0.72rem;">
+                                SIÊU THỊ TIỆN LỢI &bull; KHO BÁN LẺ
+                            </span>
+                            <span class="small text-muted fw-semibold">@qrProduct.Category</span>
+                        </div>
+                        
+                        <h6 class="fw-bold text-dark mb-1" style="font-size: 0.95rem; line-height: 1.35;">
+                            @qrProduct.Name
+                        </h6>
+                        
+                        <div class="d-flex justify-content-between align-items-baseline mb-2">
+                            <span class="small text-muted">ĐVT: <strong>@qrProduct.Unit</strong> &bull; Tồn: <strong class="text-success">@qrProduct.CurrentStock</strong></span>
+                            <div class="h4 fw-bold text-success mb-0">
+                                @((qrProduct.Price).ToString("N0")) đ
+                            </div>
+                        </div>
+
+                        <!-- ẢNH MÃ QR LỚN, RÕ RÀNG, CHUẨN QUIET ZONE 1:1 KHÔNG BỊ CẮT GÓC (260x260px) -->
+                        <div class="text-center p-2.5 bg-white rounded-3 border my-2.5 position-relative d-flex justify-content-center align-items-center">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=260x260&margin=12&data=@(Uri.EscapeDataString(qrProduct.Sku))" 
+                                 alt="Mã QR SKU @qrProduct.Sku"
+                                 class="img-fluid"
+                                 style="width: 240px; height: 240px; object-fit: contain; image-rendering: pixelated;" />
+                        </div>
+                        
+                        <div class="text-center border-top pt-2">
+                            <div class="font-monospace fw-bold fs-6 text-dark tracking-wider mb-0">
+                                * @qrProduct.Sku *
+                            </div>
+                            <small class="text-muted" style="font-size: 0.7rem;">
+                                Quét bằng camera hoặc máy quét mã vạch để tự động tra cứu trong hệ thống
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-white border-top px-4 py-2.5 d-flex flex-wrap justify-content-between gap-2">
+                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" @onclick="CloseQrModal">
+                        Đóng
+                    </button>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-sm btn-outline-success rounded-pill fw-semibold px-3"
+                                @onclick='() => NavigateToPosWithSku(qrProduct.Sku)'>
+                            <i class="bi bi-cart-check me-1"></i>Bán tại POS
+                        </button>
+                        <a href="https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=20&data=@(Uri.EscapeDataString(qrProduct.Sku))"
+                           target="_blank" download="QR_@(qrProduct.Sku).png"
+                           class="btn btn-sm btn-outline-primary rounded-pill fw-semibold px-3">
+                            <i class="bi bi-download me-1"></i>Tải QR
+                        </a>
+                        <button type="button" class="btn btn-sm btn-success text-white rounded-pill fw-bold px-3 shadow-xs"
+                                @onclick="PrintQrLabel">
+                            <i class="bi bi-printer me-1"></i>In Tem Nhãn
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
     private List<Product> allProducts = new();
     private List<Product> filteredProducts = new();
@@ -739,17 +940,21 @@
     private string stockFilter = "all";
     private string sortBy = "default";
 
-    // 6 Nhóm ngành hàng bán lẻ siêu thị & tiện lợi
-    private readonly List<string> allCategories = new()
+    // Nhóm ngành hàng bán lẻ siêu thị & tiện lợi (Tự động cập nhật từ CSDL)
+    private List<string> allCategories = new()
     {
         "Tất cả",
-        "Nước giải khát & Bia",
-        "Bánh kẹo & Đồ ăn vặt",
-        "Sữa & Chế phẩm sữa",
         "Thực phẩm & Gia vị",
+        "Bánh kẹo & Đồ ăn vặt",
         "Hóa mỹ phẩm & Đồ gia dụng",
+        "Nước giải khát & Bia",
+        "Sữa & Chế phẩm sữa",
+        "Cà phê & Trà",
         "Văn phòng phẩm"
     };
+
+    private Product? qrProduct = null;
+    private bool showQrModal = false;
 
     private Product? previewProduct = null;
     private string previewDevice = "desktop"; // "desktop", "tablet", "mobile"
@@ -765,10 +970,37 @@
     private bool showToast = false;
     private string toastMessage = string.Empty;
 
+    [SupplyParameterFromQuery(Name = "stock")]
+    public string? QueryStock { get; set; }
+
+    [SupplyParameterFromQuery(Name = "filter")]
+    public string? QueryFilter { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         CartService.OnChange += OnCartUpdated;
         await LoadProducts();
+    }
+
+    protected override void OnParametersSet()
+    {
+        string? stockParam = QueryStock ?? QueryFilter;
+        if (!string.IsNullOrEmpty(stockParam))
+        {
+            if (stockParam == "low" || stockParam == "low_stock" || stockParam == "lowstock")
+            {
+                stockFilter = "low_stock";
+            }
+            else if (stockParam == "out" || stockParam == "out_of_stock" || stockParam == "outofstock")
+            {
+                stockFilter = "out_of_stock";
+            }
+            else if (stockParam == "in" || stockParam == "in_stock")
+            {
+                stockFilter = "in_stock";
+            }
+            ApplyFilters();
+        }
     }
 
     private async void OnCartUpdated()
@@ -785,20 +1017,53 @@
     private async Task LoadProducts()
     {
         allProducts = (await SearchProducts.ExecuteAsync()).ToList();
+        
+        // Cập nhật danh mục động từ CSDL
+        var dynamicCats = allProducts.Select(p => p.Category)
+                                     .Where(c => !string.IsNullOrWhiteSpace(c))
+                                     .Distinct()
+                                     .OrderBy(c => c)
+                                     .ToList();
+        allCategories = new List<string> { "Tất cả" };
+        allCategories.AddRange(dynamicCats);
+
         ApplyFilters();
+    }
+
+    private void OpenQrModal(Product product)
+    {
+        qrProduct = product;
+        showQrModal = true;
+    }
+
+    private void CloseQrModal()
+    {
+        showQrModal = false;
+        qrProduct = null;
+    }
+
+    private void NavigateToPosWithSku(string sku)
+    {
+        CloseQrModal();
+        Nav.NavigateTo($"cart?scan={Uri.EscapeDataString(sku)}");
+    }
+
+    private async Task PrintQrLabel()
+    {
+        await JS.InvokeVoidAsync("window.print");
     }
 
     private void ApplyFilters()
     {
         var query = allProducts.AsEnumerable();
 
-        // Search term
+        // Search term (hỗ trợ tìm kiếm tiếng Việt có dấu và không dấu: vd "hao hao" -> "Mì Hảo Hảo")
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
             query = query.Where(p =>
-                p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                p.Sku.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                p.Category.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+                KhoBanLe.Services.SearchHelper.Matches(p.Name, searchTerm) ||
+                KhoBanLe.Services.SearchHelper.Matches(p.Sku, searchTerm) ||
+                KhoBanLe.Services.SearchHelper.Matches(p.Category, searchTerm));
         }
 
         // Category
@@ -911,6 +1176,25 @@
         ApplyFilters();
     }
 
+    private void SetQuickSearch(string term)
+    {
+        searchTerm = term;
+        ApplyFilters();
+    }
+
+    private string GetCategoryIcon(string cat) => cat switch
+    {
+        "Tất cả" => "bi-grid-fill",
+        "Thực phẩm & Gia vị" => "bi-egg-fried",
+        "Bánh kẹo & Đồ ăn vặt" => "bi-cookie",
+        "Hóa mỹ phẩm & Đồ gia dụng" => "bi-stars",
+        "Nước giải khát & Bia" => "bi-cup-straw",
+        "Sữa & Chế phẩm sữa" => "bi-droplet-half",
+        "Cà phê & Trà" => "bi-cup-hot-fill",
+        "Văn phòng phẩm" => "bi-pen-fill",
+        _ => "bi-tag-fill"
+    };
+
     // MODAL XEM THỬ (LIVE PREVIEW)
     private void OpenLivePreview(Product p)
     {
@@ -972,6 +1256,14 @@
 
     private async Task ConfirmDelete()
     {
+        if (!RoleService.IsManager)
+        {
+            alertMessage = "Chỉ Quản lý kho mới có quyền xóa hàng hóa khỏi hệ thống!";
+            isSuccessAlert = false;
+            productToDelete = null;
+            return;
+        }
+
         if (productToDelete != null)
         {
             await DeleteProduct.ExecuteAsync(productToDelete.Id);

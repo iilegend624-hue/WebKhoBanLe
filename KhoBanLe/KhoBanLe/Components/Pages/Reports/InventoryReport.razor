@@ -13,13 +13,15 @@
             <h3 class="fw-bold text-dark mb-1">
                 <i class="bi bi-bar-chart-line-fill text-info me-2"></i>Báo Cáo Tổng Hợp Nhập – Xuất – Tồn
             </h3>
-            <p class="text-muted small mb-0">Cài đặt <strong>LUẬT 2: Bảo toàn công thức Nhập - Xuất - Tồn</strong> &bull; Hỗ trợ xuất trực tiếp sang Excel</p>
+            <p class="text-muted small mb-0">
+                Cài đặt <strong>LUẬT 2: Bảo toàn công thức Nhập - Xuất - Tồn</strong> &bull; Dữ liệu truy vấn trực tiếp từ SQL Server
+            </p>
         </div>
         <div class="d-flex flex-wrap gap-2">
-            <button class="btn btn-outline-primary rounded-pill fw-semibold shadow-xs" @onclick="RunAuditCheck">
+            <button type="button" class="btn btn-outline-primary rounded-pill fw-semibold shadow-xs" @onclick="RunAuditCheck">
                 <i class="bi bi-shield-check me-1"></i>Kiểm Tra Đối Soát Chéo
             </button>
-            <button class="btn btn-success rounded-pill fw-semibold shadow-xs" @onclick="ExportToExcel">
+            <button type="button" class="btn btn-success rounded-pill fw-semibold shadow-xs" @onclick="ExportToExcel">
                 <i class="bi bi-file-earmark-excel-fill me-1"></i>Xuất Báo Cáo Sang Excel (.CSV)
             </button>
         </div>
@@ -31,11 +33,11 @@
             <div class="d-flex align-items-center gap-2">
                 <i class="bi bi-calculator-fill fs-3 text-success"></i>
                 <div>
-                    <h6 class="fw-bold text-success mb-0">LUẬT 2: BẢO TOÀN CÔNG THỨC BẤT BIẾN NHẬP - XUẤT - TỒN</h6>
+                    <h6 class="fw-bold text-success mb-0">LUẬT 2 (K1.3, K2.3): BẢO TOÀN CÔNG THỨC BẤT BIẾN NHẬP - XUẤT - TỒN</h6>
                     <small class="text-dark">
                         Vị trí cài đặt: <code>KhoBanLe.UseCases.Reports.GetInventoryReportUseCase</code>.
                         Công thức: <strong>Tồn đầu kỳ + Tổng nhập (Approved) - Tổng xuất (Approved) = Tồn cuối kỳ</strong>.
-                        Tất cả phiếu đã duyệt đều được khóa bất biến. Hàm đối soát kiểm tra chéo tự động.
+                        Chỉ các phiếu đã Quản lý duyệt thành công mới được ghi nhận vào biến động kho thực tế.
                     </small>
                 </div>
             </div>
@@ -69,28 +71,28 @@
             <div class="col-6 col-md-4 col-xl">
                 <div class="stat-card">
                     <span class="text-muted small fw-semibold">TỒN ĐẦU KỲ</span>
-                    <div class="h4 fw-bold text-secondary mb-0 mt-1">@auditReport.TotalBeginningStock</div>
-                    <small class="text-muted">Đơn vị: chiếc/gói/thùng</small>
+                    <div class="h4 fw-bold text-secondary mb-0 mt-1">@auditReport.TotalBeginningStock.ToString("N0")</div>
+                    <small class="text-muted">Đơn vị: cái/gói/thùng</small>
                 </div>
             </div>
             <div class="col-6 col-md-4 col-xl">
                 <div class="stat-card">
                     <span class="text-muted small fw-semibold text-success">TỔNG NHẬP (APPROVED)</span>
-                    <div class="h4 fw-bold text-success mb-0 mt-1">+@auditReport.TotalImportQuantity</div>
+                    <div class="h4 fw-bold text-success mb-0 mt-1">+@auditReport.TotalImportQuantity.ToString("N0")</div>
                     <small class="text-muted">Đã duyệt trong kỳ</small>
                 </div>
             </div>
             <div class="col-6 col-md-4 col-xl">
                 <div class="stat-card">
                     <span class="text-muted small fw-semibold text-danger">TỔNG XUẤT (APPROVED)</span>
-                    <div class="h4 fw-bold text-danger mb-0 mt-1">-@auditReport.TotalExportQuantity</div>
+                    <div class="h4 fw-bold text-danger mb-0 mt-1">-@auditReport.TotalExportQuantity.ToString("N0")</div>
                     <small class="text-muted">Đã duyệt trong kỳ</small>
                 </div>
             </div>
             <div class="col-6 col-md-4 col-xl">
                 <div class="stat-card">
                     <span class="text-muted small fw-semibold text-primary">TỒN CUỐI KỲ (=)</span>
-                    <div class="h4 fw-bold text-primary mb-0 mt-1">@auditReport.TotalEndingStock</div>
+                    <div class="h4 fw-bold text-primary mb-0 mt-1">@auditReport.TotalEndingStock.ToString("N0")</div>
                     <small class="text-muted">Đầu + Nhập - Xuất</small>
                 </div>
             </div>
@@ -104,11 +106,54 @@
         </div>
     }
 
+    <!-- FILTER TOOLBAR (BỘ LỌC KHOẢNG THỜI GIAN & TÌM KIẾM HÀNG HÓA) -->
+    <div class="modern-card p-3 mb-4">
+        <div class="row g-3 align-items-end">
+            <div class="col-12 col-sm-6 col-md-3">
+                <label class="form-label small fw-bold text-dark mb-1">
+                    <i class="bi bi-calendar-event me-1 text-primary"></i>Từ ngày
+                </label>
+                <input type="date" class="form-control form-control-sm" @bind="fromDate" />
+            </div>
+
+            <div class="col-12 col-sm-6 col-md-3">
+                <label class="form-label small fw-bold text-dark mb-1">
+                    <i class="bi bi-calendar-check me-1 text-primary"></i>Đến ngày
+                </label>
+                <input type="date" class="form-control form-control-sm" @bind="toDate" />
+            </div>
+
+            <div class="col-12 col-sm-6 col-md-3">
+                <label class="form-label small fw-bold text-dark mb-1">
+                    <i class="bi bi-search me-1 text-primary"></i>Tìm mặt hàng / SKU
+                </label>
+                <input type="text" class="form-control form-control-sm" placeholder="Nhập mã SKU hoặc tên hàng..." @bind="searchTerm" @bind:event="oninput" />
+            </div>
+
+            <div class="col-12 col-sm-6 col-md-3 d-flex gap-2">
+                <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 fw-bold flex-grow-1" @onclick="ApplyDateFilter" disabled="@isLoading">
+                    @if (isLoading)
+                    {
+                        <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                    }
+                    else
+                    {
+                        <i class="bi bi-funnel-fill me-1"></i>
+                    }
+                    Lọc Báo Cáo
+                </button>
+                <button type="button" class="btn btn-sm btn-light border rounded-pill px-3 text-secondary" @onclick="ResetFilter" title="Xem toàn bộ thời gian">
+                    Đặt lại
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Detailed Inventory Report Table -->
     <div class="modern-card p-0 overflow-hidden mb-4">
         <div class="px-4 py-3 bg-light border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
             <h6 class="fw-bold text-dark mb-0">
-                <i class="bi bi-table me-1 text-primary"></i>Bảng Kê Chi Tiết Nhập - Xuất - Tồn Từng Mặt Hàng
+                <i class="bi bi-table me-1 text-primary"></i>Bảng Kê Chi Tiết Nhập - Xuất - Tồn Từng Mặt Hàng (@filteredItems.Count mặt hàng)
             </h6>
             <div class="small text-muted">
                 Công thức: <code>Tồn cuối = Tồn đầu + Nhập - Xuất</code> &bull; <code>Khớp = (Tồn cuối == Tồn thực tế)</code>
@@ -133,13 +178,22 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (auditReport != null && auditReport.Items.Any())
+                    @if (isLoading)
                     {
-                        @foreach (var item in auditReport.Items)
+                        <tr>
+                            <td colspan="11" class="text-center py-5 text-muted">
+                                <div class="spinner-border spinner-border-sm text-success me-2" role="status"></div>
+                                Đang tổng hợp báo cáo từ SQL Server...
+                            </td>
+                        </tr>
+                    }
+                    else if (filteredItems.Any())
+                    {
+                        @foreach (var item in filteredItems)
                         {
                             <tr>
                                 <td data-label="Mã SKU">
-                                    <span class="badge bg-light text-dark border">@item.Sku</span>
+                                    <span class="badge bg-light text-dark border fw-bold">@item.Sku</span>
                                 </td>
                                 <td data-label="Tên Hàng Hóa">
                                     <div class="fw-bold text-dark">@item.ProductName</div>
@@ -189,26 +243,26 @@
                     {
                         <tr>
                             <td colspan="11" class="text-center py-5 text-muted">
-                                Đang tổng hợp dữ liệu báo cáo...
+                                Không tìm thấy dữ liệu hàng hóa nào khớp với điều kiện lọc.
                             </td>
                         </tr>
                     }
                 </tbody>
-                @if (auditReport != null)
+                @if (filteredItems.Any())
                 {
                     <tfoot class="table-light fw-bold">
                         <tr>
-                            <td colspan="4" class="text-end">TỔNG TOÀN KHO:</td>
-                            <td class="text-center">@auditReport.TotalBeginningStock</td>
-                            <td class="text-center text-success">+@auditReport.TotalImportQuantity</td>
-                            <td class="text-center text-danger">-@auditReport.TotalExportQuantity</td>
-                            <td class="text-center text-primary">@auditReport.TotalEndingStock</td>
-                            <td class="text-center text-dark">@auditReport.TotalEndingStock</td>
+                            <td colspan="4" class="text-end">TỔNG CỘNG:</td>
+                            <td class="text-center">@filteredItems.Sum(i => i.BeginningStock).ToString("N0")</td>
+                            <td class="text-center text-success">+@filteredItems.Sum(i => i.TotalImport).ToString("N0")</td>
+                            <td class="text-center text-danger">-@filteredItems.Sum(i => i.TotalExport).ToString("N0")</td>
+                            <td class="text-center text-primary">@filteredItems.Sum(i => i.EndingStock).ToString("N0")</td>
+                            <td class="text-center text-dark">@filteredItems.Sum(i => i.CurrentStock).ToString("N0")</td>
                             <td class="text-center">
                                 <span class="badge bg-success rounded-pill px-2.5 py-1">TOÀN VẸN</span>
                             </td>
                             <td class="text-end text-primary fs-6">
-                                @((auditReport.TotalStockValue).ToString("N0")) đ
+                                @((filteredItems.Sum(i => i.EndingStockValue)).ToString("N0")) đ
                             </td>
                         </tr>
                     </tfoot>
@@ -221,6 +275,30 @@
 @code {
     private InventoryAuditReport? auditReport;
     private bool showAuditBanner = false;
+    private bool isLoading = true;
+
+    private DateTime? fromDate;
+    private DateTime? toDate;
+    private string searchTerm = string.Empty;
+
+    private List<InventoryReportItem> filteredItems
+    {
+        get
+        {
+            if (auditReport == null || auditReport.Items == null) return new();
+            var list = auditReport.Items.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                string term = searchTerm.Trim().ToLower();
+                list = list.Where(i => i.Sku.ToLower().Contains(term) ||
+                                       i.ProductName.ToLower().Contains(term) ||
+                                       i.Category.ToLower().Contains(term));
+            }
+
+            return list.ToList();
+        }
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -229,7 +307,28 @@
 
     private async Task LoadReport()
     {
-        auditReport = await GetReport.ExecuteAsync();
+        isLoading = true;
+        try
+        {
+            auditReport = await GetReport.ExecuteAsync(fromDate, toDate);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task ApplyDateFilter()
+    {
+        await LoadReport();
+    }
+
+    private async Task ResetFilter()
+    {
+        fromDate = null;
+        toDate = null;
+        searchTerm = string.Empty;
+        await LoadReport();
     }
 
     private void RunAuditCheck()
@@ -239,9 +338,9 @@
 
     private async Task ExportToExcel()
     {
-        if (auditReport != null)
+        if (filteredItems.Any())
         {
-            await ExcelService.ExportInventoryReportToExcelAsync(auditReport.Items);
+            await ExcelService.ExportInventoryReportToExcelAsync(filteredItems);
         }
     }
 }

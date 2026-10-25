@@ -69,23 +69,27 @@ namespace KhoBanLe.UseCases.GoodsIssues
                 return ApproveGoodsIssueResult.Fail("Phiếu xuất này đã bị hủy, không thể phê duyệt.");
             }
 
-            // KIỂM TRA LUẬT 1: Chặn xuất âm kho trên từng dòng hàng hóa
-            foreach (var line in issue.Lines)
+            // KIỂM TRA LUẬT 1: Chặn xuất âm kho trên tổng số lượng theo từng mặt hàng (Group by ProductId)
+            var productGroups = issue.Lines
+                .GroupBy(l => l.ProductId)
+                .Select(g => new { ProductId = g.Key, TotalQuantity = g.Sum(x => x.Quantity) });
+
+            foreach (var group in productGroups)
             {
-                var product = await _productRepository.GetProductByIdAsync(line.ProductId);
+                var product = await _productRepository.GetProductByIdAsync(group.ProductId);
                 if (product == null)
                 {
-                    return ApproveGoodsIssueResult.Fail($"Mặt hàng mã #{line.ProductId} không tồn tại trong hệ thống.");
+                    return ApproveGoodsIssueResult.Fail($"Mặt hàng mã #{group.ProductId} không tồn tại trong hệ thống.");
                 }
 
-                if (product.CurrentStock < line.Quantity)
+                if (product.CurrentStock < group.TotalQuantity)
                 {
                     // Chặn lại ngay lập tức, không trừ kho, trả về thông báo lỗi thân thiện chuẩn Slide 7
                     return ApproveGoodsIssueResult.Fail(
-                        $"Hàng {product.Name} chỉ còn tồn {product.CurrentStock}, không đủ để xuất {line.Quantity}!",
+                        $"Hàng {product.Name} chỉ còn tồn {product.CurrentStock}, không đủ để xuất tổng {group.TotalQuantity}!",
                         product.Name,
                         product.CurrentStock,
-                        line.Quantity);
+                        group.TotalQuantity);
                 }
             }
 

@@ -165,6 +165,29 @@
         <div class="row g-3">
             <!-- CỘT TRÁI: GIỎ HÀNG BÁN LẺ & CATALOG HÀNG HÓA -->
             <div class="col-lg-8">
+                <!-- 0. THANH QUÉT MÃ QR / MÃ VẠCH (BARCODE SCANNER) NHẬN DIỆN HÀNG HÓA -->
+                <div class="modern-card p-2.5 p-md-3 mb-3 bg-white border border-success border-opacity-25 shadow-xs">
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <div class="d-flex align-items-center gap-2 text-success fw-bold me-1" style="white-space: nowrap;">
+                            <i class="bi bi-qr-code-scan fs-5"></i>
+                            <span class="small text-uppercase">Quét mã QR / SKU:</span>
+                        </div>
+                        <div class="input-group input-group-sm flex-grow-1" style="min-width: 240px;">
+                            <input type="text" class="form-control form-control-sm fw-bold border-success" 
+                                   placeholder="Quét máy barcode 2D hoặc gõ SKU (VD: HH-01, VM-01, STR-330)..."
+                                   @bind="barcodeScanInput" 
+                                   @bind:event="oninput" 
+                                   @onkeydown="HandleBarcodeKeyDown" />
+                            <button class="btn btn-success fw-bold px-3" type="button" @onclick="HandleBarcodeSubmit">
+                                <i class="bi bi-plus-lg me-1"></i>Thêm nhanh
+                            </button>
+                        </div>
+                    </div>
+                    <small class="text-muted d-block mt-1 ps-1" style="font-size: 0.72rem;">
+                        <i class="bi bi-info-circle me-1"></i>Tự động nhận diện từ máy quét mã vạch 2D/QR code, súng bắn mã hoặc nhập phím Enter để thêm hàng vào giỏ.
+                    </small>
+                </div>
+
                 <!-- 1. Danh sách mặt hàng trong đơn hiện tại -->
                 <div class="modern-card p-3 p-md-4 mb-3">
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3 border-bottom pb-2">
@@ -265,53 +288,139 @@
                             <h5 class="fw-bold text-dark mb-0">
                                 <i class="bi bi-lightning-charge-fill text-warning me-2"></i>Danh Mục Hàng Bán Lẻ Siêu Thị & Tiện Lợi
                             </h5>
-                            <small class="text-muted">Chọn nhanh mặt hàng vào đơn thu ngân (@FilteredProducts.Count() sản phẩm)</small>
+                            <small class="text-muted">Gõ tên hàng hóa tiếng Việt có dấu/không dấu hoặc mã SKU để tìm nhanh</small>
                         </div>
-                        <div class="input-group input-group-sm" style="max-width: 260px;">
-                            <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
-                            <input type="text" class="form-control" placeholder="Tìm tên, mã SKU..." @bind="searchFilter" @bind:event="oninput" />
+                        <span class="badge bg-success-subtle text-success fw-bold px-3 py-1.5 rounded-pill border border-success-subtle">
+                            <i class="bi bi-box-seam me-1"></i>@FilteredProducts.Count() / @allProducts.Count mặt hàng
+                        </span>
+                    </div>
+
+                    <!-- THANH TÌM KIẾM TÊN HÀNG HÓA CAO CẤP -->
+                    <div class="pos-catalog-search-wrap mb-2">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0 text-success ps-3">
+                                <i class="bi bi-search fs-6"></i>
+                            </span>
+                            <input type="text" class="form-control border-start-0 border-end-0 py-2.5 ps-2 fw-medium"
+                                   placeholder="🔍 Tìm kiếm tên hàng hóa (vd: gõ 'h', 'haohao', 'coca', 'omo', 'but bi'...) hoặc mã SKU..."
+                                   @bind="searchFilter" 
+                                   @bind:event="oninput" />
+                            @if (!string.IsNullOrWhiteSpace(searchFilter))
+                            {
+                                <button class="btn btn-outline-secondary border-start-0 border-end-0 bg-white text-muted px-3" 
+                                        type="button" 
+                                        title="Xóa tìm kiếm"
+                                        @onclick="() => searchFilter = string.Empty">
+                                    <i class="bi bi-x-circle-fill text-secondary"></i>
+                                </button>
+                            }
+                            <button class="btn btn-success fw-semibold px-3" type="button" @onclick="() => StateHasChanged()">
+                                <i class="bi bi-filter me-1"></i>Tìm kiếm
+                            </button>
                         </div>
+                    </div>
+
+                    <!-- Quick Keywords Bar in POS -->
+                    <div class="d-flex flex-wrap align-items-center gap-1.5 mb-2.5">
+                        <small class="text-muted fw-bold me-1"><i class="bi bi-lightning-charge-fill text-warning me-1"></i>Tìm nhanh:</small>
+                        <button type="button" class="btn btn-xs rounded-pill @(searchFilter == "h" ? "btn-success text-white fw-bold shadow-xs" : "btn-light text-secondary border")"
+                                @onclick='() => searchFilter = "h"'>
+                            Chữ "h"
+                        </button>
+                        <button type="button" class="btn btn-xs rounded-pill @(searchFilter == "haohao" || searchFilter == "hảo hảo" ? "btn-success text-white fw-bold shadow-xs" : "btn-light text-secondary border")"
+                                @onclick='() => searchFilter = "haohao"'>
+                            🍜 Mì Hảo Hảo
+                        </button>
+                        <button type="button" class="btn btn-xs rounded-pill @(searchFilter == "coca" ? "btn-success text-white fw-bold shadow-xs" : "btn-light text-secondary border")"
+                                @onclick='() => searchFilter = "coca"'>
+                            🥤 Coca-Cola
+                        </button>
+                        <button type="button" class="btn btn-xs rounded-pill @(searchFilter == "vinamilk" ? "btn-success text-white fw-bold shadow-xs" : "btn-light text-secondary border")"
+                                @onclick='() => searchFilter = "vinamilk"'>
+                            🥛 Sữa Vinamilk
+                        </button>
+                        <button type="button" class="btn btn-xs rounded-pill @(searchFilter == "thienlong" || searchFilter == "thiên long" ? "btn-success text-white fw-bold shadow-xs" : "btn-light text-secondary border")"
+                                @onclick='() => searchFilter = "thienlong"'>
+                            ✏️ Bút Thiên Long
+                        </button>
+                        <button type="button" class="btn btn-xs rounded-pill @(searchFilter == "omo" ? "btn-success text-white fw-bold shadow-xs" : "btn-light text-secondary border")"
+                                @onclick='() => searchFilter = "omo"'>
+                            🧼 Bột giặt OMO
+                        </button>
+                        <button type="button" class="btn btn-xs rounded-pill @(searchFilter == "simply" ? "btn-success text-white fw-bold shadow-xs" : "btn-light text-secondary border")"
+                                @onclick='() => searchFilter = "simply"'>
+                            🍳 Dầu Simply
+                        </button>
                     </div>
 
                     <!-- Category Filter Pills -->
                     <div class="d-flex flex-wrap gap-1.5 mb-3">
                         @foreach (var cat in categoriesList)
                         {
+                            int catCount = cat == "Tất cả" ? allProducts.Count : allProducts.Count(p => p.Category == cat);
                             <button type="button" class="btn btn-xs rounded-pill fw-semibold @(selectedCategory == cat ? "btn-success text-white shadow-xs" : "btn-light text-secondary border")"
                                     @onclick="() => selectedCategory = cat">
-                                @cat
+                                @cat <span class="opacity-75 ms-1">(@catCount)</span>
                             </button>
                         }
                     </div>
 
                     <!-- Product Grid -->
-                    <div class="row g-2.5">
-                        @foreach (var prod in FilteredProducts)
-                        {
-                            <div class="col-6 col-sm-4 col-md-3">
-                                <div class="card h-100 border rounded-3 p-2 text-center modern-card-interactive position-relative">
-                                    <div class="rounded-2 overflow-hidden mb-2 position-relative d-flex align-items-center justify-content-center p-2" style="height: 110px; background: #ffffff; border: 1px solid #edf2f7;">
-                                        <img src="@(string.IsNullOrEmpty(prod.ImageUrl) ? "images/default-product.svg" : prod.ImageUrl)" 
-                                             alt="@prod.Name" 
-                                             class="w-100 h-100" 
-                                             style="object-fit: contain; max-height: 95px;" 
-                                             onerror="this.src='images/default-product.svg'" />
-                                        <span class="position-absolute top-0 start-0 m-1 badge @(prod.CurrentStock <= 0 ? "bg-danger" : (prod.CurrentStock <= prod.MinStockLevel ? "bg-warning text-dark" : "bg-dark bg-opacity-75")) small">
-                                            Tồn: @prod.CurrentStock
-                                        </span>
+                    @if (FilteredProducts.Any())
+                    {
+                        <div class="row g-2.5">
+                            @foreach (var prod in FilteredProducts)
+                            {
+                                <div class="col-6 col-sm-4 col-md-3">
+                                    <div class="card h-100 border rounded-3 p-2 text-center pos-product-card position-relative">
+                                        <div class="rounded-2 overflow-hidden mb-2 position-relative d-flex align-items-center justify-content-center p-2 card-img-wrap" style="height: 120px; background: #ffffff; border: 1px solid #edf2f7;">
+                                            <img src="@(string.IsNullOrEmpty(prod.ImageUrl) ? "images/default-product.svg" : prod.ImageUrl)" 
+                                                 alt="@prod.Name" 
+                                                 class="w-100 h-100" 
+                                                 style="object-fit: contain; max-height: 100px;" 
+                                                 onerror="this.src='images/default-product.svg'" />
+                                            <span class="position-absolute top-0 start-0 m-1 badge @(prod.CurrentStock <= 0 ? "bg-danger" : (prod.CurrentStock <= prod.MinStockLevel ? "bg-warning text-dark" : "bg-dark bg-opacity-75")) small">
+                                                Tồn: @prod.CurrentStock
+                                            </span>
+                                            <span class="position-absolute top-0 end-0 m-1 badge bg-light text-muted border small" style="font-size: 0.68rem;">
+                                                @prod.Sku
+                                            </span>
+                                        </div>
+                                        <h6 class="fw-bold text-dark text-truncate mb-0 small" title="@prod.Name">@prod.Name</h6>
+                                        <div class="small text-muted mb-1" style="font-size: 0.72rem;">@prod.Category &bull; @prod.Unit</div>
+                                        <div class="text-success fw-bold small mb-2" style="font-size: 0.95rem;">@prod.Price.ToString("N0") đ</div>
+                                        <button class="btn btn-sm @(prod.CurrentStock > 0 ? "btn-outline-success" : "btn-light text-muted disabled") rounded-pill w-100 py-1 small fw-bold d-flex align-items-center justify-content-center gap-1"
+                                                disabled="@(prod.CurrentStock <= 0)"
+                                                @onclick="() => QuickAdd(prod)">
+                                            @if (prod.CurrentStock > 0)
+                                            {
+                                                <i class="bi bi-cart-plus"></i>
+                                                <span>+ Thêm giỏ</span>
+                                            }
+                                            else
+                                            {
+                                                <span>Hết hàng</span>
+                                            }
+                                        </button>
                                     </div>
-                                    <h6 class="fw-bold text-dark text-truncate mb-0 small" title="@prod.Name">@prod.Name</h6>
-                                    <div class="small text-muted mb-1"><code>@prod.Sku</code> &bull; @prod.Unit</div>
-                                    <div class="text-success fw-bold small mb-2">@prod.Price.ToString("N0") đ</div>
-                                    <button class="btn btn-sm @(prod.CurrentStock > 0 ? "btn-outline-success" : "btn-light text-muted disabled") rounded-pill w-100 py-1 small fw-semibold"
-                                            disabled="@(prod.CurrentStock <= 0)"
-                                            @onclick="() => QuickAdd(prod)">
-                                        @(prod.CurrentStock > 0 ? "+ Thêm giỏ" : "Hết hàng")
-                                    </button>
                                 </div>
-                            </div>
-                        }
-                    </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5 bg-light rounded-4 border border-dashed my-2">
+                            <i class="bi bi-search text-muted fs-1 mb-2 d-block"></i>
+                            <h6 class="fw-bold text-dark mb-1">Không tìm thấy hàng hóa phù hợp!</h6>
+                            <p class="text-muted small mb-3">
+                                Không có sản phẩm nào khớp với từ khóa "<strong>@searchFilter</strong>" trong ngành "@selectedCategory".
+                            </p>
+                            <button class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold" 
+                                    @onclick='() => { searchFilter = string.Empty; selectedCategory = "Tất cả"; }'>
+                                <i class="bi bi-arrow-counterclockwise me-1"></i>Xóa bộ lọc & hiện toàn bộ 111 sản phẩm
+                            </button>
+                        </div>
+                    }
                 </div>
             </div>
 
@@ -466,13 +575,13 @@
                             <div class="vietqr-image-wrapper position-relative text-center p-2 bg-white rounded-3 border">
                                 @if (qrDisplayMode == "card")
                                 {
-                                    <div class="position-relative d-inline-block">
-                                        <img src="images/vcb_qr_card_full.png" alt="Mã QR Vietcombank của tôi" 
-                                             class="img-fluid rounded-2 shadow-xs cursor-pointer" 
-                                             style="max-height: 220px; object-fit: contain; cursor: pointer;" 
+                                    <div class="position-relative d-inline-block p-1 bg-white rounded-3 w-100 text-center">
+                                        <img src="images/vcb_vietqr_sample.png" alt="Mã QR Vietcombank của tôi" 
+                                             class="img-fluid rounded-2 shadow-xs cursor-pointer w-100" 
+                                             style="max-width: 320px; height: auto; object-fit: contain; cursor: pointer;" 
                                              @onclick="() => showQrCardModal = true" title="Nhấn để phóng to ảnh thẻ QR gốc" />
                                     </div>
-                                    <div class="text-center mt-1.5">
+                                    <div class="text-center mt-2">
                                         <button type="button" class="btn btn-link btn-xs text-success p-0 text-decoration-none fw-semibold" @onclick="() => showQrCardModal = true">
                                             <i class="bi bi-arrows-fullscreen me-1"></i>Phóng to ảnh thẻ QR gốc
                                         </button>
@@ -480,11 +589,16 @@
                                 }
                                 else
                                 {
-                                    <img src="@VietQrImageUrl" alt="Mã thanh toán VietQR Động" 
-                                         onerror="this.src='images/vcb_qr_card_full.png'"
-                                         style="width: 175px; height: 175px; object-fit: contain;" />
-                                    <div class="text-center mt-1">
-                                        <small class="text-muted" style="font-size: 0.72rem;">Quét tự động điền <strong>@PayableAmount.ToString("N0") đ</strong></small>
+                                    <div class="p-1 bg-white rounded-3 d-flex flex-column align-items-center justify-content-center w-100">
+                                        <img src="@VietQrImageUrl" alt="Mã thanh toán VietQR Động" 
+                                             onerror="this.src='images/vcb_vietqr_sample.png'"
+                                             class="img-fluid rounded-2 w-100"
+                                             style="max-width: 320px; height: auto; min-height: 280px; object-fit: contain; image-rendering: pixelated;" />
+                                        <div class="text-center mt-2 w-100">
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1 w-100">
+                                                <i class="bi bi-shield-check me-1"></i>Tự động điền số tiền: <strong>@PayableAmount.ToString("N0") đ</strong>
+                                            </span>
+                                        </div>
                                     </div>
                                 }
                             </div>
@@ -1219,7 +1333,7 @@
                     <button type="button" class="btn-close btn-close-white" @onclick="() => showQrCardModal = false"></button>
                 </div>
                 <div class="modal-body p-3 text-center bg-light">
-                    <img src="images/vcb_qr_card_full.png" alt="Thẻ QR Vietcombank" class="img-fluid rounded-3 shadow-sm border" style="max-height: 75vh;" />
+                    <img src="images/vcb_vietqr_sample.png" alt="Mã QR Vietcombank" class="img-fluid rounded-3 shadow-sm border" style="max-height: 75vh; max-width: 100%; object-fit: contain;" />
                     <div class="small text-muted mt-2">
                         Vietcombank &bull; <strong>NGUYEN TRUNG QUYET</strong> &bull; <code>1041587637</code> &bull; Trụ sở CN Huế
                     </div>
@@ -1385,8 +1499,9 @@
             }
             if (!string.IsNullOrWhiteSpace(searchFilter))
             {
-                list = list.Where(p => p.Name.Contains(searchFilter, StringComparison.OrdinalIgnoreCase) ||
-                                       p.Sku.Contains(searchFilter, StringComparison.OrdinalIgnoreCase));
+                list = list.Where(p => KhoBanLe.Services.SearchHelper.Matches(p.Name, searchFilter) ||
+                                       KhoBanLe.Services.SearchHelper.Matches(p.Sku, searchFilter) ||
+                                       KhoBanLe.Services.SearchHelper.Matches(p.Category, searchFilter));
             }
             return list;
         }
@@ -1425,10 +1540,92 @@
     private string VietQrImageUrl =>
         $"https://img.vietqr.io/image/VCB-1041587637-compact2.png?amount={(long)PayableAmount}&addInfo=Thanh%20toan%20POS%20{tempOrderSuffix}&accountName=NGUYEN%20TRUNG%20QUYET";
 
+    [SupplyParameterFromQuery(Name = "scan")]
+    public string? QueryScanSku { get; set; }
+
+    private string barcodeScanInput = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrEmpty(QueryScanSku))
+        {
+            var targetProd = allProducts.FirstOrDefault(p => p.Sku.Equals(QueryScanSku, StringComparison.OrdinalIgnoreCase));
+            if (targetProd != null)
+            {
+                if (targetProd.CurrentStock > 0)
+                {
+                    QuickAdd(targetProd);
+                    alertMessage = $"Đã nhận diện mã QR: Đã thêm '{targetProd.Name}' (SKU: {targetProd.Sku}) vào đơn bán lẻ!";
+                    isSuccessAlert = true;
+                }
+                else
+                {
+                    alertMessage = $"Sản phẩm '{targetProd.Name}' đã hết hàng trong kho (Tồn = 0), không thể bán!";
+                    isSuccessAlert = false;
+                }
+            }
+        }
+    }
+
+    private void HandleBarcodeKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            HandleBarcodeSubmit();
+        }
+    }
+
+    private void HandleBarcodeSubmit()
+    {
+        if (string.IsNullOrWhiteSpace(barcodeScanInput)) return;
+
+        string cleanInput = barcodeScanInput.Trim();
+        var prod = allProducts.FirstOrDefault(p => 
+            p.Sku.Equals(cleanInput, StringComparison.OrdinalIgnoreCase) ||
+            p.Name.Equals(cleanInput, StringComparison.OrdinalIgnoreCase));
+
+        if (prod == null)
+        {
+            prod = allProducts.FirstOrDefault(p => 
+                p.Sku.Contains(cleanInput, StringComparison.OrdinalIgnoreCase) ||
+                KhoBanLe.Services.SearchHelper.Matches(p.Name, cleanInput));
+        }
+
+        if (prod != null)
+        {
+            if (prod.CurrentStock > 0)
+            {
+                QuickAdd(prod);
+                alertMessage = $"Quét mã thành công: Đã thêm '{prod.Name}' (SKU: {prod.Sku}) vào giỏ bán lẻ!";
+                isSuccessAlert = true;
+                barcodeScanInput = string.Empty;
+            }
+            else
+            {
+                alertMessage = $"Sản phẩm '{prod.Name}' hiện đã hết hàng trong kho (Tồn: 0)!";
+                isSuccessAlert = false;
+            }
+        }
+        else
+        {
+            alertMessage = $"Không tìm thấy mặt hàng nào khớp với mã SKU: '{cleanInput}'!";
+            isSuccessAlert = false;
+        }
+    }
+
     protected override async Task OnInitializedAsync()
     {
         CartService.OnChange += OnCartUpdated;
         allProducts = (await SearchProducts.ExecuteAsync()).ToList();
+
+        var dynamicCats = allProducts.Select(p => p.Category)
+                                     .Where(c => !string.IsNullOrWhiteSpace(c))
+                                     .Distinct()
+                                     .OrderBy(c => c)
+                                     .ToList();
+        categoriesList = new List<string> { "Tất cả" };
+        categoriesList.AddRange(dynamicCats);
+
         customersList = (await GetCustomers.ExecuteAsync()).ToList();
         await LoadPosOrders();
         receivedCash = PayableAmount;

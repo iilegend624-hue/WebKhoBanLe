@@ -67,6 +67,10 @@ namespace KhoBanLe
 
             // Suppliers
             builder.Services.AddTransient<IGetSuppliersUseCase, GetSuppliersUseCase>();
+            builder.Services.AddTransient<IViewSupplierUseCase, ViewSupplierUseCase>();
+            builder.Services.AddTransient<IAddSupplierUseCase, AddSupplierUseCase>();
+            builder.Services.AddTransient<IEditSupplierUseCase, EditSupplierUseCase>();
+            builder.Services.AddTransient<IDeleteSupplierUseCase, DeleteSupplierUseCase>();
 
             // Customers
             builder.Services.AddTransient<KhoBanLe.UseCases.Customers.IGetCustomersUseCase, KhoBanLe.UseCases.Customers.GetCustomersUseCase>();

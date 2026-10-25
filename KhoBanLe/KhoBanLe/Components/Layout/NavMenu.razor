@@ -1,118 +1,238 @@
 @namespace KhoBanLe.Components.Layout
 @inject UserRoleService RoleService
+@inject IViewGoodsReceiptUseCase ViewReceipts
+@inject IViewGoodsIssueUseCase ViewIssues
+@inject ISearchProductsUseCase SearchProducts
 @implements IDisposable
 
-<div class="sidebar-header px-4 py-3 d-flex align-items-center justify-content-between border-bottom border-secondary border-opacity-25">
-    <div class="d-flex align-items-center gap-2">
-        <div class="brand-icon bg-primary text-white rounded-3 d-flex align-items-center justify-content-center shadow-sm" style="width: 38px; height: 38px;">
-            <i class="bi bi-box-seam-fill fs-5"></i>
-        </div>
-        <div>
-            <div class="fw-bold text-white fs-6 lh-1">KHOBANLE</div>
-            <small class="text-white-50" style="font-size: 0.72rem;">Retail Inventory System</small>
-        </div>
-    </div>
-</div>
+<div class="app-sidebar-inner d-flex flex-column h-100">
+    <!-- Brand / Logo Header -->
+    <div class="sidebar-header px-3 py-3 d-flex align-items-center justify-content-between border-bottom border-secondary border-opacity-25">
+        <a href="" class="d-flex align-items-center gap-2.5 text-decoration-none">
+            <div class="brand-icon-box bg-success text-white rounded-3 d-flex align-items-center justify-content-center shadow-xs" style="width: 38px; height: 38px; flex-shrink: 0;">
+                <i class="bi bi-box-seam-fill fs-5"></i>
+            </div>
+            @if (!IsCollapsed)
+            {
+                <div class="sidebar-brand-text">
+                    <div class="fw-bold text-white fs-6 lh-1" style="letter-spacing: -0.01em;">KHOBANLE</div>
+                    <small class="text-white-50" style="font-size: 0.72rem; letter-spacing: 0.03em;">Kho Bán Lẻ & POS</small>
+                </div>
+            }
+        </a>
 
-<!-- Role Switcher in Sidebar -->
-<div class="px-3 pt-3 pb-2">
-    <div class="p-2.5 rounded-3 bg-secondary bg-opacity-25 border border-secondary border-opacity-25">
-        <div class="d-flex justify-content-between align-items-center mb-1">
-            <span class="text-white-50 small fw-medium" style="font-size: 0.75rem;">VAI TRÒ HIỆN TẠI</span>
-            <button class="btn btn-xs btn-outline-info py-0 px-1.5 rounded" style="font-size: 0.7rem;" @onclick="RoleService.SwitchRole" title="Chuyển đổi nhanh vai trò">
-                <i class="bi bi-arrow-repeat me-1"></i>Đổi
+        @if (OnCloseMobile.HasDelegate)
+        {
+            <button type="button" class="btn btn-sm btn-outline-secondary text-white d-xl-none p-1" @onclick="CloseMobile" title="Đóng menu">
+                <i class="bi bi-x-lg"></i>
             </button>
+        }
+    </div>
+
+    <!-- Active User & Role Card -->
+    @if (!IsCollapsed)
+    {
+        <div class="px-3 pt-3 pb-2">
+            <div class="p-2.5 rounded-3 bg-secondary bg-opacity-25 border border-secondary border-opacity-25">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <span class="text-white-50 small fw-medium" style="font-size: 0.72rem; letter-spacing: 0.04em;">VAI TRÒ HIỆN TẠI</span>
+                    <button class="btn btn-xs btn-outline-info py-0 px-1.5 rounded fw-semibold" style="font-size: 0.68rem;" @onclick="RoleService.SwitchRole" title="Chuyển đổi nhanh vai trò">
+                        <i class="bi bi-arrow-repeat me-1"></i>Đổi
+                    </button>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge @(RoleService.CurrentRole == SystemRole.WarehouseStaff ? "bg-primary" : "bg-warning text-dark") fw-bold px-2 py-1">
+                        @(RoleService.CurrentRole == SystemRole.WarehouseStaff ? "Thủ kho" : "Quản lý")
+                    </span>
+                    <span class="text-white small text-truncate fw-medium">@RoleService.CurrentUserName</span>
+                </div>
+            </div>
         </div>
-        <div class="d-flex align-items-center gap-2">
-            <span class="badge @(RoleService.CurrentRole == SystemRole.WarehouseStaff ? "bg-primary" : "bg-warning text-dark") fw-semibold">
-                @(RoleService.CurrentRole == SystemRole.WarehouseStaff ? "Thủ kho" : "Quản lý")
-            </span>
-            <span class="text-white small text-truncate fw-medium">@RoleService.CurrentUserName</span>
+    }
+
+    <!-- Scrollable Nav Links -->
+    <div class="nav-scrollable flex-grow-1 px-2 py-2 overflow-y-auto">
+        <!-- 1. TỔNG QUAN -->
+        <div class="nav-section-title px-3 pt-2 pb-1 text-white-50 fw-bold" style="font-size: 0.68rem; letter-spacing: 0.08em;">
+            TỔNG QUAN
         </div>
-    </div>
-</div>
+        <NavLink class="admin-nav-link" href="" Match="NavLinkMatch.All" @onclick="HandleNavClick" title="Bảng điều khiển">
+            <i class="bi bi-grid-1x2-fill nav-icon text-success"></i>
+            @if (!IsCollapsed)
+            {
+                <span class="nav-label">Bảng Điều Khiển</span>
+            }
+        </NavLink>
 
-<div class="nav-scrollable flex-grow-1 px-1 py-2">
-    <div class="nav-section-title px-3 pt-2 pb-1 text-white-50 fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.05em;">
-        TỔNG QUAN
-    </div>
-    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-        <i class="bi bi-grid-1x2-fill"></i>
-        <span>Bảng điều khiển</span>
-    </NavLink>
-    <NavLink class="nav-link" href="products">
-        <i class="bi bi-boxes"></i>
-        <span>Hàng hóa & Tồn kho</span>
-    </NavLink>
+        <!-- 2. HÀNG HÓA & TỒN KHO -->
+        <div class="nav-section-title px-3 pt-3 pb-1 text-white-50 fw-bold" style="font-size: 0.68rem; letter-spacing: 0.08em;">
+            HÀNG HÓA
+        </div>
+        <NavLink class="admin-nav-link" href="products" Match="NavLinkMatch.Prefix" @onclick="HandleNavClick" title="Danh sách hàng hóa & Tồn kho">
+            <i class="bi bi-boxes nav-icon text-primary"></i>
+            @if (!IsCollapsed)
+            {
+                <span class="nav-label">Danh Sách Hàng Hóa</span>
+            }
+        </NavLink>
 
-    <div class="nav-section-title px-3 pt-3 pb-1 text-white-50 fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.05em;">
-        BÁN HÀNG TẠI QUẦY (POS)
-    </div>
-    <NavLink class="nav-link" href="cart">
-        <i class="bi bi-shop text-warning"></i>
-        <span>Thu Ngân & Bán Lẻ (POS)</span>
-    </NavLink>
+        <!-- 3. KHO HÀNG (NHẬP - XUẤT) -->
+        <div class="nav-section-title px-3 pt-3 pb-1 text-white-50 fw-bold" style="font-size: 0.68rem; letter-spacing: 0.08em;">
+            KHO HÀNG
+        </div>
+        <NavLink class="admin-nav-link" href="receipts/create" @onclick="HandleNavClick" title="Lập phiếu nhập kho">
+            <i class="bi bi-plus-circle-fill nav-icon text-success"></i>
+            @if (!IsCollapsed)
+            {
+                <span class="nav-label">Lập Phiếu Nhập</span>
+            }
+        </NavLink>
+        <NavLink class="admin-nav-link" href="receipts" Match="NavLinkMatch.All" @onclick="HandleNavClick" title="Sổ phiếu nhập kho">
+            <i class="bi bi-box-arrow-in-down nav-icon text-success"></i>
+            @if (!IsCollapsed)
+            {
+                <span class="nav-label">Sổ Phiếu Nhập</span>
+            }
+        </NavLink>
+        <NavLink class="admin-nav-link" href="issues/create" @onclick="HandleNavClick" title="Lập phiếu xuất kho">
+            <i class="bi bi-dash-circle-fill nav-icon text-danger"></i>
+            @if (!IsCollapsed)
+            {
+                <span class="nav-label">Lập Phiếu Xuất</span>
+            }
+        </NavLink>
+        <NavLink class="admin-nav-link" href="issues" Match="NavLinkMatch.All" @onclick="HandleNavClick" title="Sổ phiếu xuất kho">
+            <i class="bi bi-box-arrow-up nav-icon text-danger"></i>
+            @if (!IsCollapsed)
+            {
+                <span class="nav-label">Sổ Phiếu Xuất</span>
+            }
+        </NavLink>
+        <NavLink class="admin-nav-link" href="approvals" @onclick="HandleNavClick" title="Duyệt phiếu (Luật 1)">
+            <i class="bi bi-shield-check nav-icon text-warning"></i>
+            @if (!IsCollapsed)
+            {
+                <span class="nav-label">Duyệt Phiếu Kho</span>
+                @if (pendingApprovalsCount > 0)
+                {
+                    <span class="badge bg-warning text-dark ms-auto rounded-pill px-2 py-0.5 small fw-bold">
+                        @pendingApprovalsCount
+                    </span>
+                }
+            }
+        </NavLink>
 
-    <div class="nav-section-title px-3 pt-3 pb-1 text-white-50 fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.05em;">
-        PHIẾU NHẬP (GOODS RECEIPT)
-    </div>
-    <NavLink class="nav-link" href="receipts/create">
-        <i class="bi bi-plus-circle-fill text-success"></i>
-        <span>Lập phiếu nhập (AI)</span>
-    </NavLink>
-    <NavLink class="nav-link" href="receipts">
-        <i class="bi bi-receipt"></i>
-        <span>Sổ phiếu nhập</span>
-    </NavLink>
+        <!-- 4. BÁN HÀNG TẠI QUẦY (POS) -->
+        <div class="nav-section-title px-3 pt-3 pb-1 text-white-50 fw-bold" style="font-size: 0.68rem; letter-spacing: 0.08em;">
+            BÁN HÀNG POS
+        </div>
+        <NavLink class="admin-nav-link" href="cart" @onclick="HandleNavClick" title="Thu ngân bán lẻ POS">
+            <i class="bi bi-shop nav-icon text-warning"></i>
+            @if (!IsCollapsed)
+            {
+                <span class="nav-label">Thu Ngân & Quầy POS</span>
+            }
+        </NavLink>
 
-    <div class="nav-section-title px-3 pt-3 pb-1 text-white-50 fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.05em;">
-        PHIẾU XUẤT (GOODS ISSUE)
-    </div>
-    <NavLink class="nav-link" href="issues/create">
-        <i class="bi bi-dash-circle-fill text-danger"></i>
-        <span>Lập phiếu xuất kho</span>
-    </NavLink>
-    <NavLink class="nav-link" href="issues">
-        <i class="bi bi-journal-arrow-up"></i>
-        <span>Sổ phiếu xuất</span>
-    </NavLink>
+        <!-- 5. ĐỐI TÁC -->
+        <div class="nav-section-title px-3 pt-3 pb-1 text-white-50 fw-bold" style="font-size: 0.68rem; letter-spacing: 0.08em;">
+            ĐỐI TÁC
+        </div>
+        <NavLink class="admin-nav-link" href="suppliers" @onclick="HandleNavClick" title="Danh sách nhà cung cấp">
+            <i class="bi bi-truck nav-icon text-info"></i>
+            @if (!IsCollapsed)
+            {
+                <span class="nav-label">Nhà Cung Cấp</span>
+            }
+        </NavLink>
 
-    <div class="nav-section-title px-3 pt-3 pb-1 text-white-50 fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.05em;">
-        QUẢN LÝ & BÁO CÁO (2 LUẬT)
-    </div>
-    <NavLink class="nav-link" href="approvals">
-        <i class="bi bi-shield-check text-warning"></i>
-        <span>Duyệt phiếu (Luật 1)</span>
-    </NavLink>
-    <NavLink class="nav-link" href="reports">
-        <i class="bi bi-bar-chart-line-fill text-info"></i>
-        <span>Báo cáo NXT (Luật 2)</span>
-    </NavLink>
+        <!-- 6. BÁO CÁO -->
+        <div class="nav-section-title px-3 pt-3 pb-1 text-white-50 fw-bold" style="font-size: 0.68rem; letter-spacing: 0.08em;">
+            BÁO CÁO
+        </div>
+        <NavLink class="admin-nav-link" href="reports" @onclick="HandleNavClick" title="Báo cáo Nhập - Xuất - Tồn (Luật 2)">
+            <i class="bi bi-bar-chart-line-fill nav-icon text-info"></i>
+            @if (!IsCollapsed)
+            {
+                <span class="nav-label">Báo Cáo Nhập – Xuất – Tồn</span>
+            }
+        </NavLink>
 
-    <div class="nav-section-title px-3 pt-3 pb-1 text-white-50 fw-semibold" style="font-size: 0.7rem; letter-spacing: 0.05em;">
-        HƯỚNG DẪN & SQL
+        <!-- 7. HỆ THỐNG & ĐỒ ÁN -->
+        <div class="nav-section-title px-3 pt-3 pb-1 text-white-50 fw-bold" style="font-size: 0.68rem; letter-spacing: 0.08em;">
+            HỆ THỐNG
+        </div>
+        <NavLink class="admin-nav-link" href="guide" @onclick="HandleNavClick" title="Phiếu chấm Capstone (K1.1 - K5.3)">
+            <i class="bi bi-mortarboard-fill nav-icon text-warning"></i>
+            @if (!IsCollapsed)
+            {
+                <span class="nav-label">Phiếu Chấm Capstone</span>
+            }
+        </NavLink>
     </div>
-    <NavLink class="nav-link" href="guide">
-        <i class="bi bi-mortarboard-fill text-warning"></i>
-        <span>Phiếu Chấm Chi Tiết (8-12)</span>
-    </NavLink>
-</div>
 
-<div class="p-3 border-top border-secondary border-opacity-25 text-white-50 small" style="font-size: 0.75rem;">
-    <div class="d-flex align-items-center gap-1.5 text-white-50">
-        <i class="bi bi-code-slash text-info"></i>
-        <span>Clean Architecture .NET 8</span>
-    </div>
+    <!-- Sidebar Bottom Status Footer -->
+    @if (!IsCollapsed)
+    {
+        <div class="p-3 border-top border-secondary border-opacity-25 text-white-50 small mt-auto" style="font-size: 0.72rem;">
+            <div class="d-flex align-items-center justify-content-between mb-1">
+                <span>SQL Server Live</span>
+                <span class="badge bg-success bg-opacity-25 text-success rounded-pill px-2 py-0.5">Dapper Online</span>
+            </div>
+            <div class="text-white-50 opacity-75">Clean Architecture 4 Tầng</div>
+        </div>
+    }
 </div>
 
 @code {
-    protected override void OnInitialized()
+    [Parameter] public bool IsCollapsed { get; set; } = false;
+    [Parameter] public EventCallback OnCloseMobile { get; set; }
+
+    private int pendingApprovalsCount = 0;
+
+    protected override async Task OnInitializedAsync()
     {
-        RoleService.OnRoleChanged += StateHasChanged;
+        RoleService.OnRoleChanged += HandleRoleChanged;
+        await LoadPendingCount();
+    }
+
+    private async Task LoadPendingCount()
+    {
+        try
+        {
+            var r = await ViewReceipts.ExecuteListAsync(ReceiptStatus.Draft);
+            var i = await ViewIssues.ExecuteListAsync(ReceiptStatus.Draft);
+            pendingApprovalsCount = r.Count() + i.Count();
+        }
+        catch
+        {
+            pendingApprovalsCount = 0;
+        }
+    }
+
+    private async void HandleRoleChanged()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task HandleNavClick()
+    {
+        if (OnCloseMobile.HasDelegate)
+        {
+            await OnCloseMobile.InvokeAsync();
+        }
+    }
+
+    private async Task CloseMobile()
+    {
+        if (OnCloseMobile.HasDelegate)
+        {
+            await OnCloseMobile.InvokeAsync();
+        }
     }
 
     public void Dispose()
     {
-        RoleService.OnRoleChanged -= StateHasChanged;
+        RoleService.OnRoleChanged -= HandleRoleChanged;
     }
 }

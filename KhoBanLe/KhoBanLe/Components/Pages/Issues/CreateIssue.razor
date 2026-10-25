@@ -105,9 +105,28 @@
                         <div class="p-3 mb-3 bg-light rounded-3 border border-danger-subtle">
                             <div class="row g-2 align-items-end">
                                 <div class="col-md-5">
-                                    <label class="form-label small text-muted mb-1">Chọn mặt hàng</label>
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <label class="form-label small text-muted mb-0">Chọn mặt hàng xuất</label>
+                                        <span class="badge bg-light text-muted border" style="font-size: 0.7rem;">
+                                            @FilteredAvailableProducts.Count() / @availableProducts.Count
+                                        </span>
+                                    </div>
+                                    <div class="input-group input-group-sm mb-1.5">
+                                        <span class="input-group-text bg-white text-muted"><i class="bi bi-search"></i></span>
+                                        <input type="text" class="form-control" 
+                                               placeholder="Gõ tên hàng (vd: hảo hảo, coca, bút...) hoặc SKU..." 
+                                               @bind="productFilterText" 
+                                               @bind:event="oninput" 
+                                               @bind:after="OnProductFilterChanged" />
+                                        @if (!string.IsNullOrWhiteSpace(productFilterText))
+                                        {
+                                            <button class="btn btn-outline-secondary" type="button" @onclick="() => { productFilterText = string.Empty; OnProductFilterChanged(); }">
+                                                <i class="bi bi-x"></i>
+                                            </button>
+                                        }
+                                    </div>
                                     <select class="form-select form-select-sm" @bind="selectedProductId" @bind:after="OnProductSelectionChanged">
-                                        @foreach (var p in availableProducts)
+                                        @foreach (var p in FilteredAvailableProducts)
                                         {
                                             <option value="@p.Id">[@p.Sku] @p.Name (Tồn: @p.CurrentStock @p.Unit)</option>
                                         }
@@ -240,6 +259,31 @@
     private int selectedProductId = 1;
     private int newQuantity = 1;
     private double newUnitPrice = 0;
+    private string productFilterText = string.Empty;
+
+    private IEnumerable<Product> FilteredAvailableProducts
+    {
+        get
+        {
+            if (string.IsNullOrWhiteSpace(productFilterText))
+                return availableProducts;
+
+            return availableProducts.Where(p => 
+                KhoBanLe.Services.SearchHelper.Matches(p.Name, productFilterText) || 
+                KhoBanLe.Services.SearchHelper.Matches(p.Sku, productFilterText) ||
+                KhoBanLe.Services.SearchHelper.Matches(p.Category, productFilterText));
+        }
+    }
+
+    private void OnProductFilterChanged()
+    {
+        var firstMatch = FilteredAvailableProducts.FirstOrDefault();
+        if (firstMatch != null && !FilteredAvailableProducts.Any(p => p.Id == selectedProductId))
+        {
+            selectedProductId = firstMatch.Id;
+            newUnitPrice = firstMatch.Price;
+        }
+    }
 
     private string errorMessage = string.Empty;
     private bool isSubmitting = false;
