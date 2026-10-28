@@ -11,22 +11,31 @@ namespace ReportGen
         static void Main(string[] args)
         {
             Console.OutputEncoding = Encoding.UTF8;
-            string rootDir = Directory.GetCurrentDirectory();
-            string mdPath = Path.Combine(rootDir, "baocaodemo.md");
-            string htmlPath = Path.Combine(rootDir, "baocaodemo.html");
-            string docxPath = Path.Combine(rootDir, "baocaodemo.docx");
-            string pdfPath = Path.Combine(rootDir, "baocaodemo.pdf");
+            string rootDir = @"c:\Users\trung\OneDrive\Máy tính\WebKhoBanLe";
+            string mdPath = Path.Combine(rootDir, "baocao_khobanle.md");
+            string htmlPath = Path.Combine(rootDir, "báo cáo kho bán lẻ.html");
+            string docxPath = Path.Combine(rootDir, "báo cáo kho bán lẻ.docx");
+            string pdfPath = Path.Combine(rootDir, "báo cáo kho bán lẻ.pdf");
+            string logoPath = Path.Combine(rootDir, "logo_hce.png");
 
             Console.WriteLine($">>> Đang đọc file: {mdPath} ...");
             if (!File.Exists(mdPath))
             {
-                Console.WriteLine("Lỗi: Không tìm thấy file baocaodemo.md!");
+                Console.WriteLine("Lỗi: Không tìm thấy file baocao_khobanle.md!");
                 return;
             }
 
             string mdContent = File.ReadAllText(mdPath, Encoding.UTF8);
 
-            // Cấu hình Markdig với Advanced Extensions (Tables, TaskLists, Footnotes, etc.)
+            // Đọc logo base64
+            string logoBase64 = "";
+            if (File.Exists(logoPath))
+            {
+                byte[] logoBytes = File.ReadAllBytes(logoPath);
+                logoBase64 = Convert.ToBase64String(logoBytes);
+            }
+
+            // Cấu hình Markdig với Advanced Extensions (Tables, TaskLists, etc.)
             var pipeline = new MarkdownPipelineBuilder()
                 .UseAdvancedExtensions()
                 .Build();
@@ -34,22 +43,29 @@ namespace ReportGen
             Console.WriteLine(">>> Đang chuyển đổi Markdown sang HTML chuẩn in ấn ...");
             string bodyHtml = Markdown.ToHtml(mdContent, pipeline);
 
-            // Tùy biến thêm các thẻ để trình bày chuẩn Word / PDF
-            // Thêm ngắt trang trước mỗi CHƯƠNG
-            bodyHtml = Regex.Replace(bodyHtml, @"<h2 id=""chương-", @"<div style=""page-break-before: always;""></div><h2 id=""chương-");
+            // Bỏ tiêu đề H1 và H2 đầu trang markdown vì đã có ở trang bìa
+            bodyHtml = Regex.Replace(bodyHtml, @"^<h1>BÁO CÁO THỰC TẬP NGHỀ NGHIỆP</h1>\s*", "", RegexOptions.Multiline);
+            bodyHtml = Regex.Replace(bodyHtml, @"^<h1>XÂY DỰNG HỆ THỐNG QUẢN LÝ KHO BÁN LẺ &amp; BÁN HÀNG TẠI QUẦY \(POS\)</h1>\s*", "", RegexOptions.Multiline);
+            bodyHtml = Regex.Replace(bodyHtml, @"^<h2>WEB KHOBANLE — KIẾN TRÚC CLEAN ARCHITECTURE 4 TẦNG &amp; MICROSOFT SQL SERVER</h2>\s*", "", RegexOptions.Multiline);
+
+            // Thêm ngắt trang trước mỗi CHƯƠNG và các phần quan trọng
+            bodyHtml = Regex.Replace(bodyHtml, @"<h2>LỜI CẢM ƠN</h2>", @"<div style=""page-break-before: always;""></div><h2>LỜI CẢM ƠN</h2>");
+            bodyHtml = Regex.Replace(bodyHtml, @"<h2>MỤC LỤC TỔNG QUAN</h2>", @"<div style=""page-break-before: always;""></div><h2>MỤC LỤC TỔNG QUAN</h2>");
+            bodyHtml = Regex.Replace(bodyHtml, @"<h2>DANH MỤC CÁC KÝ HIỆU VÀ TỪ VIẾT TẮT</h2>", @"<div style=""page-break-before: always;""></div><h2>DANH MỤC CÁC KÝ HIỆU VÀ TỪ VIẾT TẮT</h2>");
             bodyHtml = Regex.Replace(bodyHtml, @"<h2>CHƯƠNG ", @"<div style=""page-break-before: always;""></div><h2>CHƯƠNG ");
+            bodyHtml = Regex.Replace(bodyHtml, @"<h2>TÀI LIỆU THAM KHẢO</h2>", @"<div style=""page-break-before: always;""></div><h2>TÀI LIỆU THAM KHẢO</h2>");
 
-            // Bọc bảng trong div và thêm class
-            bodyHtml = bodyHtml.Replace("<table>", "<table class=\"doc-table\" border=\"1\" cellspacing=\"0\" cellpadding=\"6\">");
+            // Bọc bảng biểu với class định dạng chuẩn Word
+            bodyHtml = bodyHtml.Replace("<table>", "<table class=\"doc-table\" border=\"1\" cellspacing=\"0\" cellpadding=\"5\">");
 
-            // Xây dựng tài liệu hoàn chỉnh với CSS in ấn A4 chuẩn Office Word
+            // Xây dựng trang HTML hoàn chỉnh tương thích Word HTML MSO
             string fullHtml = $@"<!DOCTYPE html>
 <html xmlns:o='urn:schemas-microsoft-com:office:office' 
       xmlns:w='urn:schemas-microsoft-com:office:word' 
       xmlns='http://www.w3.org/TR/REC-html40'>
 <head>
     <meta charset=""utf-8"">
-    <title>Báo Cáo Đồ Án Capstone - Kho Bán Lẻ</title>
+    <title>Báo Cáo Thực Tập Nghề Nghiệp - Kho Bán Lẻ</title>
     <!--[if gte mso 9]>
     <xml>
         <w:WordDocument>
@@ -62,7 +78,7 @@ namespace ReportGen
     <style>
         @page {{
             size: A4 portrait;
-            margin: 20mm 20mm 20mm 25mm; /* Chuẩn đồ án: Lề trái 25mm để đóng gáy, lề trên/dưới/phải 20mm */
+            margin: 20mm 20mm 20mm 25mm; /* Chuẩn: Trái 25mm đóng gáy, Trên/Dưới/Phải 20mm */
             mso-header-margin: 10mm;
             mso-footer-margin: 10mm;
         }}
@@ -70,85 +86,125 @@ namespace ReportGen
         body {{
             font-family: 'Times New Roman', Times, serif;
             font-size: 13pt;
-            line-height: 1.45;
-            color: #1a202c;
+            line-height: 1.35;
+            color: #111827;
             background-color: #ffffff;
             margin: 0;
             padding: 0;
             text-align: justify;
         }}
 
-        /* Trang bìa */
+        /* TRANG BÌA CHUẨN ĐẠI HỌC KINH TẾ HUẾ */
         .cover-page {{
             text-align: center;
-            padding: 35px 20px;
-            border: 3px double #2b6cb0;
-            margin-bottom: 30px;
+            padding: 24px 20px 20px 20px;
+            border: 4px double #1e3a8a;
+            border-radius: 4px;
+            margin-bottom: 25px;
             page-break-after: always;
+            min-height: 940px;
+            box-sizing: border-box;
         }}
-        .cover-inst {{
-            font-size: 13pt;
-            font-weight: bold;
-            color: #2d3748;
-            margin-bottom: 5px;
-            text-transform: uppercase;
-        }}
-        .cover-faculty {{
-            font-size: 12pt;
-            font-weight: bold;
-            color: #4a5568;
-            margin-bottom: 40px;
-        }}
-        .cover-title {{
-            font-size: 22pt;
-            font-weight: bold;
-            color: #1a365d;
-            margin: 30px 0 15px 0;
-            text-transform: uppercase;
-            line-height: 1.3;
-        }}
-        .cover-subtitle {{
+        .cover-univ {{
             font-size: 14pt;
             font-weight: bold;
-            color: #2b6cb0;
-            margin-bottom: 35px;
-            line-height: 1.4;
+            color: #111827;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }}
-        .cover-meta {{
-            font-size: 12pt;
-            text-align: left;
-            margin: 40px auto;
-            width: 85%;
-            border-top: 1px solid #cbd5e1;
-            padding-top: 20px;
-            line-height: 1.8;
+        .cover-school {{
+            font-size: 14pt;
+            font-weight: bold;
+            color: #1e3a8a;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }}
-        .cover-footer {{
-            font-size: 12pt;
-            color: #718096;
-            margin-top: 50px;
+        .cover-dept {{
+            font-size: 13pt;
+            font-weight: bold;
+            color: #374151;
+            margin-bottom: 25px;
+            text-transform: uppercase;
+            border-bottom: 1.5px solid #1e3a8a;
+            display: inline-block;
+            padding-bottom: 6px;
         }}
-
-        /* Tiêu đề */
-        h1 {{
+        .cover-logo-box {{
+            margin: 20px auto 25px auto;
+            text-align: center;
+        }}
+        .cover-logo {{
+            width: 140px;
+            height: 140px;
+            object-fit: contain;
+        }}
+        .cover-report-type {{
+            font-size: 18pt;
+            font-weight: bold;
+            color: #111827;
+            margin-bottom: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }}
+        .cover-title {{
             font-size: 17pt;
             font-weight: bold;
-            color: #1a365d;
-            margin-top: 25px;
-            margin-bottom: 12px;
+            color: #1e3a8a;
+            margin: 10px 0 35px 0;
+            text-transform: uppercase;
+            line-height: 1.35;
+        }}
+        .cover-meta-table {{
+            width: 88%;
+            margin: 30px auto 35px auto;
+            border: none;
+            font-size: 13pt;
+            text-align: left;
+            line-height: 1.8;
+        }}
+        .cover-meta-table td {{
+            border: none;
+            padding: 4px 6px;
+            vertical-align: top;
+        }}
+        .cover-meta-label {{
+            width: 44%;
+            font-weight: bold;
+            color: #1f2937;
+        }}
+        .cover-meta-value {{
+            font-weight: bold;
+            color: #111827;
+        }}
+        .cover-footer {{
+            font-size: 13pt;
+            font-weight: bold;
+            color: #374151;
+            margin-top: 40px;
+        }}
+
+        /* TIÊU ĐỀ CHƯƠNG & MỤC */
+        h1 {{
+            font-size: 16pt;
+            font-weight: bold;
+            color: #1e3a8a;
+            margin-top: 20px;
+            margin-bottom: 10px;
             text-align: center;
             text-transform: uppercase;
             page-break-after: avoid;
         }}
 
         h2 {{
-            font-size: 15pt;
+            font-size: 14.5pt;
             font-weight: bold;
-            color: #1a365d;
-            margin-top: 28px;
-            margin-bottom: 12px;
-            padding-bottom: 5px;
-            border-bottom: 2px solid #2b6cb0;
+            color: #1e3a8a;
+            margin-top: 24px;
+            margin-bottom: 10px;
+            padding-bottom: 4px;
+            border-bottom: 1.5px solid #1e3a8a;
             text-transform: uppercase;
             page-break-after: avoid;
         }}
@@ -156,9 +212,9 @@ namespace ReportGen
         h3 {{
             font-size: 13.5pt;
             font-weight: bold;
-            color: #2b6cb0;
-            margin-top: 20px;
-            margin-bottom: 8px;
+            color: #1e40af;
+            margin-top: 16px;
+            margin-bottom: 6px;
             page-break-after: avoid;
         }}
 
@@ -166,38 +222,38 @@ namespace ReportGen
             font-size: 13pt;
             font-weight: bold;
             font-style: italic;
-            color: #2d3748;
-            margin-top: 14px;
-            margin-bottom: 6px;
+            color: #374151;
+            margin-top: 12px;
+            margin-bottom: 4px;
             page-break-after: avoid;
         }}
 
         p {{
-            margin: 0 0 10px 0;
+            margin: 0 0 8px 0;
             text-indent: 1.25cm;
         }}
 
-        /* Bảng biểu */
+        /* BẢNG BIỂU CHUẨN BÁO CÁO */
         table.doc-table {{
             width: 100%;
             border-collapse: collapse;
-            margin: 16px 0;
+            margin: 12px 0;
             font-size: 11pt;
             border: 1px solid #cbd5e1;
             page-break-inside: avoid;
         }}
 
         table.doc-table th {{
-            background-color: #2b6cb0;
+            background-color: #1e3a8a;
             color: #ffffff;
             font-weight: bold;
             text-align: center;
-            padding: 8px 10px;
-            border: 1px solid #2b6cb0;
+            padding: 6px 8px;
+            border: 1px solid #1e3a8a;
         }}
 
         table.doc-table td {{
-            padding: 7px 10px;
+            padding: 5px 8px;
             border: 1px solid #cbd5e1;
             vertical-align: middle;
         }}
@@ -206,17 +262,17 @@ namespace ReportGen
             background-color: #f8fafc;
         }}
 
-        /* Khối mã nguồn */
+        /* MÃ NGUỒN */
         pre {{
             background-color: #f8fafc;
             border: 1px solid #e2e8f0;
-            border-left: 4px solid #3b82f6;
+            border-left: 4px solid #2563eb;
             border-radius: 4px;
-            padding: 10px 14px;
-            margin: 14px 0;
+            padding: 8px 12px;
+            margin: 10px 0;
             font-family: 'Consolas', 'Courier New', monospace;
-            font-size: 10pt;
-            line-height: 1.35;
+            font-size: 9.5pt;
+            line-height: 1.3;
             white-space: pre-wrap;
             word-break: break-all;
             page-break-inside: avoid;
@@ -224,27 +280,27 @@ namespace ReportGen
 
         code {{
             font-family: 'Consolas', 'Courier New', monospace;
-            font-size: 11pt;
-            background-color: #edf2f7;
-            color: #c53030;
-            padding: 1px 4px;
+            font-size: 10.5pt;
+            background-color: #f1f5f9;
+            color: #b91c1c;
+            padding: 1px 3px;
             border-radius: 3px;
         }}
 
         pre code {{
             background-color: transparent;
-            color: #1a202c;
+            color: #1f2937;
             padding: 0;
             border: none;
-            font-size: 10pt;
+            font-size: 9.5pt;
         }}
 
-        /* Trích dẫn / Alert */
+        /* TRÍCH DẪN & GHI CHÚ */
         blockquote {{
-            margin: 14px 0;
-            padding: 10px 16px;
-            background-color: #ebf8ff;
-            border-left: 4px solid #3182ce;
+            margin: 10px 0;
+            padding: 8px 14px;
+            background-color: #eff6ff;
+            border-left: 4px solid #3b82f6;
             border-radius: 3px;
             font-size: 11.5pt;
             page-break-inside: avoid;
@@ -255,61 +311,76 @@ namespace ReportGen
             text-indent: 0;
         }}
 
-        /* Danh sách */
         ul, ol {{
-            margin: 8px 0 12px 25px;
+            margin: 6px 0 10px 24px;
             padding: 0;
         }}
 
         li {{
-            margin-bottom: 5px;
-            line-height: 1.4;
+            margin-bottom: 4px;
+            line-height: 1.35;
         }}
 
         hr {{
             border: 0;
             height: 1px;
-            background-color: #cbd5e1;
-            margin: 24px 0;
+            background-color: #e2e8f0;
+            margin: 18px 0;
         }}
 
         a {{
-            color: #2b6cb0;
-            text-decoration: underline;
+            color: #1e3a8a;
+            text-decoration: none;
         }}
     </style>
 </head>
 <body>
 
-    <!-- TRANG BÌA ĐỒ ÁN CHUYÊN NGHIỆP -->
+    <!-- TRANG BÌA CHUẨN ĐẠI HỌC KINH TẾ HUẾ THEO ẢNH NGƯỜI DÙNG -->
     <div class=""cover-page"">
-        <div class=""cover-inst"">BỘ GIÁO DỤC VÀ ĐÀO TẠO</div>
-        <div class=""cover-faculty"">HỌC PHẦN ĐỒ ÁN CAPSTONE (ECO2415) — BỘ MÔN THƯƠNG MẠI ĐIỆN TỬ</div>
+        <div class=""cover-univ"">ĐẠI HỌC HUẾ</div>
+        <div class=""cover-school"">TRƯỜNG ĐẠI HỌC KINH TẾ</div>
+        <div class=""cover-dept"">KHOA HỆ THỐNG THÔNG TIN KINH TẾ</div>
         
-        <div style=""height: 35px;""></div>
-        
-        <div class=""cover-title"">BÁO CÁO TỔNG KẾT ĐỒ ÁN CAPSTONE</div>
-        <div class=""cover-subtitle"">ĐỀ TÀI 13: HỆ THỐNG QUẢN LÝ KHO BÁN LẺ & BÁN HÀNG TẠI QUẦY (POS)<br/>KIẾN TRÚC CLEAN ARCHITECTURE 4 TẦNG & MICROSOFT SQL SERVER</div>
-        
-        <div style=""height: 25px;""></div>
-        
-        <div class=""cover-meta"">
-            <table style=""width: 100%; border: none; font-size: 12pt;"">
-                <tr style=""border: none;""><td style=""width: 35%; border: none;""><b>Học phần:</b></td><td style=""border: none;"">Đồ án Capstone Thương Mại Điện Tử (ECO2415)</td></tr>
-                <tr style=""border: none;""><td style=""border: none;""><b>Mã đề tài:</b></td><td style=""border: none;"">Đề tài số 13 (Kho bán lẻ: Nhập – Xuất – Tồn)</td></tr>
-                <tr style=""border: none;""><td style=""border: none;""><b>Kiến trúc:</b></td><td style=""border: none;"">Clean Architecture 4 Tầng (.NET 8 Blazor Server)</td></tr>
-                <tr style=""border: none;""><td style=""border: none;""><b>Cơ sở dữ liệu:</b></td><td style=""border: none;"">Microsoft SQL Server (Chuẩn 3NF, Dapper & 1 Transaction)</td></tr>
-                <tr style=""border: none;""><td style=""border: none;""><b>Điểm tự đánh giá:</b></td><td style=""border: none;""><b>100 / 100 Điểm (Đạt đủ 17 mã K1.1 – K5.3)</b></td></tr>
-            </table>
+        <div class=""cover-logo-box"">
+            {(string.IsNullOrEmpty(logoBase64) 
+                ? "<div style='font-size: 36pt;'>🎓</div>" 
+                : $"<img src='data:image/png;base64,{logoBase64}' class='cover-logo' alt='Logo HCE'/>")}
         </div>
         
+        <div class=""cover-report-type"">BÁO CÁO THỰC TẬP NGHỀ NGHIỆP</div>
+        <div class=""cover-title"">XÂY DỰNG HỆ THỐNG QUẢN LÝ KHO BÁN LẺ &amp; BÁN HÀNG TẠI QUẦY (POS)</div>
+        
+        <table class=""cover-meta-table"">
+            <tr>
+                <td class=""cover-meta-label"">Giảng viên hướng dẫn:</td>
+                <td class=""cover-meta-value"">TS. Hà Ngọc Long</td>
+            </tr>
+            <tr>
+                <td class=""cover-meta-label"">Sinh viên thực hiện:</td>
+                <td class=""cover-meta-value"">Nguyễn Trung Quyết</td>
+            </tr>
+            <tr>
+                <td class=""cover-meta-label"">Mã sinh viên:</td>
+                <td class=""cover-meta-value"">23K4080044</td>
+            </tr>
+            <tr>
+                <td class=""cover-meta-label"">Lớp:</td>
+                <td class=""cover-meta-value"">K57 Tin học Kinh tế</td>
+            </tr>
+            <tr>
+                <td class=""cover-meta-label"">Đơn vị thực tập:</td>
+                <td class=""cover-meta-value"">Công ty Cổ phần Đầu tư Công nghệ TST ECO</td>
+            </tr>
+        </table>
+        
         <div class=""cover-footer"">
-            HỌC KỲ CAPSTONE 2026
+            Huế, ngày 11/09/2026
         </div>
     </div>
 
-    <!-- NỘI DUNG BÁO CÁO -->
-    <div class=""main-content"">
+    <!-- TOÀN BỘ NỘI DUNG TÀI LIỆU BÁO CÁO -->
+    <div class=""report-body"">
         {bodyHtml}
     </div>
 
@@ -319,7 +390,7 @@ namespace ReportGen
             Console.WriteLine($">>> Đang lưu file HTML: {htmlPath} ...");
             File.WriteAllText(htmlPath, fullHtml, Encoding.UTF8);
 
-            // Chuyển đổi sang Word (.docx) và PDF (.pdf) qua Word COM Automation
+            // Chuyển đổi sang Word DOCX và PDF thông qua Word COM Automation
             Console.WriteLine(">>> Đang khởi chạy Microsoft Word Automation để xuất DOCX và PDF ...");
             try
             {
@@ -336,18 +407,33 @@ namespace ReportGen
 
                 try
                 {
-                    Console.WriteLine(">>> Đang mở tài liệu trong Word ...");
+                    Console.WriteLine(">>> Đang mở file HTML trong Word ...");
                     dynamic doc = word.Documents.Open(htmlPath, false, true);
 
-                    Console.WriteLine($">>> Đang xuất file Word (.docx): {docxPath} ...");
+                    // Thiết lập chân trang: Đánh số trang Page X / Y
+                    try
+                    {
+                        foreach (dynamic section in doc.Sections)
+                        {
+                            dynamic footer = section.Footers(1); // 1 = wdHeaderFooterPrimary
+                            footer.PageNumbers.Add(2, true); // 2 = wdAlignPageNumberRight
+                        }
+                    }
+                    catch { }
+
+                    Console.WriteLine($">>> Đang lưu file Word (.docx): {docxPath} ...");
                     // 16 = wdFormatXMLDocument (.docx)
                     doc.SaveAs2(docxPath, 16);
-                    Console.WriteLine("===> Tạo thành công file DOCX!");
+                    Console.WriteLine("===> ĐÃ TẠO THÀNH CÔNG FILE DOCX!");
 
                     Console.WriteLine($">>> Đang xuất file PDF (.pdf): {pdfPath} ...");
                     // 17 = wdFormatPDF (.pdf)
                     doc.SaveAs2(pdfPath, 17);
-                    Console.WriteLine("===> Tạo thành công file PDF!");
+                    Console.WriteLine("===> ĐÃ TẠO THÀNH CÔNG FILE PDF!");
+
+                    // Đếm số trang thực tế
+                    int pageCount = doc.ComputeStatistics(2); // 2 = wdStatisticPages
+                    Console.WriteLine($"\n===> SỐ TRANG THỰC TẾ TRONG WORD: {pageCount} TRANG");
 
                     doc.Close(false);
                 }
@@ -358,8 +444,8 @@ namespace ReportGen
 
                 Console.WriteLine("\n==========================================================");
                 Console.WriteLine("HOÀN TẤT THÀNH CÔNG 100%!");
-                Console.WriteLine($"1. File Word: {docxPath}");
-                Console.WriteLine($"2. File PDF : {pdfPath}");
+                Console.WriteLine($"1. File Word (.docx): {docxPath}");
+                Console.WriteLine($"2. File PDF  (.pdf) : {pdfPath}");
                 Console.WriteLine("==========================================================");
             }
             catch (Exception ex)

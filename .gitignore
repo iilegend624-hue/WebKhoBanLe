@@ -26,3 +26,10 @@ ehthumbs.db
 
 ## Scratch files
 scratch/
+
+## Documents, Reports & Word files (Do not commit to Git)
+*.docx
+*.pdf
+báo cáo kho bán lẻ*
+baocao*
+logo_hce.png
