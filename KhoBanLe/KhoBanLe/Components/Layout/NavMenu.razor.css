@@ -8,7 +8,7 @@
 }
 
 .sidebar-header {
-    background-color: #0b1120;
+    background-color: #060b18;
     min-height: 64px;
 }
 
@@ -17,12 +17,12 @@
 }
 
 .nav-scrollable::-webkit-scrollbar-thumb {
-    background: #334155;
+    background: #1e293b;
     border-radius: 4px;
 }
 
 .nav-section-title {
-    color: #64748b;
+    color: #475569;
     font-size: 0.68rem;
     font-weight: 700;
     letter-spacing: 0.08em;
@@ -65,13 +65,13 @@
 
 .admin-nav-link.active {
     color: #ffffff;
-    background: linear-gradient(90deg, rgba(0, 166, 81, 0.22) 0%, rgba(0, 166, 81, 0.08) 100%);
-    border-left: 3px solid #00a651;
+    background: linear-gradient(90deg, rgba(5, 150, 105, 0.22) 0%, rgba(5, 150, 105, 0.05) 100%);
+    border-left: 3px solid #059669;
     font-weight: 700;
 }
 
 .admin-nav-link.active .nav-icon {
-    color: #00a651 !important;
+    color: #34d399 !important;
 }
 
 /* Collapsed sidebar adjustments */

@@ -963,6 +963,227 @@ namespace KhoBanLe.DataStore.HardCoded
                     MinStockLevel = 20,
                     Description = "Bàn chải Colgate lông chải siêu mềm mảnh phủ than hoạt tính len sâu kẽ răng làm sạch hiệu quả.",
                     ImageUrl = "images/products/colgate-banchai.jpg"
+                },
+                new Product
+                {
+                    Id = 72,
+                    Sku = "G7-50",
+                    Name = "Cà phê hòa tan G7 3in1 Trung Nguyên bịch 50 gói x 16g",
+                    Unit = "Bịch",
+                    Category = "Cà phê & Trà",
+                    Price = 135000,
+                    CurrentStock = 35,
+                    MinStockLevel = 10,
+                    Description = "Cà phê hòa tan G7 hương vị đậm đà nguyên bản từ hạt cà phê Buôn Ma Thuột hảo hạng.",
+                    ImageUrl = "images/products/g7-3in1.jpg"
+                },
+                new Product
+                {
+                    Id = 73,
+                    Sku = "NES-DEN",
+                    Name = "Cà phê đen hòa tan Nescafé Café Việt đậm đà hộp 15 gói",
+                    Unit = "Hộp",
+                    Category = "Cà phê & Trà",
+                    Price = 48000,
+                    CurrentStock = 25,
+                    MinStockLevel = 10,
+                    Description = "Cà phê đen đá chuẩn gu Việt, vị đắng đậm đà và hương thơm nồng nàn.",
+                    ImageUrl = "images/products/nescafe-3in1.jpg"
+                },
+                new Product
+                {
+                    Id = 74,
+                    Sku = "VINA-CHAT",
+                    Name = "Cà phê sữa hòa tan Vinacafé CHẤT Sài Gòn hộp 10 gói",
+                    Unit = "Hộp",
+                    Category = "Cà phê & Trà",
+                    Price = 42000,
+                    CurrentStock = 30,
+                    MinStockLevel = 10,
+                    Description = "Cà phê sữa đá Sài Gòn thơm béo ngậy, chuẩn gu người tiêu dùng Việt.",
+                    ImageUrl = "images/products/trungnguyen-chus.jpg"
+                },
+                new Product
+                {
+                    Id = 75,
+                    Sku = "HUDA-330",
+                    Name = "Bia Huda lon 330ml đậm tình miền Trung",
+                    Unit = "Lon",
+                    Category = "Nước giải khát & Bia",
+                    Price = 14000,
+                    CurrentStock = 72,
+                    MinStockLevel = 24,
+                    Description = "Bia Huda đặc sản xứ Huế được nấu từ lúa mạch thượng hạng và hoa bia chất lượng châu Âu.",
+                    ImageUrl = "images/products/huda-beer.jpg"
+                },
+                new Product
+                {
+                    Id = 76,
+                    Sku = "HUDA-T24",
+                    Name = "Bia Huda lon 330ml (Thùng 24 lon)",
+                    Unit = "Thùng",
+                    Category = "Nước giải khát & Bia",
+                    Price = 315000,
+                    CurrentStock = 40,
+                    MinStockLevel = 15,
+                    Description = "Thùng 24 lon bia Huda 330ml mát lạnh sảng khoái, lựa chọn số 1 cho các bữa tiệc.",
+                    ImageUrl = "images/products/huda-beer.jpg"
+                },
+                new Product
+                {
+                    Id = 77,
+                    Sku = "HUDA-GOLD",
+                    Name = "Bia Huda Gold lon cao 330ml thượng hạng",
+                    Unit = "Lon",
+                    Category = "Nước giải khát & Bia",
+                    Price = 18000,
+                    CurrentStock = 50,
+                    MinStockLevel = 15,
+                    Description = "Dòng bia cao cấp Huda Gold với hương thơm hoa bia tinh tế và hậu vị êm đằm.",
+                    ImageUrl = "images/products/huda-beer.jpg"
+                },
+                new Product
+                {
+                    Id = 78,
+                    Sku = "KOP-140",
+                    Name = "Kẹo cà phê Kopiko hương vị cà phê đậm đà gói 140g",
+                    Unit = "Gói",
+                    Category = "Bánh kẹo & Đồ ăn vặt",
+                    Price = 18000,
+                    CurrentStock = 60,
+                    MinStockLevel = 20,
+                    Description = "Kẹo ngậm chiết xuất từ hạt cà phê thật Kopiko giúp tỉnh táo sảng khoái mọi lúc.",
+                    ImageUrl = "images/products/kopiko.jpg"
+                },
+                new Product
+                {
+                    Id = 79,
+                    Sku = "ALP-CARA",
+                    Name = "Kẹo mềm sữa Caramen Alpenliebe béo ngậy gói 120g",
+                    Unit = "Gói",
+                    Category = "Bánh kẹo & Đồ ăn vặt",
+                    Price = 16000,
+                    CurrentStock = 55,
+                    MinStockLevel = 15,
+                    Description = "Kẹo mềm sữa caramen Alpenliebe ngọt ngào thơm béo tan chảy trong miệng.",
+                    ImageUrl = "images/products/alpenliebe-dau.jpg"
+                },
+                new Product
+                {
+                    Id = 80,
+                    Sku = "HAR-BEAR",
+                    Name = "Kẹo dẻo gấu Haribo Goldbears nhập khẩu gói 80g",
+                    Unit = "Gói",
+                    Category = "Bánh kẹo & Đồ ăn vặt",
+                    Price = 26000,
+                    CurrentStock = 45,
+                    MinStockLevel = 10,
+                    Description = "Kẹo dẻo hình chú gấu nhiều hương vị trái cây tự nhiên được trẻ em yêu thích.",
+                    ImageUrl = "images/products/chupachups-panda.jpg"
+                },
+                new Product
+                {
+                    Id = 81,
+                    Sku = "DYN-MINT",
+                    Name = "Kẹo bạc hà nhân socola Dynamite BigBang gói 125g",
+                    Unit = "Gói",
+                    Category = "Bánh kẹo & Đồ ăn vặt",
+                    Price = 14000,
+                    CurrentStock = 50,
+                    MinStockLevel = 15,
+                    Description = "Sự kết hợp bùng nổ giữa vị bạc hà the mát bên ngoài và nhân socola đậm đà bên trong.",
+                    ImageUrl = "images/products/coolair-58g.jpg"
+                },
+                new Product
+                {
+                    Id = 82,
+                    Sku = "GHIM-10",
+                    Name = "Hộp ghim bấm số 10 Deli Plus mạ kẽm (1000 ghim)",
+                    Unit = "Hộp",
+                    Category = "Văn phòng phẩm",
+                    Price = 4000,
+                    CurrentStock = 120,
+                    MinStockLevel = 30,
+                    Description = "Hộp kim bấm số 10 chống rỉ sét bấm chắc chắn không gãy thích hợp cho văn phòng và học tập.",
+                    ImageUrl = "images/products/ghim-bam-no10.jpg"
+                },
+                new Product
+                {
+                    Id = 83,
+                    Sku = "DAP-10",
+                    Name = "Máy dập ghim / Bấm kim số 10 Deli trợ lực kèm gỡ ghim",
+                    Unit = "Cái",
+                    Category = "Văn phòng phẩm",
+                    Price = 28000,
+                    CurrentStock = 35,
+                    MinStockLevel = 10,
+                    Description = "Dập ghim nhỏ gọn tiện lợi bấm nhẹ nhàng có khay chứa ghim dự phòng và móc gỡ ghim.",
+                    ImageUrl = "images/products/dap-ghim-no10.jpg"
+                },
+                new Product
+                {
+                    Id = 84,
+                    Sku = "DA-A4-70",
+                    Name = "Giấy in A4 Double A 70gsm cao cấp (Ram 500 tờ)",
+                    Unit = "Ram",
+                    Category = "Văn phòng phẩm",
+                    Price = 72000,
+                    CurrentStock = 40,
+                    MinStockLevel = 15,
+                    Description = "Giấy in photo Double A độ trắng mịn cao không kẹt giấy cho bản in sắc nét.",
+                    ImageUrl = "images/products/double-a-a4.jpg"
+                },
+                new Product
+                {
+                    Id = 85,
+                    Sku = "BK-18",
+                    Name = "Băng keo trong văn phòng 1.8cm cuộn 100 yard độ dính cao",
+                    Unit = "Cuộn",
+                    Category = "Văn phòng phẩm",
+                    Price = 8000,
+                    CurrentStock = 65,
+                    MinStockLevel = 20,
+                    Description = "Băng dính trong suốt bề rộng 1.8cm keo bám dính chắc không ố vàng.",
+                    ImageUrl = "images/products/campus.jpg"
+                },
+                new Product
+                {
+                    Id = 86,
+                    Sku = "KEO-18",
+                    Name = "Kéo văn phòng Deli cán bọc nhựa êm tay lưỡi inox 18cm",
+                    Unit = "Cái",
+                    Category = "Văn phòng phẩm",
+                    Price = 22000,
+                    CurrentStock = 25,
+                    MinStockLevel = 10,
+                    Description = "Kéo lưỡi thép không gỉ sắc bén cán nhựa cao cấp trợ lực cắt ngọt.",
+                    ImageUrl = "images/products/campus-a5.jpg"
+                },
+                new Product
+                {
+                    Id = 87,
+                    Sku = "BUT-DA",
+                    Name = "Bút dạ quang nhớ dòng Thiên Long pastel 5 màu nổi bật",
+                    Unit = "Cây",
+                    Category = "Văn phòng phẩm",
+                    Price = 11000,
+                    CurrentStock = 50,
+                    MinStockLevel = 15,
+                    Description = "Bút dạ quang màu mực tươi sáng không lem mực bảo vệ mắt khi đọc tài liệu.",
+                    ImageUrl = "images/products/thienlong-tl027.jpg"
+                },
+                new Product
+                {
+                    Id = 88,
+                    Sku = "CHI-2B",
+                    Name = "Bút chì gỗ 2B Thiên Long kèm gôm tẩy (Hộp 12 cây)",
+                    Unit = "Hộp",
+                    Category = "Văn phòng phẩm",
+                    Price = 36000,
+                    CurrentStock = 30,
+                    MinStockLevel = 10,
+                    Description = "Bút chì ruột 2B đậm nét ngòi chì mềm êm dễ gọt dùng vẽ và ghi chép.",
+                    ImageUrl = "images/products/thienlong.jpg"
                 }
             };
         }

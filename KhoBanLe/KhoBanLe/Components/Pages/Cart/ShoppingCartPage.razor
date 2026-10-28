@@ -302,7 +302,7 @@
                                 <i class="bi bi-search fs-6"></i>
                             </span>
                             <input type="text" class="form-control border-start-0 border-end-0 py-2.5 ps-2 fw-medium"
-                                   placeholder="🔍 Tìm kiếm tên hàng hóa (vd: gõ 'h', 'haohao', 'coca', 'omo', 'but bi'...) hoặc mã SKU..."
+                                   placeholder="Tìm kiếm theo tên hàng hóa hoặc mã SKU..."
                                    @bind="searchFilter" 
                                    @bind:event="oninput" />
                             @if (!string.IsNullOrWhiteSpace(searchFilter))
@@ -318,39 +318,6 @@
                                 <i class="bi bi-filter me-1"></i>Tìm kiếm
                             </button>
                         </div>
-                    </div>
-
-                    <!-- Quick Keywords Bar in POS -->
-                    <div class="d-flex flex-wrap align-items-center gap-1.5 mb-2.5">
-                        <small class="text-muted fw-bold me-1"><i class="bi bi-lightning-charge-fill text-warning me-1"></i>Tìm nhanh:</small>
-                        <button type="button" class="btn btn-xs rounded-pill @(searchFilter == "h" ? "btn-success text-white fw-bold shadow-xs" : "btn-light text-secondary border")"
-                                @onclick='() => searchFilter = "h"'>
-                            Chữ "h"
-                        </button>
-                        <button type="button" class="btn btn-xs rounded-pill @(searchFilter == "haohao" || searchFilter == "hảo hảo" ? "btn-success text-white fw-bold shadow-xs" : "btn-light text-secondary border")"
-                                @onclick='() => searchFilter = "haohao"'>
-                            🍜 Mì Hảo Hảo
-                        </button>
-                        <button type="button" class="btn btn-xs rounded-pill @(searchFilter == "coca" ? "btn-success text-white fw-bold shadow-xs" : "btn-light text-secondary border")"
-                                @onclick='() => searchFilter = "coca"'>
-                            🥤 Coca-Cola
-                        </button>
-                        <button type="button" class="btn btn-xs rounded-pill @(searchFilter == "vinamilk" ? "btn-success text-white fw-bold shadow-xs" : "btn-light text-secondary border")"
-                                @onclick='() => searchFilter = "vinamilk"'>
-                            🥛 Sữa Vinamilk
-                        </button>
-                        <button type="button" class="btn btn-xs rounded-pill @(searchFilter == "thienlong" || searchFilter == "thiên long" ? "btn-success text-white fw-bold shadow-xs" : "btn-light text-secondary border")"
-                                @onclick='() => searchFilter = "thienlong"'>
-                            ✏️ Bút Thiên Long
-                        </button>
-                        <button type="button" class="btn btn-xs rounded-pill @(searchFilter == "omo" ? "btn-success text-white fw-bold shadow-xs" : "btn-light text-secondary border")"
-                                @onclick='() => searchFilter = "omo"'>
-                            🧼 Bột giặt OMO
-                        </button>
-                        <button type="button" class="btn btn-xs rounded-pill @(searchFilter == "simply" ? "btn-success text-white fw-bold shadow-xs" : "btn-light text-secondary border")"
-                                @onclick='() => searchFilter = "simply"'>
-                            🍳 Dầu Simply
-                        </button>
                     </div>
 
                     <!-- Category Filter Pills -->
